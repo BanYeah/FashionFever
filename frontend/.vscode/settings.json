@@ -1,4 +1,6 @@
 {
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "cssVariables.lookupFiles": [
     "**/*.css",
     "**/*.scss",
