@@ -1,6 +1,12 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafafa; /* White */
+  --foreground: #0c0c0c; /* Black */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c0c0c;
+  }
 }
 
 * {
@@ -17,8 +23,23 @@ body {
 }
 
 body {
+  display: flex;
+  justify-content: center;
+
   background: var(--background);
   color: var(--foreground);
+}
+
+main {
+  position: relative;
+
+  /* F12 (개발자 모드)에서 Device Toolbar로 확인 */
+  width: 100%;
+  max-width: 480px;
+  min-width: 320px;
+  min-height: 100dvh;
+
+  background-color: #fafafa;
 }
 
 a {
