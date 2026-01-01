@@ -2,8 +2,7 @@
   position: sticky;
   top: 0;
 
-  width: auto;
-  height: 110px;
+  height: fit-content;
 
   z-index: 200;
 }
@@ -13,7 +12,6 @@
   align-items: center;
   justify-content: center;
 
-  width: auto;
   height: 70px;
 
   background-color: var(--black);
@@ -24,7 +22,6 @@
   align-items: center;
   justify-content: center;
 
-  width: auto;
   height: 40px;
 
   background-color: var(--gray);
