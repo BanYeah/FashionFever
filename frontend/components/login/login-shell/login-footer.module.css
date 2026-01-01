@@ -1,0 +1,22 @@
+.Container {
+  position: fixed;
+  bottom: 0;
+
+  width: 100%;
+  max-width: 480px;
+  min-width: 320px;
+  height: 40px;
+
+  padding-bottom: env(safe-area-inset-bottom);
+  background-color: var(--black);
+
+  z-index: 200;
+}
+
+.Footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;
+}

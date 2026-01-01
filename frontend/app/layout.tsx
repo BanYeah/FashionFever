@@ -1,7 +1,10 @@
+import React from "react";
 import type { Metadata } from "next";
 import BMJUA from "next/font/local";
 import "@mantine/core/styles.layer.css";
+import { MantineProvider } from "@mantine/core";
 import "./globals.css";
+import "./color-style.css";
 
 const font = BMJUA({
   src: "../public/fonts/BMJUA.woff",
@@ -27,7 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={font.className}>
       <body>
-        <main>{children}</main>
+        <main>
+          <MantineProvider>{children}</MantineProvider>
+        </main>
       </body>
     </html>
   );
