@@ -3,9 +3,14 @@
 import classes from "./login-input.module.css";
 import Image from "next/image";
 import { useState } from "react";
-import { Input } from "@mantine/core";
+import { Input, UnstyledButton } from "@mantine/core";
 
-export function LoginInput() {
+interface LoginInputProps {
+  disabled?: boolean;
+  rightButton?: boolean;
+}
+
+export function LoginInput({ disabled, rightButton }: LoginInputProps) {
   const [value, setValue] = useState("");
 
   return (
@@ -16,22 +21,25 @@ export function LoginInput() {
         section: classes.InputSection,
       }}
       variant="unstyled"
+      disabled={disabled}
       placeholder="미니 코드 입력"
       value={value}
       onChange={(event) => setValue(event.currentTarget.value)}
       maxLength={6}
       rightSection={
-        <button className={classes.Button}>
-          <Image
-            src="/images/login/arrow-right.svg"
-            alt=""
-            width={24}
-            height={24}
-          />
-        </button>
+        rightButton ? (
+          <UnstyledButton className={classes.Button}>
+            <Image
+              src="/images/login/arrow-right.svg"
+              alt=""
+              width={24}
+              height={24}
+            />
+          </UnstyledButton>
+        ) : null
       }
-      rightSectionWidth={60}
-      rightSectionPointerEvents="all"
+      rightSectionWidth={rightButton ? 60 : 0}
+      rightSectionPointerEvents={rightButton ? "all" : "none"}
     />
   );
 }

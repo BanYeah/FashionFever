@@ -11,7 +11,7 @@ export function LoginHeader() {
           alt="FASHION FEVER"
           width={187}
           height={59}
-        ></Image>
+        />
       </div>
       <div className={classes.SubHeader}>
         <p>패션을 뽐내는 미니들의 축제</p>

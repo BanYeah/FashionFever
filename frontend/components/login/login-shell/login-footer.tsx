@@ -10,7 +10,7 @@ export function LoginFooter() {
           alt="FASHION FEVER"
           width={93}
           height={36}
-        ></Image>
+        />
       </div>
     </div>
   );
