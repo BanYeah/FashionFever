@@ -63,7 +63,7 @@ export function LoginInputBase({
 interface LoginInputProps {
   disabled?: boolean;
   placeholder: string;
-  defaultValue: string;
+  defaultValue?: string;
   rightButton?: boolean;
 }
 
