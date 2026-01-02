@@ -5,37 +5,23 @@
   border: 3.5px solid var(--black);
 
   p {
+    font-size: 16px;
     line-height: 1.6;
+
     text-align: center;
     word-break: keep-all;
   }
+
+  span {
+    color: var(--main);
+  }
 }
 
-.ScheduleWrapper {
-  position: relative;
-  width: 100%;
-}
+.Finish {
+  display: flex;
+  justify-content: center;
 
-.Image {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 0%); /* 중앙 정렬 */
-}
-
-.ScheduleEmpty {
-  width: inherit;
-  height: 78px;
-
-  margin-top: 146px;
-
-  background-color: var(--white);
-  border: 3.5px solid var(--black);
-}
-
-.Schedule {
-  width: inherit;
-  height: 81px;
-  padding: 40px 0px 5px 0px;
-
-  background-color: var(--black);
+  p {
+    font-size: 16px;
+  }
 }

@@ -7,11 +7,18 @@ import { Input, UnstyledButton } from "@mantine/core";
 
 interface LoginInputProps {
   disabled?: boolean;
+  placeholder: string;
+  value?: string;
   rightButton?: boolean;
 }
 
-export function LoginInput({ disabled, rightButton }: LoginInputProps) {
-  const [value, setValue] = useState("");
+export function LoginInput({
+  disabled,
+  placeholder,
+  value,
+  rightButton,
+}: LoginInputProps) {
+  const [v, setV] = useState(value);
 
   return (
     <Input
@@ -22,9 +29,9 @@ export function LoginInput({ disabled, rightButton }: LoginInputProps) {
       }}
       variant="unstyled"
       disabled={disabled}
-      placeholder="미니 코드 입력"
-      value={value}
-      onChange={(event) => setValue(event.currentTarget.value)}
+      placeholder={placeholder}
+      value={v}
+      onChange={(event) => setV(event.currentTarget.value)}
       maxLength={6}
       rightSection={
         rightButton ? (
