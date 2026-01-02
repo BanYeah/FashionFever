@@ -20,6 +20,8 @@
 
   &[data-disabled] {
     background-color: transparent;
+    color: var(--gray-b3);
+    opacity: 1;
   }
 }
 

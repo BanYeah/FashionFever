@@ -19,7 +19,11 @@ export default async function LoginPage({ params }: LoginPageProps) {
         </p>
       </div>
       <Stack align="stretch" mt={16} mb={16} gap={12}>
-        <LoginInput disabled placeholder="미니 코드 입력" value={minicode} />
+        <LoginInput
+          disabled
+          placeholder="미니 코드 입력"
+          defaultValue={minicode}
+        />
         <LoginInput placeholder="입장 코드 입력" rightButton />
       </Stack>
       <EventSchedule />

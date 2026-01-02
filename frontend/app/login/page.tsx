@@ -1,6 +1,6 @@
 import classes from "./classes.module.css";
 import { Stack, Box } from "@mantine/core";
-import { LoginInput } from "@/components/login/login-input";
+import { LoginInputWithModal } from "@/components/login/login-input";
 import { EventSchedule } from "@/components/login/event-schedule";
 
 export default function LoginPage() {
@@ -15,7 +15,7 @@ export default function LoginPage() {
         </p>
       </Stack>
       <Stack align="stretch" mt={16} mb={16} gap={12}>
-        <LoginInput placeholder="미니 코드 입력" rightButton />
+        <LoginInputWithModal placeholder="미니 코드 입력" rightButton />
       </Stack>
       <EventSchedule />
       <Box className={classes.Finish} mt={25}>

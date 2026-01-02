@@ -1,0 +1,80 @@
+.ModalInner {
+  align-items: center;
+  left: 0;
+
+  width: 100vw;
+  height: 100dvh;
+}
+
+.ModalContent {
+  width: 294px;
+  height: fit-content;
+  overflow-y: hidden;
+
+  border-radius: 0px;
+}
+
+.ModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;
+  min-height: 40px;
+
+  background-color: var(--main);
+  border-radius: 0px;
+
+  color: var(--white);
+  font-size: 18px;
+}
+
+.ModalDescription {
+  padding: 18px 35px;
+
+  p {
+    font-size: 16px;
+    line-height: 1.8;
+
+    text-align: center;
+    word-break: keep-all;
+  }
+
+  span {
+    color: var(--main);
+  }
+}
+
+.ModalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 10px;
+
+  height: 80px;
+
+  background-color: var(--main);
+}
+
+.Button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 130px;
+  height: 40px;
+
+  border-radius: 10px;
+
+  color: var(--white);
+}
+
+.GoButton {
+  background-color: var(--black);
+  font-size: 20px;
+}
+
+.BackButton {
+  background-color: var(--main-dark);
+  font-size: 18px;
+}
