@@ -1,0 +1,62 @@
+/* src/components/app-shell/header.module.css */
+
+.container {
+  position: sticky;
+  top: 0;
+
+  width: 100%;
+  height: fit-content;
+
+  z-index: 200;
+}
+
+.mainHeader {
+  display: flex;
+  align-items: center; /* 세로 중앙 정렬 */
+  justify-content: space-between; /* 양 끝 정렬 */
+
+  height: 50px;
+
+  background-color: var(--main);
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 43px;
+  height: 38px;
+
+  background-color: var(--black);
+  border-radius: 0 10px 10px 0;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+
+  width: 43px;
+  padding-right: 8px;
+}
+
+.title {
+  padding-top: 2px; /* 이게 있어야 위아래 간격 대칭이 맞아보임... */
+  
+  font-size: 24px;
+}
+
+.subHeader {
+  height: 36px;
+  padding: 11px;
+
+  background-color: var(--black);
+
+  text-align: left;
+}
+
+.subText {
+  color: var(--white);
+  font-size: 14px;
+}
