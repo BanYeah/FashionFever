@@ -7,7 +7,7 @@ export function EventSchedule() {
     <div className={classes.ScheduleWrapper}>
       <Image
         className={classes.Image}
-        src="/images/login/fashionmini.svg"
+        src="/images/login/fashionmini.png"
         alt=""
         width={263}
         height={257}

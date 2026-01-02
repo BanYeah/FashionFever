@@ -1,0 +1,116 @@
+.Container {
+  position: sticky;
+  top: 0;
+
+  height: fit-content;
+
+  z-index: 200;
+}
+
+.HelpButton {
+  position: absolute;
+  top: 0px;
+  left: 2px;
+
+  width: 40px;
+  height: 40px;
+}
+
+.LogoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: absolute;
+  top: 6px;
+  right: 7px;
+
+  width: 26px;
+  height: 24px;
+}
+
+.VoteButton {
+  position: absolute;
+  top: 41px;
+  right: 0px;
+
+  padding: 4px 14px 8px 17px;
+
+  width: 96px;
+  height: 60px;
+
+  background-color: var(--black);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+
+  p {
+    color: var(--white);
+    font-size: 20px;
+  }
+}
+
+.TopSection {
+  display: flex;
+  justify-content: center;
+
+  padding: 0px 100px;
+
+  height: 36px;
+  background-color: var(--black);
+}
+
+.TopCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: inherit;
+  background-color: var(--main);
+
+  overflow: hidden;
+}
+
+.BottomSection {
+  display: flex;
+  justify-content: center;
+
+  padding: 0px 100px;
+
+  height: 70px;
+  background-color: var(--main);
+}
+
+.BottomCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: inherit;
+  background-color: var(--black);
+
+  color: var(--main);
+  font-size: 40px;
+}
+
+@media (min-width: 390px) {
+  .TopSection {
+    padding: 0px 108px;
+  }
+  .BottomSection {
+    padding: 0px 108px;
+  }
+}
+
+@media (max-width: 350px) {
+  .BottomCenter {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 335px) {
+  .BottomCenter {
+    font-size: 32px;
+  }
+}
