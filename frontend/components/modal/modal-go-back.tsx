@@ -28,6 +28,7 @@ export function ModalGoBack({
         inner: classes.ModalInner,
         content: classes.ModalContent,
         header: classes.ModalHeader,
+        title: classes.ModalTitle,
       }}
       opened={opened}
       onClose={close}
@@ -46,13 +47,13 @@ export function ModalGoBack({
             className={`${classes.Button} ${classes.BackButton}`}
             onClick={close}
           >
-            {back}
+            <p>{back}</p>
           </UnstyledButton>
           <UnstyledButton
             className={`${classes.Button} ${classes.GoButton}`}
             onClick={onGo}
           >
-            {go}
+            <p>{go}</p>
           </UnstyledButton>
         </div>
       </Stack>
