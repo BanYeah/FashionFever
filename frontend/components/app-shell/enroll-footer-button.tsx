@@ -1,7 +1,7 @@
 "use client";
 
-import { UnstyledButton } from "@mantine/core";
 import classes from "./enroll-footer.module.css";
+import { UnstyledButton } from "@mantine/core";
 
 export function EnrollButton() {
   const handleEnrollClick = () => {

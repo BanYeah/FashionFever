@@ -1,21 +1,21 @@
 .FooterContainer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
   display: flex;
   align-items: center;
 
-  position: fixed;
-  bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom);
 
   width: 100%;
   max-width: 425px;
   height: 60px;
 
-  left: 50%;
-  transform: translateX(-50%);
+  background-color: var(--main);
 
   z-index: 200;
-
-  padding-bottom: env(safe-area-inset-bottom);
-  background-color: var(--main);
 }
 
 /* 2. 미니 꾸미기형: 이미지처럼 오른쪽 정렬 */
@@ -34,14 +34,13 @@
   width: 160px;
   height: 40px;
 
+  background-color: var(--black);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
   color: var(--white);
 
   font-size: 24px;
   padding-top: 3px;
-
-  background-color: var(--black);
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
 }
 
 /* 4. 분리형: n분의 1 및 색상 반전 */

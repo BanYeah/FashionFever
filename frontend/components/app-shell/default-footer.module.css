@@ -8,20 +8,18 @@
   align-items: center;
   justify-content: center;
 
+  padding-bottom: env(safe-area-inset-bottom);
+
   width: 100%;
   max-width: 425px;
   height: 60px;
-  z-index: 200;
 
   background-color: var(--main);
-  padding-bottom: env(safe-area-inset-bottom);
+
+  z-index: 200;
 }
 
 .DefaultText {
-  width: 100%;
-  text-align: center;
   color: var(--white);
   font-size: 20px;
-  font-weight: 400;
-  margin: 0;
 }

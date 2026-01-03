@@ -1,21 +1,22 @@
 .FooterContainer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
   display: flex;
   justify-content: center;
   align-items: center;
 
-  position: fixed;
-  bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom);
 
   width: 100%;
   max-width: 425px;
   height: 56px;
 
-  left: 50%;
-  transform: translateX(-50%);
+  background-color: var(--main-light);
 
   z-index: 200;
-  padding-bottom: env(safe-area-inset-bottom);
-  background-color: var(--main-light);
 }
 
 .PinkBtn {
