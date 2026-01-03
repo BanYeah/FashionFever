@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { Input, UnstyledButton } from "@mantine/core";
+import { ModalNoti } from "../modal/model-noti";
 import { ModalGoBack } from "../modal/modal-go-back";
 
 interface LoginInputBaseProps {
@@ -40,11 +41,7 @@ export function LoginInputBase({
       maxLength={12}
       rightSection={
         rightButton ? (
-          <UnstyledButton
-            className={classes.Button}
-            disabled={value.length < 5} // 나중에 notification 띄우도록
-            onClick={onClick}
-          >
+          <UnstyledButton className={classes.Button} onClick={onClick}>
             <Image
               src="/images/login/arrow-right.svg"
               alt=""
@@ -94,18 +91,30 @@ export function LoginInputWithModal({
 }: LoginInputProps) {
   const router = useRouter();
 
-  const [opened, { open, close }] = useDisclosure(false);
+  const [agreeOpened, { open: openAgree, close: closeAgree }] =
+    useDisclosure(false);
+  const [notiOpened, { open: openNoti, close: closeNoti }] =
+    useDisclosure(false);
   const [value, setValue] = useState(defaultValue);
+
+  const isValidMinicode = (code: string) => {
+    const regex = /^[a-z0-9_]{5,12}$/;
+    return regex.test(code);
+  };
 
   return (
     <>
+      <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
+        <p>유효하지 않은 형식의 미니코드예요!</p>
+      </ModalNoti>
+
       <ModalGoBack
         title="정보 제공 및 활용 동의 안내"
         go="참여하기"
         back="그만두기"
-        opened={opened}
+        opened={agreeOpened}
         onGo={() => router.push(`/login/${value}`)}
-        close={close}
+        close={closeAgree}
       >
         <>
           <p>
@@ -125,7 +134,7 @@ export function LoginInputWithModal({
         rightButton={rightButton}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onClick={open}
+        onClick={isValidMinicode(value) ? openAgree : openNoti}
       />
     </>
   );
