@@ -1,4 +1,4 @@
-.container {
+.Container {
   position: sticky;
   top: 0;
 
@@ -8,17 +8,17 @@
   z-index: 200;
 }
 
-.mainHeader {
+.MainHeader {
   display: flex;
-  align-items: center; 
-  justify-content: space-between; 
+  align-items: center;
+  justify-content: space-between;
 
   height: 50px;
 
   background-color: var(--main);
 }
 
-.backButton {
+.BackButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,7 +31,7 @@
   border-bottom-right-radius: 10px;
 }
 
-.rightSection {
+.RightSection {
   display: flex;
   align-items: center;
   justify-content: right;
@@ -40,13 +40,13 @@
   padding-right: 8px;
 }
 
-.title {
+.Title {
   padding-top: 2px; /* 이게 있어야 위아래 간격 대칭이 맞아보임 */
-  
+
   font-size: 24px;
 }
 
-.subHeader {
+.SubHeader {
   height: 36px;
   padding: 11px;
 
@@ -55,7 +55,7 @@
   text-align: left;
 }
 
-.subText {
+.SubText {
   padding-top: 1px; /* 이게 있어야 위아래 간격 대칭이 맞아보임*/
 
   color: var(--white);
