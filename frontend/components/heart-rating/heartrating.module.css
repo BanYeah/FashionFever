@@ -1,0 +1,16 @@
+/* src/components/rating/HeartRating.module.css */
+
+.ratingRoot {
+  display: inline-flex;
+}
+
+.ratingItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart {
+  display: block;
+  object-fit: contain;
+}
