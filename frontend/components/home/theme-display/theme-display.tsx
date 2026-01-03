@@ -2,6 +2,7 @@
 
 import classes from "./theme-display.module.css";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Flex,
   Group,
@@ -12,32 +13,32 @@ import {
 } from "@mantine/core";
 
 interface ThemeDisplayProps {
-  type: "open" | "pending" | "vote" | "result";
+  variant: "open" | "pending" | "vote" | "result";
   registered: boolean;
   point?: number;
 }
 
-export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
+export function ThemeDisplay({
+  variant,
+  registered,
+  point,
+}: ThemeDisplayProps) {
   return (
     <Stack className={classes.Container} gap={0}>
       {/* classes.Container에서 <p> 태그의 color: var(--gray-8a); font-size: 14px로 설정 */}
 
       {/* 테마 배너 이미지 */}
       <div className={classes.ImageWrapper}>
-        {type === "vote" || type === "result" ? (
+        {variant === "vote" ? (
           <Stack
             className={classes.ImageDark}
             align="center"
             justify="center"
             gap={6}
           >
-            <p>{type === "vote" ? "투 표 중" : "투 표 마 감"}</p>
+            <p>투 표 중</p>
             <Image
-              src={
-                type === "vote"
-                  ? "/images/home/theme-display/clock-hour-10.svg"
-                  : "/images/home/theme-display/clock-hour-12.svg"
-              }
+              src="/images/home/theme-display/clock-hour-10.svg"
               alt=""
               width={28}
               height={28}
@@ -48,7 +49,8 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
       </div>
 
       {/* 참가 상태 */}
-      {type === "open" ? (
+      {variant === "open" ? (
+        // 모 집 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p style={{ color: "var(--black)" }}>
             {registered
@@ -67,14 +69,16 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
             </UnstyledButton>
           </Stack>
         </Group>
-      ) : type === "pending" ? (
+      ) : variant === "pending" ? (
+        // 검 수 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>{registered ? "참가한 테마예요!" : "참가하지 않은 테마예요!"}</p>
           <Flex align="flex-start" h={56}>
             <p style={{ color: "var(--main)" }}>7시간 15분 후 투표 시작</p>
           </Flex>
         </Group>
-      ) : type === "vote" ? (
+      ) : variant === "vote" ? (
+        // 투 표 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Box pt={7} pb={7} w={"50%"}>
             <Stack w={"fit-content"} gap={5}>
@@ -101,6 +105,7 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
           </Stack>
         </Group>
       ) : (
+        // 투 표 종 료
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Box pt={7} pb={7} w={"50%"}>
             <Stack w={"fit-content"} gap={5}>
@@ -128,10 +133,15 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
             w={"50%"}
             h={56.5}
           >
-            <UnstyledButton
-              style={{ position: "absolute", top: "-28px", right: "-6px" }}
-              w={61}
-              h={61}
+            <Link
+              style={{
+                position: "absolute",
+                top: "-28px",
+                right: "-6px",
+                width: "61px",
+                height: "61px",
+              }}
+              href="/"
             >
               <Image
                 src="/images/home/theme-display/result.svg"
@@ -139,7 +149,7 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
                 width={61}
                 height={61}
               />
-            </UnstyledButton>
+            </Link>
 
             <ProgressBar point={point} />
           </Flex>

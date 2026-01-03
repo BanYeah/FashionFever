@@ -76,3 +76,24 @@
 
   border: 1px solid var(--black);
 }
+
+.ThemeReview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  height: 30px;
+
+  padding: 0px 10px;
+
+  background-color: var(--black);
+  border-radius: 15px;
+
+  p {
+    padding-top: 1px;
+    padding-left: 1px;
+
+    color: var(--main);
+  }
+}

@@ -2,18 +2,42 @@
 
 import { Stack } from "@mantine/core";
 import { ThemeDisplay } from "./theme-display/theme-display";
+import { ThemeDisplayJudge } from "./theme-display/theme-display-judge";
+import { ThemeDisplayAdmin } from "./theme-display/theme-display-admin";
 
 export function ThemeCollection() {
+  const type = "admin" as "user" | "judge" | "admin";
+
   return (
     <Stack m={10} gap={10}>
-      <ThemeDisplay type="open" registered={false} />
-      <ThemeDisplay type="open" registered={true} />
-      <ThemeDisplay type="pending" registered={false} />
-      <ThemeDisplay type="pending" registered={true} />
-      <ThemeDisplay type="vote" registered={false} point={10} />
-      <ThemeDisplay type="vote" registered={true} point={100} />
-      <ThemeDisplay type="result" registered={false} point={30} />
-      <ThemeDisplay type="result" registered={true} point={150} />
+      {type === "user" ? (
+        <>
+          <ThemeDisplay variant="open" registered={false} />
+          <ThemeDisplay variant="open" registered={true} />
+          <ThemeDisplay variant="pending" registered={false} />
+          <ThemeDisplay variant="pending" registered={true} />
+          <ThemeDisplay variant="vote" registered={false} point={10} />
+          <ThemeDisplay variant="vote" registered={true} point={100} />
+          <ThemeDisplay variant="result" registered={false} point={30} />
+          <ThemeDisplay variant="result" registered={true} point={150} />
+        </>
+      ) : type == "judge" ? (
+        <>
+          <ThemeDisplayJudge variant="open" />
+          <ThemeDisplayJudge variant="pending" />
+          <ThemeDisplayJudge variant="vote" registered={false} />
+          <ThemeDisplayJudge variant="vote" registered={true} />
+          <ThemeDisplayJudge variant="result" />
+        </>
+      ) : (
+        <>
+          <ThemeDisplayAdmin variant="unopen" />
+          <ThemeDisplayAdmin variant="open" />
+          <ThemeDisplayAdmin variant="pending" />
+          <ThemeDisplayAdmin variant="vote" />
+          <ThemeDisplayAdmin variant="result" />
+        </>
+      )}
     </Stack>
   );
 }
