@@ -26,8 +26,8 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p style={{ color: "var(--black)" }}>
             {registered
-              ? "이미 참가한 테마에요!"
-              : "아직 참가하지 않은 테마에요!"}
+              ? "이미 참가한 테마예요!"
+              : "아직 참가하지 않은 테마예요!"}
           </p>
           <Stack align="flex-end" justify="space-between" gap={22}>
             <p style={{ color: "var(--main)" }}>23시간 35분 남음</p>
@@ -43,7 +43,7 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
         </Group>
       ) : type === "pending" ? (
         <Group align="center" justify="space-between" p={6} gap={0}>
-          <p>{registered ? "참가한 테마에요!" : "참가하지 않은 테마에요!"}</p>
+          <p>{registered ? "참가한 테마예요!" : "참가하지 않은 테마예요!"}</p>
           <Flex align="flex-start" h={56}>
             <p style={{ color: "var(--main)" }}>7시간 15분 후 투표 시작</p>
           </Flex>
@@ -59,7 +59,7 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
                     <p>23</p>
                   </>
                 ) : (
-                  <p>참가하지 않은 테마에요!</p>
+                  <p>참가하지 않은 테마예요!</p>
                 )}
               </Group>
               <Divider size={1.5} color="var(--gray-8a)" />
@@ -85,7 +85,7 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
                     <p>20</p>
                   </>
                 ) : (
-                  <p>참가하지 않은 테마에요!</p>
+                  <p>참가하지 않은 테마예요!</p>
                 )}
               </Group>
               <Divider size={1.5} color="var(--gray-8a)" />
