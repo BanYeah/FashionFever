@@ -1,14 +1,9 @@
-.ratingRoot {
+.RatingRoot {
   display: inline-flex;
 }
 
-.ratingItem {
+.RatingItem {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.heart {
-  display: block;
-  object-fit: contain;
 }

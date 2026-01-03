@@ -1,10 +1,9 @@
-import classes from './heartrating.module.css';
-import Image from 'next/image';
-import { Rating } from '@mantine/core';
-
+import classes from "./heartrating.module.css";
+import Image from "next/image";
+import { Rating } from "@mantine/core";
 
 interface HeartRatingProps {
-  value: number; 
+  value: number;
   unitW: number;
   unitH: number;
 }
@@ -16,28 +15,26 @@ export default function HeartRating({ value, unitW, unitH }: HeartRatingProps) {
     <Rating
       value={clampedValue}
       count={5}
-      readOnly 
-      fractions={100} 
-      classNames={{ 
-        root: classes.ratingRoot,
-        symbolBody: classes.ratingItem 
+      readOnly
+      fractions={100}
+      classNames={{
+        root: classes.RatingRoot,
+        symbolBody: classes.RatingItem,
       }}
-      
       emptySymbol={
-        <Image 
-          src="/images/heart-rating/emptyheart.svg" 
-          alt="empty" 
-          width={unitW} 
-          height={unitH} 
+        <Image
+          src="/images/heart-rating/emptyheart.svg"
+          alt="empty"
+          width={unitW}
+          height={unitH}
         />
       }
-      
       fullSymbol={
-        <Image 
-          src="/images/heart-rating/fullheart.svg" 
-          alt="full" 
-          width={unitW} 
-          height={unitH} 
+        <Image
+          src="/images/heart-rating/fullheart.svg"
+          alt="full"
+          width={unitW}
+          height={unitH}
         />
       }
     />
