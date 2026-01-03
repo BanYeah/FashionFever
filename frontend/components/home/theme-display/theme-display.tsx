@@ -21,7 +21,33 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
   return (
     <Stack className={classes.Container} gap={0}>
       {/* classes.Container에서 <p> 태그의 color: var(--gray-8a); font-size: 14px로 설정 */}
-      <img src="/images/home/gray.svg" width="100%" />
+
+      {/* 테마 배너 이미지 */}
+      <div className={classes.ImageWrapper}>
+        {type === "vote" || type === "result" ? (
+          <Stack
+            className={classes.ImageDark}
+            align="center"
+            justify="center"
+            gap={6}
+          >
+            <p>{type === "vote" ? "투 표 중" : "투 표 마 감"}</p>
+            <Image
+              src={
+                type === "vote"
+                  ? "/images/home/theme-display/clock-hour-10.svg"
+                  : "/images/home/theme-display/clock-hour-12.svg"
+              }
+              alt=""
+              width={28}
+              height={28}
+            />
+          </Stack>
+        ) : null}
+        <img src="/images/home/theme-display/image.png" width="100%" />
+      </div>
+
+      {/* 참가 상태 */}
       {type === "open" ? (
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p style={{ color: "var(--black)" }}>
@@ -33,7 +59,7 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
             <p style={{ color: "var(--main)" }}>23시간 35분 남음</p>
             <UnstyledButton w={20} h={20}>
               <Image
-                src="/images/home/register.svg"
+                src="/images/home/theme-display/register.svg"
                 alt=""
                 width={20}
                 height={20}
@@ -108,7 +134,7 @@ export function ThemeDisplay({ type, registered, point }: ThemeDisplayProps) {
               h={61}
             >
               <Image
-                src="/images/home/result.svg"
+                src="/images/home/theme-display/result.svg"
                 alt="결과 발표"
                 width={61}
                 height={61}
@@ -131,7 +157,7 @@ function ProgressBar({ point }: { point?: number }) {
       <Image
         className={classes.Star}
         style={{ left: "calc(30% - 20.4px)" }}
-        src="/images/home/star.svg"
+        src="/images/home/theme-display/star.svg"
         alt="30%"
         width={25}
         height={26}
@@ -139,7 +165,7 @@ function ProgressBar({ point }: { point?: number }) {
       <Image
         className={classes.Star}
         style={{ left: "calc(100% - 68px)" }}
-        src="/images/home/star.svg"
+        src="/images/home/theme-display/star.svg"
         alt="100%"
         width={25}
         height={26}
