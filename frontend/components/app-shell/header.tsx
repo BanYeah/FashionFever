@@ -1,40 +1,38 @@
-// src/components/app-shell/header.tsx
-import React from 'react';
+import classes from './header.module.css';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from './header.module.css';
 import { UnstyledButton } from '@mantine/core';
 
-interface GlobalHeaderProps {
+interface AppShellHeaderProps {
   href: string;
   gift?: boolean;
-  description: string;
-  subDescription?: string;
+  title: string;
+  subTitle?: string;
 }
 
-export default function GlobalHeader({ href, gift, description, subDescription }: GlobalHeaderProps) {
+export default function GlobalHeader({ href, gift, title, subTitle }: AppShellHeaderProps) {
   return (
-    <div className={styles.container}>
-      <header className={styles.mainHeader}>
+    <div className={classes.container}>
+      <header className={classes.mainHeader}>
         {/* 뒤로가기 버튼 영역 */}
-        <Link href={href} className={styles.backButton}>
+        <Link href={href} className={classes.backButton}>
           <Image 
-            src="/images/app-shell/goback.svg" // /public 제거, images 확인
+            src="/images/app-shell/goback.svg" 
             alt="뒤로가기" 
-            width={17} // 요청하신 사이즈 43
-            height={25} // 요청하신 사이즈 38
+            width={17} 
+            height={25} 
             priority
           />
         </Link>
         
-        <div className={styles.title}>{description}</div>
+        <div className={classes.title}>{title}</div>
 
         {/* 우측 선물 버튼 영역 */}
-        <div className={styles.rightSection}>
+        <div className={classes.rightSection}>
           {gift && (
             <UnstyledButton w={30} h={30}>
               <Image 
-                src="/images/app-shell/present.svg" // /public 제거, images 확인
+                src="/images/app-shell/present.svg" 
                 alt="선물목록" 
                 width={30} 
                 height={30} 
@@ -44,11 +42,14 @@ export default function GlobalHeader({ href, gift, description, subDescription }
         </div>
       </header>
 
-      {subDescription && (
-        <div className={styles.subHeader}>
-          <p className={styles.subText}>{subDescription}</p>
+      {subTitle && (
+        <div className={classes.subHeader}>
+          <p className={classes.subText}>{subTitle}</p>
         </div>
       )}
     </div>
   );
+
 }
+
+
