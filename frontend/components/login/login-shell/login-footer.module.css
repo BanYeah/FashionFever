@@ -2,6 +2,10 @@
   position: fixed;
   bottom: 0;
 
+  /* 브라우저 창을 기준으로 중앙 정렬 */
+  left: 50%;
+  transform: translateX(-50%);
+
   width: 100%;
   max-width: 425px;
   min-width: 320px;
