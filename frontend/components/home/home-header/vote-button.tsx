@@ -12,10 +12,10 @@ export function VoteButton() {
   return (
     <>
       <ModalNoti icon="alert" opened={opened} close={close}>
-        <p>
-          현재 투표가 진행 중인 테마가 없어요! 다음 테마가 열릴 때까지 조금만
-          기다려 주세요.
-        </p>
+        <>
+          <p>현재 투표가 진행 중인 테마가 없어요!</p>
+          <p>다음 테마가 열릴 때까지 조금만 기다려 주세요.</p>
+        </>
       </ModalNoti>
 
       <UnstyledButton className={classes.VoteButton} onClick={open}>
