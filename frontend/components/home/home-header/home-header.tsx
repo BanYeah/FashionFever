@@ -15,6 +15,7 @@ export function HomeHeader() {
           alt=""
           width={98}
           height={113}
+          priority
         />
         <HelpButton />
         <LogoutButton />

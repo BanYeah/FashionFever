@@ -1,0 +1,54 @@
+.ModalInner {
+  align-items: center;
+  left: 0;
+
+  width: 100vw;
+  height: 100dvh;
+}
+
+.ModalContent {
+  width: 352px;
+  height: fit-content;
+  overflow-y: hidden;
+
+  background-color: var(--main-light);
+  border-radius: 0px;
+}
+
+@media (max-width: 370px) {
+  .ModalContent {
+    width: 330px;
+  }
+}
+
+.Section {
+  padding: 17px;
+  background-color: var(--white);
+
+  p {
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: center;
+    word-break: keep-all;
+  }
+}
+
+.CheckButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 164px;
+  height: 40px;
+
+  background-color: var(--white);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+
+  p {
+    padding-top: 3px;
+
+    color: var(--main-light);
+    font-size: 24px;
+  }
+}

@@ -5,9 +5,9 @@ import { Modal, Stack, UnstyledButton } from "@mantine/core";
 
 interface ModalGoBackProps {
   title: string;
-  description: React.ReactNode;
   go: string;
   back: string;
+  children: React.ReactNode;
   opened: boolean;
   onGo: () => void;
   close: () => void;
@@ -15,9 +15,9 @@ interface ModalGoBackProps {
 
 export function ModalGoBack({
   title,
-  description,
   go,
   back,
+  children,
   opened,
   onGo,
   close,
@@ -38,8 +38,8 @@ export function ModalGoBack({
       withCloseButton={false}
     >
       <Stack gap={0}>
-        <Stack className={classes.ModalDescription} gap={30}>
-          {description}
+        <Stack className={classes.Section} gap={30}>
+          {children}
         </Stack>
         <div className={classes.ModalFooter}>
           <UnstyledButton

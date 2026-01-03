@@ -11,6 +11,7 @@ export function EventSchedule() {
         alt=""
         width={263}
         height={257}
+        priority
       />
       <div className={classes.ScheduleEmpty} />
       <Stack className={classes.Schedule} align="center" gap={6}>
