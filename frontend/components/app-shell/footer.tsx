@@ -1,60 +1,60 @@
-import Link from 'next/link';
-import styles from './footer.module.css';
+import Link from "next/link";
+import classes from "./footer.module.css";
 
 interface GlobalFooterProps {
-  varient: "default" | "dressUp" | "2Tab" | "3Tab";
-  description?: string;
-  onTab?: number;
+  variant: "dressUp" | "tabs";
+  activeTab?: number;
   tabs?: string[];
   tabLinks?: string[];
 }
 
-export default function GlobalFooter({ 
-  varient, 
-  description, 
-  onTab = 0, 
-  tabs, 
-  tabLinks 
+export default function GlobalFooter({
+  variant,
+  activeTab = 0,
+  tabs,
+  tabLinks,
 }: GlobalFooterProps) {
-  
   const renderContent = () => {
-    switch (varient) {
-      case "default":
-        return <p className={styles.defaultText}>{description}</p>;
-        
+    switch (variant) {
       case "dressUp":
         return (
-          <div className={styles.dressUpContainer}>
-            <Link href="/mini-dressup" className={styles.dressUpLink}>
+          <div className={classes.DressUpContainer}>
+            <Link href="/mini-dressup" className={classes.DressUpLink}>
               미니 꾸미기
             </Link>
           </div>
         );
-        
-      case "2Tab":
-      case "3Tab":
+
+      case "tabs":
         return (
-          <div className={styles.tabContainer}>
-            {tabs?.map((text, index) => (
-              <Link 
-                key={index} 
-                href={tabLinks?.[index] || "#"} 
-                className={`${styles.tabItem} ${onTab === index ? styles.activeTab : styles.inactiveTab}`}
-              >
-                {text}
-              </Link>
-            ))}
+          <div className={classes.TabContainer}>
+            {tabs?.map((text, index) => {
+              const isActive = activeTab === index;
+              const tabClassName = `${classes.TabItem} ${
+                isActive ? classes.ActiveTab : classes.InactiveTab
+              }`;
+
+              return isActive ? (
+                <div key={index} className={tabClassName}>
+                  {text}
+                </div>
+              ) : (
+                <Link
+                  key={index}
+                  href={tabLinks?.[index] || "#"}
+                  className={tabClassName}
+                >
+                  {text}
+                </Link>
+              );
+            })}
           </div>
         );
-        
+
       default:
         return null;
     }
   };
 
-  return (
-    <footer className={styles.footerContainer}>
-      {renderContent()}
-    </footer>
-  );
+  return <footer className={classes.FooterContainer}>{renderContent()}</footer>;
 }
