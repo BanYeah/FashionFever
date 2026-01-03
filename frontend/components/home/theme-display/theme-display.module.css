@@ -82,10 +82,10 @@
   align-items: center;
   justify-content: center;
 
+  padding: 0px 10px;
+
   width: fit-content;
   height: 30px;
-
-  padding: 0px 10px;
 
   background-color: var(--black);
   border-radius: 15px;
