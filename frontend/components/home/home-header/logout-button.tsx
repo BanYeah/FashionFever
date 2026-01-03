@@ -7,7 +7,12 @@ import { UnstyledButton } from "@mantine/core";
 export function LogoutButton() {
   return (
     <UnstyledButton className={classes.LogoutButton}>
-      <Image src="/images/home/logout.svg" alt="" width={20} height={20} />
+      <Image
+        src="/images/home/home-shell/logout.svg"
+        alt=""
+        width={20}
+        height={20}
+      />
     </UnstyledButton>
   );
 }

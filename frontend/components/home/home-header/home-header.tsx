@@ -11,7 +11,7 @@ export function HomeHeader() {
       <div style={{ position: "relative" }}>
         <Image
           style={{ position: "absolute", left: "2px" }}
-          src="/images/home/fashionminini.png"
+          src="/images/home/home-shell/fashionminini.png"
           alt=""
           width={98}
           height={113}
@@ -25,7 +25,7 @@ export function HomeHeader() {
           <div className={classes.TopSection}>
             <div className={classes.TopCenter}>
               <Image
-                src="/images/home/fashion-fever.svg"
+                src="/images/home/home-shell/fashion-fever.svg"
                 alt=""
                 width={169}
                 height={24}
