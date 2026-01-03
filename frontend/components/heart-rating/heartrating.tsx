@@ -1,35 +1,34 @@
-// src/components/rating/HeartRating.tsx
-import { Rating } from '@mantine/core';
+import classes from './heartrating.module.css';
 import Image from 'next/image';
-import styles from './heartrating.module.css';
+import { Rating } from '@mantine/core';
+
 
 interface HeartRatingProps {
-  value: number; // 0.0 ~ 5.0 사이의 정밀한 값
-  width: number;
-  height: number;
+  value: number; 
+  unitW: number;
+  unitH: number;
 }
 
-export default function HeartRating({ value, width, height }: HeartRatingProps) {
-  // 💡 Clamp 로직: 0 미만은 0으로, 5 초과는 5로 고정
+export default function HeartRating({ value, unitW, unitH }: HeartRatingProps) {
   const clampedValue = Math.min(Math.max(value, 0), 5);
 
   return (
     <Rating
       value={clampedValue}
       count={5}
-      readOnly // 💡 클릭 불가 (단순 보여주기용)
-      fractions={100} // 💡 0.01 단위까지 정밀하게 채워줌 (1/100 단위)
+      readOnly 
+      fractions={100} 
       classNames={{ 
-        root: styles.ratingRoot,
-        symbolBody: styles.ratingItem 
+        root: classes.ratingRoot,
+        symbolBody: classes.ratingItem 
       }}
       
       emptySymbol={
         <Image 
           src="/images/heart-rating/emptyheart.svg" 
           alt="empty" 
-          width={width} 
-          height={height} 
+          width={unitW} 
+          height={unitH} 
         />
       }
       
@@ -37,8 +36,8 @@ export default function HeartRating({ value, width, height }: HeartRatingProps) 
         <Image 
           src="/images/heart-rating/fullheart.svg" 
           alt="full" 
-          width={width} 
-          height={height} 
+          width={unitW} 
+          height={unitH} 
         />
       }
     />
