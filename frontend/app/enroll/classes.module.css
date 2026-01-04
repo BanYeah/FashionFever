@@ -1,0 +1,58 @@
+.EnlargedPhotoWrapper {
+  position: relative;
+
+  width: 100%;
+  height: fit-content;
+
+  img {
+    display: block;
+  }
+}
+
+.AlertBgLimitWrapper {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+
+  width: 308px;
+  height: 40px;
+
+  background-color: var(--main-light);
+}
+
+.AlertBgLimit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 268px;
+  height: 32px;
+
+  background-color: var(--white);
+
+  p {
+    padding-top: 2px;
+    font-size: 16px;
+  }
+}
+
+.GuideButton {
+  position: absolute;
+  bottom: 6px;
+  right: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 70px;
+  height: 52px;
+
+  background-color: var(--main);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+
+  img {
+    padding-left: 2px;
+  }
+}
