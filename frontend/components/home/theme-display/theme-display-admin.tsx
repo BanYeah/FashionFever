@@ -139,14 +139,10 @@ function ThemeDeleteButton() {
         onGo={() => {}}
         close={close}
       >
-        <>
-          <p>
-            테마 삭제는 <span>되돌릴 수 없습니다.</span>
-          </p>
-          <p>
-            정말로 테마를 <span>삭제</span>하시겠습니까?
-          </p>
-        </>
+        <p>
+          테마 삭제는 <span>되돌릴 수 없습니다.</span> <br />
+          정말로 테마를 삭제하시겠습니까?
+        </p>
       </ModalGoBack>
 
       <UnstyledButton w={30} h={30} onClick={open}>
