@@ -5,25 +5,30 @@ import Image from "next/image";
 import { UnstyledButton } from "@mantine/core";
 
 interface EnrollFooterProps {
+  text: string;
   disabled?: boolean;
   onClick: () => void;
 }
 
-export function EnrollFooter({ disabled, onClick }: EnrollFooterProps) {
+export function EnrollFooter({ text, disabled, onClick }: EnrollFooterProps) {
   return (
     <div className={classes.FooterContainer}>
       {disabled ? (
-        <UnstyledButton className={classes.DisabledBtn} disabled={disabled}>
+        <UnstyledButton
+          className={`${classes.Button} ${classes.Disabled}`}
+          disabled={disabled}
+        >
+          <p>{text}</p>
           <Image
-            src="/images/app-shell/disable-enroll.svg"
+            src="/images/app-shell/forbid.svg"
             alt=""
-            width={99}
+            width={50}
             height={50}
           />
         </UnstyledButton>
       ) : (
-        <UnstyledButton className={classes.PinkBtn} onClick={onClick}>
-          <p>참 가 하 기</p>
+        <UnstyledButton className={classes.Button} onClick={onClick}>
+          <p>{text}</p>
         </UnstyledButton>
       )}
     </div>

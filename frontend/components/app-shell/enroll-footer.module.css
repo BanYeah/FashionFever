@@ -19,7 +19,7 @@
   z-index: 200;
 }
 
-.DisabledBtn {
+.Button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,19 +27,29 @@
   width: 196px;
   height: inherit;
 
-  background-color: #ffc2de;
-}
-
-.PinkBtn {
-  width: 196px;
-  height: inherit;
-
   background-color: var(--main);
 
   p {
     padding-top: 2;
+
     color: var(--white);
     font-size: 24px;
-    text-align: center;
+  }
+}
+
+.Disabled {
+  position: relative;
+
+  background-color: #ffc2de;
+
+  p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    white-space: nowrap;
+
+    z-index: 250;
   }
 }

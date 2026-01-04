@@ -56,7 +56,11 @@ export default function EnrollPage() {
 
       <AppShell
         footer={
-          <EnrollFooter disabled={files.length <= 0} onClick={openEnroll} />
+          <EnrollFooter
+            text="참 가 하 기"
+            disabled={files.length <= 0}
+            onClick={openEnroll}
+          />
         }
       >
         <Stack gap={0}>
