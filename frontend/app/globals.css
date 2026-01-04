@@ -13,19 +13,17 @@
 
 html,
 body {
-  max-width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {
-  display: flex;
-  justify-content: center;
-
   background: var(--background);
   color: var(--foreground);
 }
 
 main {
-  position: relative;
+  margin: 0 auto;
 
   /* F12 (개발자 모드)에서 Device Toolbar로 확인 */
   width: 100%;
