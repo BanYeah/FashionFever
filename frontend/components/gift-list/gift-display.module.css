@@ -1,0 +1,34 @@
+.Caption {
+  p {
+    line-height: 1.2;
+    white-space: nowrap; /* 줄바꿈 방지 */
+  }
+
+  span {
+    color: var(--main);
+  }
+}
+
+.ImageWrapper {
+  display: flex;
+  justify-content: center;
+
+  width: 125px;
+
+  img {
+    display: block;
+  }
+}
+
+.GiftCaption {
+  min-width: 0;
+  flex: 1;
+
+  p {
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
