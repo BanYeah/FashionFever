@@ -56,3 +56,10 @@
     padding-left: 2px;
   }
 }
+
+.EmptyImage {
+  width: 100%;
+  aspect-ratio: 5 / 4;
+
+  background-color: #f2f2f2;
+}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Stack } from "@mantine/core";
 import { ModalNoti } from "@/components/modal/model-noti";
 
@@ -10,7 +11,13 @@ export function EnrollGuide({ opened, close }: EnrollNotiProps) {
   return (
     <ModalNoti icon="info" opened={opened} close={close}>
       <Stack gap={20}>
-        <img src="/images/enroll/guide-bg.png" width={"100%"} />
+        <Image
+          src="/images/enroll/guide-bg.png"
+          alt=""
+          width={300}
+          height={472}
+          style={{ width: "100%", height: "auto" }}
+        />
 
         <Stack gap={14}>
           <p>마음에 드는 배경색을 선택해 주세요.</p>
@@ -27,7 +34,13 @@ export function EnrollGuide({ opened, close }: EnrollNotiProps) {
           </p>
         </Stack>
 
-        <img src="/images/enroll/guide-ratio.png" width={"100%"} />
+        <Image
+          src="/images/enroll/guide-ratio.png"
+          alt=""
+          width={300}
+          height={438}
+          style={{ width: "100%", height: "auto" }}
+        />
 
         <p>
           스크린샷을 찍은 후,
@@ -35,7 +48,13 @@ export function EnrollGuide({ opened, close }: EnrollNotiProps) {
           맞춰 잘라 주세요!
         </p>
 
-        <img src="/images/enroll/guide-clean.png" width={"100%"} />
+        <Image
+          src="/images/enroll/guide-clean.png"
+          alt=""
+          width={300}
+          height={240}
+          style={{ width: "100%", height: "auto" }}
+        />
 
         <Stack gap={14}>
           <p>

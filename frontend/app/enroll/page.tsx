@@ -1,27 +1,34 @@
 "use client";
 
-import classes from "./classes.module.css";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { Group, UnstyledButton } from "@mantine/core";
+import { SimpleGrid, Stack } from "@mantine/core";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { EnrollFooter } from "@/components/app-shell/enroll-footer";
 import { ModalGoBack } from "@/components/modal/modal-go-back";
-import { EnrollGuide } from "@/components/enroll/enroll-guide";
 import { EnrollNoti } from "@/components/enroll/enroll-noti";
+import { EnrollTopSection } from "@/components/enroll/enroll-top-section";
+import { FileDisplay } from "@/components/enroll/file-display";
+import { AddFileButton } from "@/components/enroll/add-file-button";
 
 export default function EnrollPage() {
-  const [guideOpened, { open: openGuide, close: closeGuide }] =
-    useDisclosure(false);
   const [enrollOpened, { open: openEnroll, close: closeEnroll }] =
     useDisclosure(false);
   const [notiOpened, { open: openNoti, close: closeNoti }] =
     useDisclosure(false);
 
+  const [index, setIndex] = useState<number>(0); // File Index
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+
+  useEffect(() => {
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setPreviews(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [files]);
+
   return (
     <>
-      <EnrollGuide opened={guideOpened} close={closeGuide} />
-
       <ModalGoBack
         title="참가 전 안내"
         go="참가하기"
@@ -45,72 +52,36 @@ export default function EnrollPage() {
         </>
       </ModalGoBack>
 
-      <EnrollNoti variant="success" opened={notiOpened} close={closeNoti} />
+      <EnrollNoti variant="fail" opened={notiOpened} close={closeNoti} />
 
-      <AppShell footer={<EnrollFooter onClick={openEnroll} />}>
-        <div className={classes.EnlargedPhotoWrapper}>
-          <AlertBgLimit color={2} />
-          <UnstyledButton className={classes.GuideButton} onClick={openGuide}>
-            <Image
-              src="/images/enroll/guide-check.svg"
-              alt=""
-              width={46}
-              height={36}
-            />
-          </UnstyledButton>
-          <img src="/images/model.png" width="100%" />
-        </div>
+      <AppShell
+        footer={
+          <EnrollFooter disabled={files.length <= 0} onClick={openEnroll} />
+        }
+      >
+        <Stack gap={0}>
+          <EnrollTopSection index={index} previews={previews} />
+          <SimpleGrid
+            cols={2}
+            spacing={20}
+            verticalSpacing={16}
+            px={16}
+            py={16}
+          >
+            {previews.map((preview, idx) => (
+              <FileDisplay
+                key={`${preview}_${idx}`}
+                idx={idx}
+                index={index}
+                setIndex={setIndex}
+                preview={preview}
+                setFiles={setFiles}
+              />
+            ))}
+            {previews.length < 4 && <AddFileButton setFiles={setFiles} />}
+          </SimpleGrid>
+        </Stack>
       </AppShell>
     </>
   );
-}
-
-function AlertBgLimit({ color }: { color: number }) {
-  const colorNames = [
-    "기본색", // 1
-    "분홍색",
-    "주황색",
-    "초록색",
-    "남색",
-    "하얀색",
-    "보라색",
-    "노란색",
-    "하늘색",
-    "검은색", // 10
-  ];
-  const colorPalette = [
-    "#e0c68b",
-    "#ff809d",
-    "#f56400",
-    "#5aa14d",
-    "#1b215b",
-    "#cccccc",
-    "#a771f4",
-    "#ffc478",
-    "#7adbf8",
-    "#070707",
-  ];
-
-  if (0 <= color && color <= 10)
-    return (
-      <div className={classes.AlertBgLimitWrapper}>
-        <Group align="center" gap={8} pl={8} h={"100%"}>
-          <Image src="/images/enroll/alert.svg" alt="" width={20} height={20} />
-          <div className={classes.AlertBgLimit}>
-            {color === 0 ? (
-              <p>배경 제한을 공식 카페에서 확인해주세요!</p>
-            ) : (
-              <p>
-                배경색이{" "}
-                <span style={{ color: `${colorPalette[color - 1]}` }}>
-                  {colorNames[color - 1]}
-                </span>
-                으로 제한되었어요!
-              </p>
-            )}
-          </div>
-        </Group>
-      </div>
-    );
-  else return null;
 }

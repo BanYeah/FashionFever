@@ -19,6 +19,17 @@
   z-index: 200;
 }
 
+.DisabledBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 196px;
+  height: inherit;
+
+  background-color: #ffc2de;
+}
+
 .PinkBtn {
   width: 196px;
   height: inherit;
