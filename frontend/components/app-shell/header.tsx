@@ -8,10 +8,7 @@ interface AppShellHeaderProps {
   subHeader?: boolean;
 }
 
-export function AppShellHeader({
-  gift,
-  subHeader = true,
-}: AppShellHeaderProps) {
+export function AppShellHeader({ gift, subHeader }: AppShellHeaderProps) {
   const title: string = "두근 두근 핑크빛 병원";
   const subTitle: string =
     "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
@@ -45,7 +42,7 @@ export function AppShellHeader({
         </div>
       </header>
 
-      {subHeader && subTitle && (
+      {subHeader && (
         <div className={classes.SubHeader}>
           <p className={classes.SubText}>{subTitle}</p>
         </div>
