@@ -1,19 +1,19 @@
 import classes from "./footer.module.css";
 import Link from "next/link";
 
-interface GlobalFooterProps {
+interface AppShellFooterProps {
   variant: "dressUp" | "tabs";
   activeTab?: number;
   tabs?: string[];
   tabLinks?: string[];
 }
 
-export function GlobalFooter({
+export function AppShellFooter({
   variant,
   activeTab = 0,
   tabs,
   tabLinks,
-}: GlobalFooterProps) {
+}: AppShellFooterProps) {
   const renderContent = () => {
     switch (variant) {
       case "dressUp":
