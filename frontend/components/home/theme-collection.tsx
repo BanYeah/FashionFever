@@ -6,12 +6,13 @@ import { ThemeDisplayJudge } from "./theme-display/theme-display-judge";
 import { ThemeDisplayAdmin } from "./theme-display/theme-display-admin";
 
 export function ThemeCollection() {
-  const type = "admin" as "user" | "judge" | "admin";
+  const type = "user" as "user" | "judge" | "admin";
 
   return (
     <Stack m={10} gap={10}>
       {type === "user" ? (
         <>
+          {/* API 연결할 때는 variant, registerd, point 등의 Props 제거하고 데이터만 전달 */}
           <ThemeDisplay variant="open" registered={false} />
           <ThemeDisplay variant="open" registered={true} />
           <ThemeDisplay variant="pending" registered={false} />
