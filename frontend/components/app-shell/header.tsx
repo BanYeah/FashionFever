@@ -5,8 +5,6 @@ import { UnstyledButton } from "@mantine/core";
 
 interface AppShellHeaderProps {
   gift?: boolean;
-  title: string;
-  subTitle?: string;
 }
 
 export function AppShellHeader({ gift }: AppShellHeaderProps) {
