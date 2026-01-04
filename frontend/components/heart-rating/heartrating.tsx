@@ -8,7 +8,7 @@ interface HeartRatingProps {
   unitH: number;
 }
 
-export default function HeartRating({ value, unitW, unitH }: HeartRatingProps) {
+export function HeartRating({ value, unitW, unitH }: HeartRatingProps) {
   const clampedValue = Math.min(Math.max(value, 0), 5);
 
   return (

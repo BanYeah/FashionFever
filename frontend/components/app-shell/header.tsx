@@ -10,7 +10,7 @@ interface AppShellHeaderProps {
   subTitle?: string;
 }
 
-export default function GlobalHeader({
+export function GlobalHeader({
   href,
   gift,
   title,

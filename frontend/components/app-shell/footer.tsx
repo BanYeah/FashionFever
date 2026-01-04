@@ -1,5 +1,5 @@
-import Link from "next/link";
 import classes from "./footer.module.css";
+import Link from "next/link";
 
 interface GlobalFooterProps {
   variant: "dressUp" | "tabs";
@@ -8,7 +8,7 @@ interface GlobalFooterProps {
   tabLinks?: string[];
 }
 
-export default function GlobalFooter({
+export function GlobalFooter({
   variant,
   activeTab = 0,
   tabs,

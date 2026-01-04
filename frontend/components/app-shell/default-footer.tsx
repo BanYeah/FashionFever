@@ -2,7 +2,7 @@
 
 import classes from "./default-footer.module.css";
 
-export default function DefaultFooter() {
+export function DefaultFooter() {
   const point: number = 39;
 
   return (
