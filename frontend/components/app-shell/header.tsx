@@ -5,16 +5,20 @@ import { UnstyledButton } from "@mantine/core";
 
 interface AppShellHeaderProps {
   gift?: boolean;
+  subHeader?: boolean;
 }
 
-export function AppShellHeader({ gift }: AppShellHeaderProps) {
+export function AppShellHeader({
+  gift,
+  subHeader = true,
+}: AppShellHeaderProps) {
   const title: string = "두근 두근 핑크빛 병원";
   const subTitle: string =
     "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
+
   return (
     <div className={classes.Container}>
       <header className={classes.MainHeader}>
-        {/* 뒤로가기 버튼 영역 */}
         <Link href="/home" className={classes.BackButton}>
           <Image
             src="/images/app-shell/goback.svg"
@@ -27,7 +31,6 @@ export function AppShellHeader({ gift }: AppShellHeaderProps) {
 
         <div className={classes.Title}>{title}</div>
 
-        {/* 우측 선물 버튼 영역 */}
         <div className={classes.RightSection}>
           {gift && (
             <UnstyledButton w={30} h={30}>
@@ -42,7 +45,7 @@ export function AppShellHeader({ gift }: AppShellHeaderProps) {
         </div>
       </header>
 
-      {subTitle && (
+      {subHeader && subTitle && (
         <div className={classes.SubHeader}>
           <p className={classes.SubText}>{subTitle}</p>
         </div>
