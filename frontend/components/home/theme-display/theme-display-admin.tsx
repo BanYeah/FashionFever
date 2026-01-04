@@ -39,6 +39,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
 
       {/* 참가 상태 */}
       {variant === "unopen" ? (
+        // 준 비 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>아직 공개가 되지 않은 테마예요!</p>
           <Stack align="flex-end" justify="space-between" gap={12}>
@@ -50,6 +51,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
           </Stack>
         </Group>
       ) : variant === "open" ? (
+        // 모 집 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p style={{ color: "var(--black)" }}>
             아직 미니 꾸미기가 진행 중인 테마예요!
@@ -60,6 +62,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
           </Stack>
         </Group>
       ) : variant === "pending" ? (
+        // 검 수 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Stack pt={7} pb={7} gap={5}>
             <Group pl={3} pr={3} gap={35}>
@@ -81,6 +84,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
           </Stack>
         </Group>
       ) : variant === "vote" ? (
+        // 투 표 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>현재 투표가 진행 중인 테마예요!</p>
           <Stack align="flex-end" justify="space-between" gap={12}>
@@ -89,6 +93,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
           </Stack>
         </Group>
       ) : (
+        // 결 과 발 표
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Stack pt={7} pb={7} gap={5}>
             <Group pl={3} pr={3} gap={36}>
@@ -156,7 +161,7 @@ function ThemeDeleteButton() {
   );
 }
 
-function ThemeReviewLink({ href }: { href: string }) {
+export function ThemeReviewLink({ href }: { href: string }) {
   return (
     <Link className={classes.ThemeReview} href={href}>
       <p>검수하기</p>

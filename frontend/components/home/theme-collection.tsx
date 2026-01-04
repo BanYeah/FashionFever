@@ -25,7 +25,8 @@ export function ThemeCollection() {
       ) : type == "judge" ? (
         <>
           <ThemeDisplayJudge variant="open" />
-          <ThemeDisplayJudge variant="pending" />
+          <ThemeDisplayJudge variant="pending" registered={false} />
+          <ThemeDisplayJudge variant="pending" registered={true} />
           <ThemeDisplayJudge variant="vote" registered={false} />
           <ThemeDisplayJudge variant="vote" registered={true} />
           <ThemeDisplayJudge variant="result" />

@@ -105,7 +105,7 @@ export function ThemeDisplay({
           </Stack>
         </Group>
       ) : (
-        // 투 표 종 료
+        // 결 과 발 표
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Box pt={7} pb={7} w={"50%"}>
             <Stack w={"fit-content"} gap={5}>

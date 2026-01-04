@@ -3,6 +3,7 @@
 import classes from "./theme-display.module.css";
 import Image from "next/image";
 import { Flex, Group, Stack, Divider } from "@mantine/core";
+import { ThemeReviewLink } from "./theme-display-admin";
 
 interface ThemeDisplayJudgeProps {
   variant: "open" | "pending" | "vote" | "result";
@@ -19,16 +20,20 @@ export function ThemeDisplayJudge({
 
       {/* 테마 배너 이미지 */}
       <div className={classes.ImageWrapper}>
-        {variant === "vote" ? (
+        {(variant === "pending" && registered) || variant === "vote" ? (
           <Stack
             className={classes.ImageDark}
             align="center"
             justify="center"
             gap={6}
           >
-            <p>심 사 중</p>
+            <p>{variant === "pending" ? "검 수 중" : "심 사 중"}</p>
             <Image
-              src="/images/home/theme-display/clock-hour-10.svg"
+              src={
+                variant === "pending"
+                  ? "/images/home/theme-display/clock-hour-4.svg"
+                  : "/images/home/theme-display/clock-hour-10.svg"
+              }
               alt=""
               width={28}
               height={28}
@@ -49,8 +54,27 @@ export function ThemeDisplayJudge({
             <p style={{ color: "var(--main)" }}>23시간 35분 남음</p>
           </Flex>
         </Group>
+      ) : variant === "pending" && registered ? (
+        // 검 수 중 (검수 권한 O)
+        <Group align="center" justify="space-between" p={6} gap={0}>
+          <Stack pt={7} pb={7} gap={5}>
+            <Group pl={3} pr={3} gap={35}>
+              <p>제외된 사진</p>
+              <p>23</p>
+            </Group>
+            <Divider size={1.5} color="var(--gray-8a)" />
+            <Group pt={3} pl={3} pr={3} gap={48}>
+              <p>검수 완료</p>
+              <p>100/150</p>
+            </Group>
+          </Stack>
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p style={{ color: "var(--main)" }}>7시간 15분 후 투표 시작</p>
+            <ThemeReviewLink href="/" />
+          </Stack>
+        </Group>
       ) : variant === "pending" ? (
-        // 검 수 중
+        // 검 수 중 (검수 권한 X)
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>현재 검수가 진행 중인 테마예요!</p>
           <Flex align="flex-start" h={56}>
@@ -80,6 +104,7 @@ export function ThemeDisplayJudge({
           </Flex>
         </Group>
       ) : (
+        // 결 과 발 표
         <Flex align="center" p={6} h={76} gap={0}>
           <p>심사가 종료된 테마예요!</p>
         </Flex>
