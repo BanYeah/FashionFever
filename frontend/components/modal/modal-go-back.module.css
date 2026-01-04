@@ -1,13 +1,4 @@
-.ModalInner {
-  align-items: center;
-  left: 0;
-
-  width: 100vw;
-  height: 100dvh;
-}
-
 .ModalContent {
-  width: 294px;
   height: fit-content;
   overflow-y: hidden;
 

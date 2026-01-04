@@ -15,12 +15,12 @@ export function ModalNoti({ icon, children, opened, close }: ModalNotiProps) {
   return (
     <Modal
       classNames={{
-        inner: classes.ModalInner,
         content: classes.ModalContent,
       }}
       opened={opened}
       onClose={close}
       size="auto" // width
+      centered
       closeOnClickOutside={false}
       closeOnEscape={false}
       withCloseButton={false}

@@ -25,7 +25,6 @@ export function ModalGoBack({
   return (
     <Modal
       classNames={{
-        inner: classes.ModalInner,
         content: classes.ModalContent,
         header: classes.ModalHeader,
         title: classes.ModalTitle,
@@ -34,6 +33,7 @@ export function ModalGoBack({
       onClose={close}
       title={title}
       size={294} // width
+      centered
       closeOnClickOutside={false}
       closeOnEscape={false}
       withCloseButton={false}
