@@ -40,7 +40,13 @@ export function ThemeDisplayJudge({
             />
           </Stack>
         ) : null}
-        <img src="/images/home/theme-display/image.png" width="100%" />
+        <Image
+          src="/images/home/theme-display/image.png"
+          alt=""
+          width={372}
+          height={130}
+          style={{ width: "100%", height: "auto" }}
+        />
       </div>
 
       {/* 참가 상태 */}
