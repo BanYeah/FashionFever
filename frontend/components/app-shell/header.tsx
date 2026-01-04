@@ -4,23 +4,20 @@ import Image from "next/image";
 import { UnstyledButton } from "@mantine/core";
 
 interface AppShellHeaderProps {
-  href: string;
   gift?: boolean;
   title: string;
   subTitle?: string;
 }
 
-export function GlobalHeader({
-  href,
-  gift,
-  title,
-  subTitle,
-}: AppShellHeaderProps) {
+export function AppShellHeader({ gift }: AppShellHeaderProps) {
+  const title: string = "두근 두근 핑크빛 병원";
+  const subTitle: string =
+    "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
   return (
     <div className={classes.Container}>
       <header className={classes.MainHeader}>
         {/* 뒤로가기 버튼 영역 */}
-        <Link href={href} className={classes.BackButton}>
+        <Link href="/home" className={classes.BackButton}>
           <Image
             src="/images/app-shell/goback.svg"
             alt="뒤로가기"
