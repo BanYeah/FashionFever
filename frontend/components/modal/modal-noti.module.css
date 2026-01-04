@@ -14,9 +14,14 @@
 }
 
 .Section {
-  width: calc(100% - 14px);
   padding: 17px;
+
+  width: calc(100% - 14px);
+  max-height: 70dvh;
+
   background-color: var(--white);
+
+  overflow-y: scroll;
 
   p {
     font-size: 16px;
