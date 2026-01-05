@@ -1,10 +1,9 @@
-"use client";
-
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellFooter } from "@/components/app-shell/footer";
 import { RankingDisplay } from "@/components/ranking/ranking-display";
 import { GiftReceive } from "@/components/ranking/gift-receive";
 import { Stack } from "@mantine/core"
+
 export default function RankingPage() {
   return (
     <AppShell
@@ -18,7 +17,7 @@ export default function RankingPage() {
         />
       }
     >
-      <Stack gap={29} m={15}><RankingDisplay/>
+      <Stack gap={30} m={15}><RankingDisplay/>
       <GiftReceive /></Stack>
       
     </AppShell>
