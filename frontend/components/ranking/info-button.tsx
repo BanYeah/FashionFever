@@ -3,7 +3,7 @@
 import classes from "./ranking.module.css";
 import Image from "next/image";
 import { useDisclosure } from "@mantine/hooks";
-import { UnstyledButton, Stack } from "@mantine/core";
+import { UnstyledButton } from "@mantine/core";
 import { ModalNoti } from "@/components/modal/model-noti";
 
 export function InfoButton() {

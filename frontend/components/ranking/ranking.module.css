@@ -17,7 +17,7 @@
 }
 
 .Row {
-  padding: 12px 12px;
+  padding: 12px;
   border-bottom: 1px solid #e9ecef;
 }
 
@@ -64,9 +64,10 @@
   height: 54px;
 
   background-color: var(--main);
-  color: var(--white);
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
+
+  color: var(--white);
   font-size: 20px;
 }
 
@@ -77,8 +78,5 @@
 
 .ResultText {
   font-size: 22px;
-  /* color: var(--black) 제거 */
   transform: translateY(2px); /* 글자 베이스라인 보정 */
 }
-
-/* 랭킹 태그의 기준점이 점수 스택 시작점으로 바뀌었으므로 위치를 재조정해야 합니다. */
