@@ -4,13 +4,7 @@ import { VotingDisplay } from "@/components/voting/voting";
 
 export default function RankingPage() {
   return (
-    <AppShell
-      gift
-      footer={
-        <DefaultFooter
-        />
-      }
-    >
+    <AppShell gift subHeader footer={<DefaultFooter />}>
       <VotingDisplay />
     </AppShell>
   );
