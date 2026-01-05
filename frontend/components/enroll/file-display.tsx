@@ -40,7 +40,7 @@ export function FileDisplay({
     <div className={classes.Wrapper}>
       <UnstyledButton className={classes.DeleteButton} onClick={handleDelete}>
         <Image
-          src="/images/enroll/delete-file.svg"
+          src="/images/add-file-button/delete-file.svg"
           alt=""
           width={28}
           height={28}

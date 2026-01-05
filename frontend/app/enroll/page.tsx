@@ -89,7 +89,7 @@ export default function EnrollPage() {
                 style={{ aspectRatio: 5 / 4 }}
               >
                 <AddFileButton
-                  icon="/images/enroll/add-file.svg"
+                  icon="/images/add-file-button/add-file.svg"
                   size={40}
                   fileRatio="5:4"
                   setFiles={setFiles}
