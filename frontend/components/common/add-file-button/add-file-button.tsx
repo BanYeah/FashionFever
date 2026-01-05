@@ -10,10 +10,16 @@ import { ModalNoti } from "../modal/model-noti";
 interface AddFileButtonProps {
   icon: string;
   size: number;
+  fileRatio: string;
   setFiles: Dispatch<SetStateAction<File[]>>;
 }
 
-export function AddFileButton({ icon, size, setFiles }: AddFileButtonProps) {
+export function AddFileButton({
+  icon,
+  size,
+  fileRatio,
+  setFiles,
+}: AddFileButtonProps) {
   const [opened, { open, close }] = useDisclosure(false);
   const [errorMessage, setErrorMessage] = useState<React.ReactNode>(null);
 
@@ -37,20 +43,23 @@ export function AddFileButton({ icon, size, setFiles }: AddFileButtonProps) {
         return;
       }
 
-      // 비율(5:4) 검사
+      // 비율 검사
+      const [numerator, denominator] = fileRatio.split(":").map(Number);
+      const correctRatio = numerator / denominator;
+
       const img = new window.Image();
       img.src = URL.createObjectURL(file);
       img.onload = () => {
         URL.revokeObjectURL(img.src);
         const ratio = img.width / img.height;
-        const isCorrectRatio = Math.abs(ratio - 1.25) < 0.01; // (오차범위 0.01 허용)
+        const isCorrectRatio = Math.abs(ratio - correctRatio) < 0.01; // (오차범위 0.01 허용)
 
         if (!isCorrectRatio) {
           resolve({
             isValid: false,
             msg: (
               <p>
-                이미지 비율이 5:4가 아닙니다. <br />
+                이미지 비율이 {fileRatio}가 아닙니다. <br />
                 규격에 맞는 이미지를 선택해 주세요.
               </p>
             ),

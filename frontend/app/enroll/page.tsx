@@ -91,6 +91,7 @@ export default function EnrollPage() {
                 <AddFileButton
                   icon="/images/enroll/add-file.svg"
                   size={40}
+                  fileRatio="5:4"
                   setFiles={setFiles}
                 />
               </Flex>
