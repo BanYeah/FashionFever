@@ -1,0 +1,18 @@
+.Input {
+  display: flex;
+  align-items: center;
+
+  padding: 0px 10px;
+
+  height: 40px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 16px;
+}
+
+.Input::placeholder {
+  color: var(--gray-b3);
+}
