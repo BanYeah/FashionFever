@@ -1,0 +1,25 @@
+.InputBaseInput {
+  display: flex;
+  align-items: center;
+
+  padding: 0px 10px;
+
+  height: 40px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 16px;
+}
+
+.ComboboxDropdown {
+  padding: 7px 10px;
+
+  border: 1px solid var(--gray-f2);
+  border-radius: 10px;
+}
+
+.ComboboxOption {
+  padding: 3px 0px;
+}
