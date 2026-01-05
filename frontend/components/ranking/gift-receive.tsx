@@ -9,7 +9,7 @@ export function GiftReceive() {
       <p className={classes.GiftTitle}>선물을 받았어요!</p>
 
       {/* 2. 콘텐츠 영역 (이미지 + 텍스트) */}
-      <Group gap={15} align="center" wrap="nowrap" mt={14} mb={8} ml={8}>
+      <Group gap={14} align="center" wrap="nowrap" mt={14} mb={8} ml={12}>
         <Box className={classes.GiftImageBox}>
           <Image
             src="/images/gift.png"

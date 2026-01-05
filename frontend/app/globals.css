@@ -11,10 +11,13 @@
   font-family: var(--font-BMJUA); /* 공용 폰트는 app/layout.tsx에서 정의 */
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   width: 100%;
-  overflow-x: hidden;
 }
 
 body {

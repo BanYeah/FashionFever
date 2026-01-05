@@ -9,7 +9,7 @@ export function ThemeCollection() {
   const type = "user" as "user" | "judge" | "admin";
 
   return (
-    <Stack m={10} gap={10}>
+    <Stack p={10} gap={10}>
       {type === "user" ? (
         <>
           {/* API 연결할 때는 variant, registerd, point 등의 Props 제거하고 데이터만 전달 */}
