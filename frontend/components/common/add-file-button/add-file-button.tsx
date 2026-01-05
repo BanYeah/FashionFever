@@ -8,10 +8,12 @@ import { FileInput } from "@mantine/core";
 import { ModalNoti } from "../modal/model-noti";
 
 interface AddFileButtonProps {
+  icon: string;
+  size: number;
   setFiles: Dispatch<SetStateAction<File[]>>;
 }
 
-export function AddFileButton({ setFiles }: AddFileButtonProps) {
+export function AddFileButton({ icon, size, setFiles }: AddFileButtonProps) {
   const [opened, { open, close }] = useDisclosure(false);
   const [errorMessage, setErrorMessage] = useState<React.ReactNode>(null);
 
@@ -92,22 +94,26 @@ export function AddFileButton({ setFiles }: AddFileButtonProps) {
         {errorMessage}
       </ModalNoti>
 
-      <div className={classes.FileInputContainer}>
-        <div className={classes.FileInputWrapper}>
-          <Image
-            className={classes.FileInputIcon}
-            src="/images/enroll/add-file.svg"
-            alt=""
-            width={40}
-            height={40}
-          />
-          <FileInput
-            classNames={{ root: classes.FileInput }}
-            variant="unstyled"
-            value={null}
-            onChange={handleChange}
-          />
-        </div>
+      <div
+        style={{
+          position: "relative",
+          width: `${size}px`,
+          height: `${size}px`,
+        }}
+      >
+        <Image
+          className={classes.FileInputIcon}
+          src={icon}
+          alt=""
+          width={size}
+          height={size}
+        />
+        <FileInput
+          styles={{ root: { width: `${size}px`, height: `${size}px` } }}
+          variant="unstyled"
+          value={null}
+          onChange={handleChange}
+        />
       </div>
     </>
   );

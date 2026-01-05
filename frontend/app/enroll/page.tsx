@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { SimpleGrid, Stack } from "@mantine/core";
+import { SimpleGrid, Flex, Stack } from "@mantine/core";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { EnrollFooter } from "@/components/app-shell/enroll-footer";
 import { ModalGoBack } from "@/components/common/modal/modal-go-back";
@@ -82,7 +82,19 @@ export default function EnrollPage() {
                 setFiles={setFiles}
               />
             ))}
-            {previews.length < 4 && <AddFileButton setFiles={setFiles} />}
+            {previews.length < 4 && (
+              <Flex
+                align="center"
+                justify="center"
+                style={{ aspectRatio: 5 / 4 }}
+              >
+                <AddFileButton
+                  icon="/images/enroll/add-file.svg"
+                  size={40}
+                  setFiles={setFiles}
+                />
+              </Flex>
+            )}
           </SimpleGrid>
         </Stack>
       </AppShell>
