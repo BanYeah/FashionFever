@@ -37,8 +37,8 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
         <Image
           src="/images/home/theme-display/image.png"
           alt=""
-          width={372}
-          height={130}
+          width={390}
+          height={156}
           style={{ width: "100%", height: "auto" }}
         />
       </div>
@@ -52,7 +52,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
             <p>23시간 35분 남음</p>
             <Group gap={4}>
               <ThemeDeleteButton />
-              <ThemeSettingLink href="/" />
+              <ThemeSettingLink href="/theme-setting" />
             </Group>
           </Stack>
         </Group>
@@ -64,7 +64,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
           </p>
           <Stack align="flex-end" justify="space-between" gap={12}>
             <p style={{ color: "var(--main)" }}>23시간 35분 남음</p>
-            <ThemeSettingLink href="/" />
+            <ThemeSettingLink href="/theme-setting" />
           </Stack>
         </Group>
       ) : variant === "pending" ? (
@@ -85,7 +85,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
             <p style={{ color: "var(--main)" }}>7시간 15분 후 투표 시작</p>
             <Group gap={4}>
               <ThemeReviewLink href="/" />
-              <ThemeSettingLink href="/" />
+              <ThemeSettingLink href="/theme-setting" />
             </Group>
           </Stack>
         </Group>
@@ -95,7 +95,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
           <p>현재 투표가 진행 중인 테마예요!</p>
           <Stack align="flex-end" justify="space-between" gap={12}>
             <p>결과 발표까지 21시간 15분</p>
-            <ThemeSettingLink href="/" />
+            <ThemeSettingLink href="/theme-setting" />
           </Stack>
         </Group>
       ) : (

@@ -43,8 +43,8 @@ export function ThemeDisplayJudge({
         <Image
           src="/images/home/theme-display/image.png"
           alt=""
-          width={372}
-          height={130}
+          width={390}
+          height={156}
           style={{ width: "100%", height: "auto" }}
         />
       </div>
