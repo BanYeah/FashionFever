@@ -1,0 +1,40 @@
+.Button {
+  padding: 12px 10px;
+}
+
+.Collapse {
+  padding-bottom: 12px;
+}
+
+.Label {
+  padding: 0px 10px;
+
+  color: var(--main);
+  font-size: 14px;
+}
+
+.Time {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+
+  display: flex;
+  align-items: center;
+
+  height: 36px;
+
+  color: var(--gray-8a);
+  font-size: 14px;
+}
+
+.DateInputInput {
+  padding: 0px 10px;
+
+  height: 36px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 14px;
+}
