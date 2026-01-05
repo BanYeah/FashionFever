@@ -74,6 +74,8 @@
 .InfoButton {
   width: 16px;
   height: 16px;
+
+  transform: translateY(1px);
 }
 
 .ResultText {
