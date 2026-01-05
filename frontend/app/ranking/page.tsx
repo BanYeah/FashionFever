@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellFooter } from "@/components/app-shell/footer";
-import { RankingGrid } from "@/components/ranking/ranking-grid-display";
+import { RankingGrid } from "@/components/ranking/ranking-grid";
 
 export default function RankingPage() {
   return (
