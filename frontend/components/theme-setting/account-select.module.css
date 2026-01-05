@@ -1,0 +1,48 @@
+.SelectInput {
+  padding: 0px 10px;
+
+  height: 40px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 16px;
+}
+
+.SelectInput::placeholder {
+  color: var(--gray-b3);
+}
+
+.SelectDropdown {
+  padding: 7px 10px;
+
+  border: 1px solid var(--gray-f2);
+  border-radius: 10px;
+}
+
+.SelectOption {
+  padding: 3px 0px;
+}
+
+.MultiSelectInput {
+  display: flex;
+  align-items: center;
+
+  padding: 7px 10px;
+
+  min-height: 40px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 16px;
+}
+
+.MultiSelectPill {
+  padding-left: 8px;
+
+  background-color: var(--gray-d9);
+  border-radius: 4px;
+}
