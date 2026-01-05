@@ -2,7 +2,6 @@
 
 import "@mantine/core/styles/Popover.css";
 import classes from "./account-select.module.css";
-
 import { Dispatch, SetStateAction } from "react";
 import { Stack, Box, MultiSelect, Select } from "@mantine/core";
 
@@ -19,7 +18,7 @@ export function AccountSelect({
   value,
   setValue,
 }: AccountSelectProps) {
-  const data = ["React", "Angular", "Vue", "Svelte"];
+  const data = ["admin", "React", "Angular", "Vue", "Svelte"];
 
   return (
     <Stack mt={mt} gap={9}>
@@ -58,16 +57,7 @@ export function AccountMultiSelect({
   value,
   setValue,
 }: AccountMultiSelectProps) {
-  const data = [
-    "React",
-    "Angular",
-    "Vue",
-    "Svelte",
-    "Next",
-    "Nest",
-    "Express",
-    "FastAPI",
-  ];
+  const data = ["React", "Angular", "Vue", "Svelte"];
 
   return (
     <Stack mt={mt} gap={9}>
@@ -78,6 +68,7 @@ export function AccountMultiSelect({
         classNames={{
           input: classes.MultiSelectInput,
           dropdown: classes.SelectDropdown,
+          option: classes.SelectOption,
           pill: classes.MultiSelectPill,
         }}
         data={data}
