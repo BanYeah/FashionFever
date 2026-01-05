@@ -26,7 +26,7 @@ export function GiftReceive() {
           <p className={classes.GiftItemName}>별빛이 반짝이는 소녀 아이</p>
         </Stack>
       </Group>
-      <Divider size={1} color="gray" />
+      <Divider size={1} color="var(--gray-d9)" />
       <Box />
       <p className={classes.NoticeText}>
         아이템 지급을 위해, 순차적으로 친구 신청을 드릴게요!
