@@ -1,0 +1,95 @@
+.GridContainer {
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.CardWrapper {
+  position: relative;
+
+  width: 100%;
+  height: auto;
+}
+
+.ImageArea {
+  position: relative;
+
+  aspect-ratio: 5 / 4;
+  background-color: #d9d9d9;
+
+  overflow: hidden;
+}
+
+.Placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.RankTag {
+  position: absolute;
+  right: -5px;
+  top: -5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 39px;
+  height: 25px;
+
+  background-color: var(--main);
+  color: var(--white);
+  border-radius: 10px;
+
+  font-size: 14px;
+}
+
+.ScoreText {
+  font-size: 16px;
+
+  transform: translateY(1px);
+}
+
+.CustomHeart {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 375px) {
+  .CustomHeart img,
+  .CustomHeart svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+
+.MagnifyButton {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  z-index: 5;
+}
+
+.ModalImageWrapper {
+  max-width: 90vw;
+  max-height: 80vh;
+
+  overflow: hidden;
+}
+
+.ModalImage {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  object-fit: contain;
+}
