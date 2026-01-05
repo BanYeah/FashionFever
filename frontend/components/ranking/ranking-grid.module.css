@@ -1,21 +1,14 @@
-.GridContainer {
-  width: 100%;
-  margin: 0 auto;
-  padding: 10px;
-}
-
 .CardWrapper {
   position: relative;
 
   width: 100%;
-  height: auto;
+  height: fit-content;
 }
 
 .ImageArea {
   position: relative;
 
   aspect-ratio: 5 / 4;
-  background-color: #d9d9d9;
 
   overflow: hidden;
 }
@@ -38,9 +31,9 @@
   height: 25px;
 
   background-color: var(--main);
-  color: var(--white);
   border-radius: 10px;
 
+  color: var(--white);
   font-size: 14px;
 }
 
@@ -50,46 +43,29 @@
   transform: translateY(1px);
 }
 
-.CustomHeart {
-  display: flex;
-  align-items: center;
-}
-
 @media (max-width: 375px) {
   .CustomHeart img,
   .CustomHeart svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 18px;
+    height: 18px;
   }
 }
 
 .MagnifyButton {
   position: absolute;
-  right: 0px;
-  bottom: 0px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 24px;
-  height: 24px;
+  right: 2px;
+  bottom: 2px;
 
   z-index: 5;
+
+  img {
+    display: block;
+  }
 }
 
 .ModalImageWrapper {
   max-width: 90vw;
-  max-height: 80vh;
-
-  overflow: hidden;
-}
-
-.ModalImage {
-  display: block;
-
-  width: 100%;
-  height: auto;
-
-  object-fit: contain;
+  img {
+    display: block;
+  }
 }
