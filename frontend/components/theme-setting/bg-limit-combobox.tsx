@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction } from "react";
 import { InputBase, Combobox, ComboboxStore, Stack, Box } from "@mantine/core";
 
 interface BgLimitComboboxProps {
+  mt?: number;
   combobox: ComboboxStore;
   enrollBgLimit: { name: string; color: string }[];
   bgLimit: string | null;
@@ -12,6 +13,7 @@ interface BgLimitComboboxProps {
 }
 
 export function BgLimitCombobox({
+  mt = 0,
   combobox,
   enrollBgLimit,
   bgLimit,
@@ -33,7 +35,7 @@ export function BgLimitCombobox({
   ));
 
   return (
-    <Stack gap={9}>
+    <Stack mt={mt} gap={9}>
       <Box px={10}>
         <p>배경색 제한</p>
       </Box>
