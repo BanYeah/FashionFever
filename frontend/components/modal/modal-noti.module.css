@@ -21,7 +21,7 @@
 
   background-color: var(--white);
 
-  overflow-y: scroll;
+  overflow-y: auto;
 
   p {
     font-size: 16px;
