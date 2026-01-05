@@ -1,5 +1,3 @@
-"use client";
-
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellFooter } from "@/components/app-shell/footer";
 import { RankingCollection } from "@/components/ranking/ranking-collection";
