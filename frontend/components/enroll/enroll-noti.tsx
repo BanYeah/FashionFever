@@ -1,5 +1,5 @@
 import { Stack } from "@mantine/core";
-import { ModalNoti } from "../modal/model-noti";
+import { ModalNoti } from "../common/modal/model-noti";
 
 interface EnrollNotiProps {
   variant: "success" | "fail" | "expired";

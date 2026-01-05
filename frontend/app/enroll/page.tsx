@@ -5,11 +5,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { SimpleGrid, Stack } from "@mantine/core";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { EnrollFooter } from "@/components/app-shell/enroll-footer";
-import { ModalGoBack } from "@/components/modal/modal-go-back";
+import { ModalGoBack } from "@/components/common/modal/modal-go-back";
 import { EnrollNoti } from "@/components/enroll/enroll-noti";
 import { EnrollTopSection } from "@/components/enroll/enroll-top-section";
 import { FileDisplay } from "@/components/enroll/file-display";
-import { AddFileButton } from "@/components/enroll/add-file-button";
+import { AddFileButton } from "@/components/common/add-file-button/add-file-button";
 
 export default function EnrollPage() {
   const [enrollOpened, { open: openEnroll, close: closeEnroll }] =

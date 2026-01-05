@@ -1,7 +1,7 @@
 import classes from "./ranking.module.css";
 import Image from "next/image";
 import { Stack, Group, Text, Box, Divider } from "@mantine/core";
-import { HeartRating } from "../heart-rating/heartrating";
+import { HeartRating } from "../common/heart-rating/heartrating";
 import { InfoButton } from "./info-button";
 
 export interface ScoreItem {

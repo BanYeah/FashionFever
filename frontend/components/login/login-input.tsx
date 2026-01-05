@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { Input, UnstyledButton } from "@mantine/core";
-import { ModalNoti } from "../modal/model-noti";
-import { ModalGoBack } from "../modal/modal-go-back";
+import { ModalNoti } from "../common/modal/model-noti";
+import { ModalGoBack } from "../common/modal/modal-go-back";
 
 interface LoginInputBaseProps {
   disabled?: boolean;

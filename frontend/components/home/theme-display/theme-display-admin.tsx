@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDisclosure } from "@mantine/hooks";
 import { Flex, Group, Stack, UnstyledButton, Divider } from "@mantine/core";
-import { ModalGoBack } from "../../modal/modal-go-back";
+import { ModalGoBack } from "../../common/modal/modal-go-back";
 
 interface ThemeDisplayAdminProps {
   variant: "unopen" | "open" | "pending" | "vote" | "result";

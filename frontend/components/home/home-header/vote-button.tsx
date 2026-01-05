@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDisclosure } from "@mantine/hooks";
 import { UnstyledButton, Stack } from "@mantine/core";
-import { ModalNoti } from "@/components/modal/model-noti";
+import { ModalNoti } from "@/components/common/modal/model-noti";
 
 export function VoteButton() {
   const type = "user" as "user" | "judge" | "admin";

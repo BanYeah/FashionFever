@@ -4,7 +4,7 @@ import classes from "./home-header.module.css";
 import Image from "next/image";
 import { useDisclosure } from "@mantine/hooks";
 import { Stack, UnstyledButton } from "@mantine/core";
-import { ModalNoti } from "@/components/modal/model-noti";
+import { ModalNoti } from "@/components/common/modal/model-noti";
 
 export function HelpButton() {
   const type = "user" as "user" | "judge" | "admin";

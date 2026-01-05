@@ -3,7 +3,7 @@
 import classes from "./gift-display.module.css";
 import Image from "next/image";
 import { Divider, Group, Stack } from "@mantine/core";
-import { HeartRating } from "../heart-rating/heartrating";
+import { HeartRating } from "../common/heart-rating/heartrating";
 
 export function GiftDisplay() {
   return (

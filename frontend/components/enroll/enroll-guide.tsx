@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Stack } from "@mantine/core";
-import { ModalNoti } from "@/components/modal/model-noti";
+import { ModalNoti } from "@/components/common/modal/model-noti";
 
 interface EnrollNotiProps {
   opened: boolean;

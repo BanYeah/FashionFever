@@ -21,7 +21,7 @@ export function AddFileButton({ setFiles }: AddFileButtonProps) {
   ): Promise<{ isValid: boolean; msg: React.ReactNode }> => {
     return new Promise((resolve) => {
       // 형식(확장자) 검사
-      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
       if (!validTypes.includes(file.type)) {
         resolve({
           isValid: false,
