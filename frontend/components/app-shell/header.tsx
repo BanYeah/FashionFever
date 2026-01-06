@@ -3,15 +3,34 @@ import Link from "next/link";
 import Image from "next/image";
 import { UnstyledButton } from "@mantine/core";
 
+export type ShellVariant = "theme" | "user-setting" | "judge-setting";
+
 interface AppShellHeaderProps {
   gift?: boolean;
   subHeader?: boolean;
+  variant?: ShellVariant;
 }
 
-export function AppShellHeader({ gift, subHeader }: AppShellHeaderProps) {
-  const title: string = "두근 두근 핑크빛 병원";
-  const subTitle: string =
-    "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
+export function AppShellHeader({
+  gift,
+  subHeader,
+  variant,
+}: AppShellHeaderProps) {
+  
+  let customTitle;
+  let customSubTitle;
+
+  if (variant === "user-setting") {
+    customTitle = "계정 관리";
+    customSubTitle = "패션 피버에 참가할 미니는 누구?";
+  } else if (variant === "judge-setting") {
+    customTitle = "계정 관리";
+    customSubTitle = "패션 피버를 심사할 미니는 누구?";
+  }
+
+  const displayTitle: string = customTitle || "두근 두근 핑크빛 병원";
+  const displaySubTitle: string =
+    customSubTitle || "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
 
   return (
     <div className={classes.Container}>
@@ -26,7 +45,7 @@ export function AppShellHeader({ gift, subHeader }: AppShellHeaderProps) {
           />
         </Link>
 
-        <div className={classes.Title}>{title}</div>
+        <div className={classes.Title}>{displayTitle}</div>
 
         <div className={classes.RightSection}>
           {gift && (
@@ -44,7 +63,7 @@ export function AppShellHeader({ gift, subHeader }: AppShellHeaderProps) {
 
       {subHeader && (
         <div className={classes.SubHeader}>
-          <p className={classes.SubText}>{subTitle}</p>
+          <p className={classes.SubText}>{displaySubTitle}</p>
         </div>
       )}
     </div>
