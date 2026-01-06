@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Divider,
   Flex,
@@ -19,6 +19,10 @@ import {
   AccountMultiSelect,
   AccountSelect,
 } from "@/components/theme-setting/account-select";
+import {
+  GiftSetting_t,
+  ThemeGifts,
+} from "@/components/theme-setting/theme-gifts";
 
 export default function ThemeSettingPage() {
   /* 테마 배너 */
@@ -57,6 +61,25 @@ export default function ThemeSettingPage() {
   /* 검수/심사 계정 관리 */
   const [reviewer, setReviewer] = useState<string | null>("");
   const [judge, setJudge] = useState<string[]>([]);
+
+  /* 선물 목록 관리 */
+  const themeGiftsRef = useRef<any>(null);
+  const handleSave = async () => {
+    // 하위 모든 컴포넌트의 데이터를 한 번에 긁어옴
+    const finalData: GiftSetting_t[] = themeGiftsRef.current?.getAllData();
+
+    // 에러 처리 필요! (예. 테마 배너가 없음 등)
+
+    // try {
+    //   const response = await fetch("/api/save", {
+    //     method: "POST",
+    //     body: JSON.stringify(finalData),
+    //   });
+    //   if (response.ok) alert("저장 성공!");
+    // } catch (e) {
+    //   console.error("저장 실패", e);
+    // }
+  };
 
   return (
     <>
@@ -159,6 +182,8 @@ export default function ThemeSettingPage() {
             setValue={setJudge}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
+          <ThemeGifts ref={themeGiftsRef} />
+          <Divider size={1} color={"var(--gray-d9)"} />
         </Stack>
       </section>
       <EnrollFooter text="저 장 하 기" disabled={false} onClick={() => {}} />

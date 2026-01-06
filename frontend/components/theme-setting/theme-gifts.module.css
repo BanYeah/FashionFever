@@ -1,0 +1,78 @@
+.Button {
+  width: 100%;
+  padding: 16px 10px;
+}
+
+.AddGiftSettingButton {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+}
+
+.GiftSettingWrapper {
+  position: relative;
+
+  width: 100%;
+  padding: 4px 10px;
+  padding-bottom: 10px;
+
+  border: 1px solid var(--gray-d9);
+  border-radius: 10px;
+}
+
+.DeleteGiftSettingButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.NumberInput {
+  padding: 0px 6px;
+  width: 46px;
+  height: 22px !important;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 4px;
+
+  font-size: 16px;
+}
+
+.SwitchBody {
+  column-gap: 8px;
+}
+
+.SelectInput {
+  padding: 0px 6px;
+
+  width: 78px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 4px;
+}
+
+.GiftImageWrapper {
+  position: relative;
+
+  img {
+    display: block;
+  }
+}
+
+.DeleteGiftButton {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+}
+
+.GiftInput {
+  width: 100%;
+  border: none;
+
+  font-size: 14px;
+}
+
+.GiftInput::placeholder {
+  color: var(--gray-b3);
+}
