@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellFooter } from "@/components/app-shell/footer";
-import { Search } from "@/components/account-setting/search";
+import { AccountSetting } from "@/components/account-setting/search";
 
 export default async function RankingPage({
   searchParams,
@@ -8,12 +8,12 @@ export default async function RankingPage({
   searchParams: Promise<{ view?: string }>;
 }) {
   const { view } = await searchParams;
-  const currentView = view === "judge" ? "judge" : "user";
-  const shellVariant =
-    currentView === "user" ? "user-setting" : "judge-setting";
+  const currentView = !view || view === "user" ? "user" : "judge";
+
   return (
+
     <AppShell
-      variant={shellVariant}
+      variant={!view || view === "user" ? "user-setting" : "judge-setting"}
       subHeader
       footer={
         <AppShellFooter
@@ -27,7 +27,7 @@ export default async function RankingPage({
         />
       }
     >
-      <Search type={currentView} />
+      <AccountSetting/>
     </AppShell>
   );
 }

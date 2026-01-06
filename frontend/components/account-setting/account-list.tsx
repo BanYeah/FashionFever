@@ -1,9 +1,8 @@
 "use client";
 
-import classes from "./search.module.css";
 import Image from "next/image";
-import { Box, Group, UnstyledButton, Divider } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { Box, Group, UnstyledButton, Divider } from "@mantine/core";
 import { ModalGoBack } from "@/components/common/modal/modal-go-back";
 
 interface AccountListProps {
@@ -12,100 +11,74 @@ interface AccountListProps {
 }
 
 export function AccountList({ miniCode, entryCode }: AccountListProps) {
-  const [resetOpened, { open: openReset, close: closeReset }] =
-    useDisclosure(false);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const handleReset = () => {
     console.log(`${miniCode} 코드 초기화 수행`);
-    closeReset();
-  };
-
-  const ICON_PATHS = {
-    minus: "/images/account-setting/minus.svg",
-    reset: "/images/account-setting/reset.svg",
+    close();
   };
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
-        <div className={classes.CodeText}>
-          <Box style={{ width: "50px", display: "inline-block" }}>
-            {miniCode}
-          </Box>
+      <Group align="center" justify="space-between">
+        <Group ml={10}>
+          <p style={{ width: "50px" }}>{miniCode}</p>
           <span
             style={{
-              color: "--gray-b3",
-              marginLeft: "14px",
-              marginRight: "14px",
+              color: "var(--gray-b3)",
             }}
           >
             |
           </span>
-          {entryCode}
-        </div>
+          <p>{entryCode}</p>
+        </Group>
 
         <Group gap={8}>
           {/* 리셋 버튼 */}
-          <UnstyledButton
-            onClick={openReset}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Image src={ICON_PATHS.reset} alt="Reset" width={28} height={28} />
+          <UnstyledButton onClick={open} w={28} h={28}>
+            <Image
+              src="/images/account-setting/reset.svg"
+              alt="Reset"
+              width={28}
+              height={28}
+            />
           </UnstyledButton>
 
           {/* 마이너스 버튼 */}
-          <UnstyledButton
-            onClick={openReset}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <UnstyledButton onClick={open} w={28} h={28}>
             <Image
-              src={ICON_PATHS.minus}
+              src="/images/account-setting/minus.svg"
               alt="Delete"
               width={28}
               height={28}
-              style={{ objectFit: "contain" }}
             />
           </UnstyledButton>
         </Group>
-      </div>
+      </Group>
+
       <Divider size={1} color="var(--gray-d9)" />
+
       <ModalGoBack
         title="안내"
         go="계속하기"
         back="그만두기"
-        opened={resetOpened}
-        onGo={handleReset}
-        close={closeReset}
+        opened={opened}
+        onGo={() => {}}
+        close={close}
       >
-        <div style={{ textAlign: "center", fontSize: "16px" }}>
-          정말로 미니 코드
+        <p>
+          정말로 미니 코드{" "}
           <span
             style={{
               color: "var(--main)",
             }}
           >
-            {" "}
             {miniCode}
           </span>
           의
           <br />
           입장 코드를 초기화하시겠습니까?
-        </div>
+        </p>
       </ModalGoBack>
     </>
   );

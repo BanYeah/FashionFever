@@ -5,6 +5,7 @@ import { RankingCollection } from "@/components/ranking/ranking-collection";
 export default function RankingPage() {
   return (
     <AppShell
+      variant="theme"
       gift
       footer={
         <AppShellFooter

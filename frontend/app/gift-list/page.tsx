@@ -14,6 +14,7 @@ export default async function GiftPage({ searchParams }: GiftPageProps) {
 
   return (
     <AppShell
+      variant="theme"
       footer={isBeforeDressUp ? <AppShellFooter variant="dressUp" /> : null}
     >
       <GiftCollection />

@@ -5,6 +5,7 @@ import { RankingGrid } from "@/components/ranking/ranking-grid";
 export default function RankingPage() {
   return (
     <AppShell
+      variant="theme"
       gift
       footer={
         <AppShellFooter

@@ -7,6 +7,7 @@ import { Stack } from "@mantine/core";
 export default function RankingPage() {
   return (
     <AppShell
+      variant="theme"
       gift
       footer={
         <AppShellFooter
