@@ -40,11 +40,19 @@ export interface GiftSetting_t {
   children: Gift_t[];
 }
 
+interface GiftSettingHandle {
+  getData: () => GiftSetting_t;
+}
+
+interface GiftHandle {
+  getData: () => Gift_t;
+}
+
 export const ThemeGifts = forwardRef((props, ref) => {
   const [opened, { toggle }] = useDisclosure(false);
 
   const [settingIds, setSettingIds] = useState<string[]>([]);
-  const settingRefs = useRef<{ [key: string]: any }>({});
+  const settingRefs = useRef<{ [key: string]: GiftSettingHandle | null }>({});
 
   const addSetting = () =>
     setSettingIds((prev) => [...prev, crypto.randomUUID()]);
@@ -81,11 +89,12 @@ export const ThemeGifts = forwardRef((props, ref) => {
             <GiftSetting
               key={sid}
               id={sid}
-              onDelete={() =>
-                setSettingIds((prev) => prev.filter((id) => id !== sid))
-              }
+              onDelete={() => {
+                delete settingRefs.current[sid];
+                setSettingIds((prev) => prev.filter((id) => id !== sid));
+              }}
               ref={(el) => {
-                settingRefs.current[sid] = el;
+                settingRefs.current[sid] = el as GiftSettingHandle;
               }}
             />
           ))}
@@ -107,23 +116,22 @@ export const GiftSetting = forwardRef(
     const [rarity, setRarity] = useState<string | null>("슈레");
 
     const [giftIds, setGiftIds] = useState<string[]>([]);
-    const giftRefs = useRef<{ [key: string]: any }>({});
+    const giftRefs = useRef<{ [key: string]: GiftHandle | null }>({});
 
     const addGift = () => setGiftIds((prev) => [...prev, crypto.randomUUID()]);
 
     useImperativeHandle(ref, () => ({
       getData: () => ({
         id,
-        heartRate,
-        itemTotalNumber,
+        heartRate: heartRate === "" ? 0 : Number(heartRate),
+        itemTotalNumber: itemTotalNumber === "" ? 0 : Number(itemTotalNumber),
         isRandom,
         isSameTheme,
-        themeType,
-        rarity,
-        children: giftIds.map((gid) => ({
-          id: gid,
-          ...giftRefs.current[gid]?.getData(),
-        })),
+        themeType: themeType as GiftSetting_t["themeType"],
+        rarity: rarity as GiftSetting_t["rarity"],
+        children: giftIds
+          .map((gid) => giftRefs.current[gid]?.getData())
+          .filter((data): data is Gift_t => data !== undefined),
       }),
     }));
 
@@ -187,11 +195,12 @@ export const GiftSetting = forwardRef(
           {giftIds.map((gid) => (
             <Gift
               key={gid}
-              onDelete={() =>
-                setGiftIds((prev) => prev.filter((id) => id !== gid))
-              }
+              onDelete={() => {
+                delete giftRefs.current[gid];
+                setGiftIds((prev) => prev.filter((id) => id !== gid));
+              }}
               ref={(el) => {
-                giftRefs.current[gid] = el;
+                giftRefs.current[gid] = el as GiftHandle;
               }}
             />
           ))}

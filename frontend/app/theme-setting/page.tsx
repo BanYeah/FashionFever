@@ -65,20 +65,30 @@ export default function ThemeSettingPage() {
   /* 선물 목록 관리 */
   const themeGiftsRef = useRef<any>(null);
   const handleSave = async () => {
-    // 하위 모든 컴포넌트의 데이터를 한 번에 긁어옴
-    const finalData: GiftSetting_t[] = themeGiftsRef.current?.getAllData();
+    const giftsData: GiftSetting_t[] =
+      themeGiftsRef.current?.getAllData() || [];
 
-    // 에러 처리 필요! (예. 테마 배너가 없음 등)
+    const finalPayload = {
+      themeName: name,
+      themeDescription: description,
+      themeBanner: banner[0] || null, // 파일 객체
+      bgLimit: bgLimit,
+      schedule: {
+        enrollStart,
+        enrollEnd,
+        reviewStart,
+        reviewEnd,
+        voteStart,
+        voteEnd,
+      },
+      accounts: {
+        reviewer,
+        judge,
+      },
+      giftSettings: giftsData, // 수집한 선물 데이터 포함
+    };
 
-    // try {
-    //   const response = await fetch("/api/save", {
-    //     method: "POST",
-    //     body: JSON.stringify(finalData),
-    //   });
-    //   if (response.ok) alert("저장 성공!");
-    // } catch (e) {
-    //   console.error("저장 실패", e);
-    // }
+    // 유효성 검사 필요! (예. 테마 배너가 없음 등)
   };
 
   return (
