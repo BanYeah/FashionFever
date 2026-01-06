@@ -35,10 +35,11 @@ export function ThemeSchedule({
   setVoteEnd,
 }: ThemeScheduleProps) {
   const [opened, { toggle }] = useDisclosure(false);
+
   return (
     <>
       <UnstyledButton className={classes.Button} onClick={toggle}>
-        일정 관리
+        <p>일정 관리</p>
       </UnstyledButton>
 
       <Collapse className={classes.Collapse} in={opened}>
