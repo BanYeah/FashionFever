@@ -55,6 +55,7 @@ export default function EnrollPage() {
       <EnrollNoti variant="fail" opened={notiOpened} close={closeNoti} />
 
       <AppShell
+        variant="theme"
         footer={
           <EnrollFooter
             text="참 가 하 기"

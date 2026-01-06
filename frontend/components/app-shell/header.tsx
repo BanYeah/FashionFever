@@ -12,12 +12,13 @@ interface AppShellHeaderProps {
 }
 
 export function AppShellHeader({
+  variant,
   gift,
   subHeader,
-  variant,
 }: AppShellHeaderProps) {
   const themeTitle = "두근 두근 핑크빛 병원";
   const themeDesc = "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
+
   const accountSettingTitle = "계정 관리";
   const userSettingDesc = "패션 피버에 참가할 미니는 누구?";
   const judgeSettingDesc = "패션 피버를 심사할 미니는 누구?";

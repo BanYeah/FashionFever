@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellFooter } from "@/components/app-shell/footer";
-import { AccountSetting } from "@/components/account-setting/search";
+import { AccountSetting } from "@/components/account-setting/account-setting";
 
 export default async function RankingPage({
   searchParams,
@@ -11,7 +11,6 @@ export default async function RankingPage({
   const currentView = !view || view === "user" ? "user" : "judge";
 
   return (
-
     <AppShell
       variant={!view || view === "user" ? "user-setting" : "judge-setting"}
       subHeader
@@ -27,7 +26,7 @@ export default async function RankingPage({
         />
       }
     >
-      <AccountSetting/>
+      <AccountSetting />
     </AppShell>
   );
 }
