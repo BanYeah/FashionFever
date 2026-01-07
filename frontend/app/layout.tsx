@@ -1,11 +1,11 @@
+import "@mantine/core/styles.layer.css";
+import "./globals.css";
+import "./color-style.css";
+
 import React from "react";
 import type { Metadata } from "next";
 import BMJUA from "next/font/local";
-
-import "@mantine/core/styles.layer.css";
 import { MantineProvider } from "@mantine/core";
-import "./globals.css";
-import "./color-style.css";
 
 const font = BMJUA({
   src: "../public/fonts/BMJUA.woff",
