@@ -1,45 +1,18 @@
-.InputWrapper {
-  height: 40px;
+.Announce {
+  padding: 7px;
 
-  padding-left: 20px;
+  background-color: var(--white);
+  border: 3.5px solid var(--black);
 
-  background-color: var(--gray);
-  border-radius: 10px;
-}
+  p {
+    font-size: 16px;
+    line-height: 1.6;
 
-.Input {
-  height: inherit;
-  border: none;
-
-  font-size: 16px;
-  color: var(--white);
-
-  &::placeholder {
-    color: var(--gray-b3);
+    text-align: center;
+    word-break: keep-all;
   }
 
-  &[data-disabled] {
-    background-color: transparent;
-    color: var(--gray-b3);
-    opacity: 1;
+  span {
+    color: var(--main);
   }
-}
-
-.InputSection {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  height: inherit;
-}
-
-.Button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 60px;
-  height: inherit;
-
-  background-color: var(--black);
-  border-radius: 10px;
 }

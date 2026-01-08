@@ -1,111 +1,71 @@
 "use client";
 
 import classes from "./login-input.module.css";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
+import { Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { Input, UnstyledButton } from "@mantine/core";
+import { LoginInputBase } from "./login-input-base";
 import { ModalNoti } from "../common/modal/model-noti";
 import { ModalGoBack } from "../common/modal/modal-go-back";
 
-interface LoginInputBaseProps {
-  disabled?: boolean;
-  placeholder: string;
-  rightButton?: boolean;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onClick?: () => void;
-}
+export function LoginInput() {
+  const regex = /^[a-z0-9]{5,7}$/;
+  const [minicode, setMinicode] = useState("");
 
-export function LoginInputBase({
-  disabled,
-  placeholder,
-  rightButton,
-  value,
-  onChange,
-  onClick,
-}: LoginInputBaseProps) {
-  return (
-    <Input
-      classNames={{
-        wrapper: classes.InputWrapper,
-        input: classes.Input,
-        section: classes.InputSection,
-      }}
-      variant="unstyled"
-      disabled={disabled}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      maxLength={12}
-      rightSection={
-        rightButton ? (
-          <UnstyledButton className={classes.Button} onClick={onClick}>
-            <Image
-              src="/images/login/arrow-right.svg"
-              alt=""
-              width={24}
-              height={24}
-            />
-          </UnstyledButton>
-        ) : null
-      }
-      rightSectionWidth={rightButton ? 60 : 0}
-      rightSectionPointerEvents={rightButton ? "all" : "none"}
-    />
-  );
-}
+  const [isEnter, setIsEnter] = useState(false);
+  const [entercode, setEntercode] = useState("");
 
-interface LoginInputProps {
-  disabled?: boolean;
-  placeholder: string;
-  defaultValue?: string;
-  rightButton?: boolean;
-}
-
-export function LoginInput({
-  disabled,
-  placeholder,
-  defaultValue = "",
-  rightButton,
-}: LoginInputProps) {
-  const [value, setValue] = useState(defaultValue);
-
-  return (
-    <LoginInputBase
-      disabled={disabled}
-      placeholder={placeholder}
-      rightButton={rightButton}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
-}
-
-export function LoginInputWithModal({
-  disabled,
-  placeholder,
-  defaultValue = "",
-  rightButton,
-}: LoginInputProps) {
-  const router = useRouter();
-
-  const [agreeOpened, { open: openAgree, close: closeAgree }] =
-    useDisclosure(false);
+  const [notiMessage, setNotiMessage] = useState<React.ReactNode>(null);
   const [notiOpened, { open: openNoti, close: closeNoti }] =
     useDisclosure(false);
-  const [value, setValue] = useState(defaultValue);
+  const [agreeOpened, { open: openAgree, close: closeAgree }] =
+    useDisclosure(false);
 
-  const isValidMinicode = (code: string) => {
-    const regex = /^[a-z0-9_]{5,12}$/;
-    return regex.test(code);
+  const handleMinicode = () => {
+    if (minicode === "admin_") {
+      setIsEnter(true); // 입장코드 입력창 등장
+    } else if (minicode.startsWith("judge_")) {
+      if (regex.test(minicode.slice(6))) {
+        // 해당 미니코드의 심사위원이 있는지 확인
+        // (1) 200 OK
+        // setIsEnter(true); // 입장코드 입력창 등장
+
+        // (2) 401 Unauthorized
+        setNotiMessage(<p>심사위원으로 임명되지 않은 미니예요!</p>);
+        openNoti();
+      } else {
+        setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
+        openNoti();
+      }
+    } else {
+      if (regex.test(minicode)) {
+        // 해당 미니코드의 유저가 있는지 확인
+        // (1) 200 OK
+        // setIsEnter(true); // 입장코드 입력창 등장
+
+        // (2) 404 Not Found
+        openAgree(); // 정보 제공 및 활용 동의 안내
+      } else {
+        setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
+        openNoti();
+      }
+    }
+  };
+
+  const handleEntercode = () => {
+    if (minicode === "admin_") {
+      // 어드민 로그인
+    } else if (minicode.startsWith("judge_")) {
+      // 심사위원 로그인
+    } else {
+      // 유저 로그인
+    }
   };
 
   return (
     <>
       <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
-        <p>유효하지 않은 형식의 미니코드예요!</p>
+        {notiMessage}
       </ModalNoti>
 
       <ModalGoBack
@@ -113,7 +73,10 @@ export function LoginInputWithModal({
         go="참여하기"
         back="그만두기"
         opened={agreeOpened}
-        onGo={() => router.push(`/login/${value}`)}
+        onGo={() => {
+          setIsEnter(true); // 입장코드 입력창 등장
+          closeAgree();
+        }}
         close={closeAgree}
       >
         <>
@@ -130,14 +93,48 @@ export function LoginInputWithModal({
         </>
       </ModalGoBack>
 
-      <LoginInputBase
-        disabled={disabled}
-        placeholder={placeholder}
-        rightButton={rightButton}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onClick={isValidMinicode(value) ? openAgree : openNoti}
-      />
+      <Stack className={classes.Announce} gap={0}>
+        {!isEnter ? (
+          <>
+            <p>안녕하세요, 반야입니다!</p>
+            <p>
+              2018년 4월을 끝으로 개최되지 않는 패션 피버를 비슷하게나마 즐기실
+              수 있도록 이벤트를 마련했습니다. 그때의 설렘을 다시 만끽하는
+              시간이 되길 바랍니다.
+            </p>
+          </>
+        ) : (
+          <p>
+            <span>입장코드</span>는 패션 피버 운영 계정(미니 코드: oooooo)으로
+            친구 신청을 주시면, 확인 후 1:1 메세지로 보내드립니다.
+          </p>
+        )}
+      </Stack>
+      <Stack align="stretch" mt={16} mb={16} gap={12}>
+        <LoginInputBase
+          placeholder="미니코드 입력"
+          value={minicode}
+          disabled={isEnter}
+          onChange={(e) => setMinicode(e.target.value)}
+          rightButton={!isEnter}
+          onClick={handleMinicode}
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter") handleMinicode();
+          }}
+        />
+        {isEnter && (
+          <LoginInputBase
+            placeholder="입장코드 입력"
+            value={entercode}
+            onChange={(e) => setEntercode(e.target.value)}
+            rightButton
+            onClick={handleEntercode}
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === "Enter") handleEntercode();
+            }}
+          />
+        )}
+      </Stack>
     </>
   );
 }

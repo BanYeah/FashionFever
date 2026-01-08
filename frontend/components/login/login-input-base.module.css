@@ -1,0 +1,45 @@
+.InputWrapper {
+  height: 40px;
+
+  padding-left: 20px;
+
+  background-color: var(--gray);
+  border-radius: 10px;
+}
+
+.Input {
+  height: inherit;
+  border: none;
+
+  font-size: 16px;
+  color: var(--white);
+
+  &::placeholder {
+    color: var(--gray-b3);
+  }
+
+  &[data-disabled] {
+    background-color: transparent;
+    color: var(--gray-b3);
+    opacity: 1;
+  }
+}
+
+.InputSection {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  height: inherit;
+}
+
+.Button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 60px;
+  height: inherit;
+
+  background-color: var(--black);
+  border-radius: 10px;
+}
