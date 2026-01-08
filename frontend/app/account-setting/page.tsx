@@ -2,13 +2,13 @@ import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellFooter } from "@/components/app-shell/footer";
 import { AccountSetting } from "@/components/account-setting/account-setting";
 
-export default async function RankingPage({
+export default async function AccountSettingPage({
   searchParams,
 }: {
   searchParams: Promise<{ view?: string }>;
 }) {
   const { view } = await searchParams;
-  const currentView = !view || view === "user" ? "user" : "judge";
+  const variant = !view || view === "user" ? "user" : "judge";
 
   return (
     <AppShell
@@ -18,7 +18,7 @@ export default async function RankingPage({
         <AppShellFooter
           variant="tabs"
           tabs={["유저 계정 관리", "심사위원 계정 관리"]}
-          activeTab={currentView === "user" ? 0 : 1}
+          activeTab={variant === "user" ? 0 : 1}
           tabLinks={[
             "/account-setting?view=user",
             "/account-setting?view=judge",
@@ -26,7 +26,7 @@ export default async function RankingPage({
         />
       }
     >
-      <AccountSetting />
+      <AccountSetting variant={variant} />
     </AppShell>
   );
 }
