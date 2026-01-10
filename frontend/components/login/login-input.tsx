@@ -112,9 +112,9 @@ export function LoginInput() {
       </Stack>
       <Stack align="stretch" mt={16} mb={16} gap={12}>
         <LoginInputBase
+          disabled={isEnter}
           placeholder="미니코드 입력"
           value={minicode}
-          disabled={isEnter}
           onChange={(e) => setMinicode(e.target.value)}
           rightButton={!isEnter}
           onClick={handleMinicode}
@@ -124,6 +124,7 @@ export function LoginInput() {
         />
         {isEnter && (
           <LoginInputBase
+            password
             placeholder="입장코드 입력"
             value={entercode}
             onChange={(e) => setEntercode(e.target.value)}
