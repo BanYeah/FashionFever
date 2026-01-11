@@ -12,6 +12,23 @@ export function EnrollGuide({ opened, close }: EnrollNotiProps) {
     <ModalNoti icon="info" opened={opened} close={close}>
       <Stack gap={20}>
         <Image
+          src="/images/enroll/guide-save.png"
+          alt=""
+          width={300}
+          height={264}
+          style={{ width: "100%", height: "auto" }}
+        />
+
+        <p>
+          스타일을 꼭 <span style={{ color: "var(--main)" }}>앨범에 저장</span>
+          해 주세요.
+          <br />
+          <span style={{ color: "var(--gray-8a)", fontSize: "12px" }}>
+            *선물 전달 전, 본인 확인 및 도용 여부를 확인할 수 있어요.
+          </span>
+        </p>
+
+        <Image
           src="/images/enroll/guide-bg.png"
           alt=""
           width={300}
