@@ -1,41 +1,12 @@
-.GiftContainer {
-  display: flex;
-  flex-direction: column;
-
-  background-color: var(--white);
-}
-
 .GiftTitle {
   padding: 0px 12px;
+  margin-bottom: 4px;
 
   transform: translateY(1px);
-}
-
-.GiftImageBox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 100px;
-  height: 80px;
-
-  flex-shrink: 0;
-}
-
-.GiftItemName {
-  font-size: 16px;
-  line-height: 1.5;
-
-  transform: translateY(1px);
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
 }
 
 .NoticeText {
-  padding: 8px 12px;
+  padding: 0px 12px;
 
   font-size: 14px;
   color: var(--gray-8a);
@@ -45,4 +16,39 @@
 
   white-space: normal;
   word-break: keep-all;
+}
+
+.Caption {
+  p {
+    line-height: 1.2;
+    white-space: nowrap; /* 줄바꿈 방지 */
+  }
+
+  span {
+    color: var(--main);
+  }
+}
+
+.ImageWrapper {
+  display: flex;
+  justify-content: center;
+
+  width: 100px;
+
+  img {
+    display: block;
+  }
+}
+
+.GiftCaption {
+  min-width: 0;
+  flex: 1;
+
+  p {
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
