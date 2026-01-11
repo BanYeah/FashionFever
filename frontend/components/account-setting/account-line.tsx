@@ -2,10 +2,10 @@
 
 import classes from "./account-setting.module.css";
 import Image from "next/image";
-import { useDisclosure } from "@mantine/hooks";
-import { Group, UnstyledButton, Divider } from "@mantine/core";
-import { ModalGoBack } from "@/components/common/modal/modal-go-back";
 import { useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { Group, Input, UnstyledButton, Divider } from "@mantine/core";
+import { ModalGoBack } from "@/components/common/modal/modal-go-back";
 
 interface AccountLineProps {
   variant: "user" | "judge";
@@ -19,6 +19,7 @@ export function AccountLine({
   entryCode,
 }: AccountLineProps) {
   const [opened, { open, close }] = useDisclosure(false);
+  const [value, setValue] = useState<string>("");
   const [action, setAction] = useState<"reset" | "delete">("reset");
 
   return (
@@ -28,22 +29,43 @@ export function AccountLine({
         go="계속하기"
         back="그만두기"
         opened={opened}
-        onGo={() => {}}
+        onGo={() => {
+          if (value === miniCode) {
+            if (action === "reset") {
+              // 입장 코드 초기화
+            } else if (variant === "user") {
+              // 유저 계정 삭제
+            } else {
+              // 심사위원 임명 취소
+            }
+          }
+        }}
         close={close}
       >
-        <p>
-          정말로 미니 코드 <span>{miniCode}</span>
-          의
-          <br />
-          <span>
-            {action === "reset"
-              ? "입장 코드를 초기화"
-              : variant === "user"
-              ? "계정을 삭제"
-              : "심사위원 임명을 취소"}
-          </span>
-          하시겠습니까?
-        </p>
+        <>
+          <p>
+            정말로 미니 코드 <span>{miniCode}</span>
+            의
+            <br />
+            <span>
+              {action === "reset"
+                ? "입장 코드를 초기화"
+                : variant === "user"
+                ? "계정을 삭제"
+                : "심사위원 임명을 취소"}
+            </span>
+            하시겠습니까?
+          </p>
+          <Input
+            classNames={{ input: classes.SearchInput }}
+            styles={{ input: { textAlign: "center" } }}
+            variant="unstyled"
+            placeholder={`미니 코드 확인 : ${miniCode}`}
+            maxLength={7}
+            value={value}
+            onChange={(event) => setValue(event.currentTarget.value)}
+          />
+        </>
       </ModalGoBack>
 
       <Group className={classes.AccountLine} align="center" gap={8}>
