@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,11 +24,10 @@ import { AppService } from './app.service';
 
         // 각 모듈에서 TypeOrmModule.forFeature([User])와 같이 등록된 엔티티들 자동 수집
         autoLoadEntities: true,
-
-        // 개발 환경에서 엔티티 변경 시 DB 테이블 자동 수정 (배포 환경에서는 false)
-        synchronize: configService.get<string>('NODE_ENV') === 'development',
+        synchronize: false,
       }),
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

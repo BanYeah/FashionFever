@@ -5,6 +5,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const apiPrefix = process.env.API_PREFIX || 'api/v1';
+  app.setGlobalPrefix(apiPrefix);
+
   // Swagger Configuration
   const config = new DocumentBuilder()
     .setTitle('Pocket Mini: Fashion Fever Event API Service')
