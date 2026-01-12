@@ -16,8 +16,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document); // http://localhost:3000/api로 접속
+  SwaggerModule.setup('api', app, document); // http://localhost:8000/api로 접속
 
-  await app.listen(3000);
+  await app.listen(8000);
 }
 bootstrap();
