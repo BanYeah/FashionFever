@@ -7,6 +7,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { LoginInputBase } from "./login-input-base";
 import { ModalNoti } from "../common/modal/model-noti";
 import { ModalGoBack } from "../common/modal/modal-go-back";
+import {
+  registerUser,
+  checkUserExist,
+  checkJudgeExist,
+} from "@/utils/api/auth";
 
 export function LoginInput() {
   const regex = /^[a-z0-9]{5,7}$/;
@@ -21,34 +26,55 @@ export function LoginInput() {
   const [agreeOpened, { open: openAgree, close: closeAgree }] =
     useDisclosure(false);
 
-  const handleMinicode = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleServerError = () => {
+    setNotiMessage(
+      <p>
+        서버와의 통신에 실패했습니다.
+        <br /> 잠시 후 다시 시도해주세요.
+      </p>
+    );
+    openNoti();
+  };
+
+  const handleMinicode = async () => {
     if (minicode === "admin_") {
       setIsEnter(true); // 입장코드 입력창 등장
-    } else if (minicode.startsWith("judge_")) {
-      if (regex.test(minicode.slice(6))) {
-        // 해당 미니코드의 심사위원이 있는지 확인
-        // (1) 200 OK
-        // setIsEnter(true); // 입장코드 입력창 등장
+      return;
+    }
 
-        // (2) 401 Unauthorized
+    const isJudge = minicode.startsWith("judge_");
+    const code = isJudge ? minicode.slice(6) : minicode;
+
+    if (minicode !== "admin_" && !regex.test(code)) {
+      setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
+      openNoti();
+      return;
+    }
+
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const result = isJudge
+        ? await checkJudgeExist(code)
+        : await checkUserExist(code);
+
+      if (result.success) {
+        setIsEnter(true); // 입장코드 입력창 등장
+      } else if (result.status === 404) {
+        if (isJudge) {
         setNotiMessage(<p>심사위원으로 임명되지 않은 미니예요!</p>);
         openNoti();
       } else {
-        setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
-        openNoti();
-      }
-    } else {
-      if (regex.test(minicode)) {
-        // 해당 미니코드의 유저가 있는지 확인
-        // (1) 200 OK
-        // setIsEnter(true); // 입장코드 입력창 등장
-
-        // (2) 404 Not Found
         openAgree(); // 정보 제공 및 활용 동의 안내
+        }
       } else {
-        setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
-        openNoti();
+        handleServerError();
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,9 +99,22 @@ export function LoginInput() {
         go="참여하기"
         back="그만두기"
         opened={agreeOpened}
-        onGo={() => {
+        onGo={async () => {
+          if (loading) return;
+          setLoading(true);
+          try {
+            const result = await registerUser(minicode);
+
+            if (result.success || result.status === 409) {
           setIsEnter(true); // 입장코드 입력창 등장
           closeAgree();
+            } else {
+              closeAgree();
+              handleServerError();
+            }
+          } finally {
+            setLoading(false);
+          }
         }}
         close={closeAgree}
       >
