@@ -1,7 +1,7 @@
 "use client";
 
 import classes from "./modal-go-back.module.css";
-import { Modal, Stack, UnstyledButton } from "@mantine/core";
+import { Modal, Stack, UnstyledButton, Loader } from "@mantine/core";
 
 interface ModalGoBackProps {
   title: string;
@@ -11,6 +11,7 @@ interface ModalGoBackProps {
   opened: boolean;
   onGo: () => void;
   close: () => void;
+  loading?: boolean;
 }
 
 export function ModalGoBack({
@@ -21,6 +22,7 @@ export function ModalGoBack({
   opened,
   onGo,
   close,
+  loading,
 }: ModalGoBackProps) {
   return (
     <Modal
@@ -53,7 +55,7 @@ export function ModalGoBack({
             className={`${classes.Button} ${classes.GoButton}`}
             onClick={onGo}
           >
-            <p>{go}</p>
+            {loading ? <Loader size={24} color="var(--white)" /> : <p>{go}</p>}
           </UnstyledButton>
         </div>
       </Stack>

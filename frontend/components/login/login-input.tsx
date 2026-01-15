@@ -65,10 +65,10 @@ export function LoginInput() {
         setIsEnter(true); // 입장코드 입력창 등장
       } else if (result.status === 404) {
         if (isJudge) {
-        setNotiMessage(<p>심사위원으로 임명되지 않은 미니예요!</p>);
-        openNoti();
-      } else {
-        openAgree(); // 정보 제공 및 활용 동의 안내
+          setNotiMessage(<p>심사위원으로 임명되지 않은 미니예요!</p>);
+          openNoti();
+        } else {
+          openAgree(); // 정보 제공 및 활용 동의 안내
         }
       } else {
         handleServerError();
@@ -106,8 +106,8 @@ export function LoginInput() {
             const result = await registerUser(minicode);
 
             if (result.success || result.status === 409) {
-          setIsEnter(true); // 입장코드 입력창 등장
-          closeAgree();
+              setIsEnter(true); // 입장코드 입력창 등장
+              closeAgree();
             } else {
               closeAgree();
               handleServerError();
@@ -117,6 +117,7 @@ export function LoginInput() {
           }
         }}
         close={closeAgree}
+        loading={loading}
       >
         <>
           <p>
@@ -160,6 +161,7 @@ export function LoginInput() {
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === "Enter") handleMinicode();
           }}
+          loading={loading}
         />
         {isEnter && (
           <LoginInputBase
@@ -172,6 +174,7 @@ export function LoginInput() {
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter") handleEntercode();
             }}
+            loading={loading}
           />
         )}
       </Stack>

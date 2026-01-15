@@ -1,6 +1,6 @@
 import classes from "./login-input-base.module.css";
 import Image from "next/image";
-import { Input, PasswordInput, UnstyledButton } from "@mantine/core";
+import { Input, PasswordInput, UnstyledButton, Loader } from "@mantine/core";
 
 interface LoginInputBaseProps {
   password?: boolean;
@@ -11,6 +11,7 @@ interface LoginInputBaseProps {
   rightButton?: boolean;
   onClick?: () => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  loading?: boolean;
 }
 
 export function LoginInputBase({
@@ -22,6 +23,7 @@ export function LoginInputBase({
   rightButton,
   onClick,
   onKeyDown,
+  loading,
 }: LoginInputBaseProps) {
   const props = {
     classNames: {
@@ -37,12 +39,16 @@ export function LoginInputBase({
     onKeyDown: onKeyDown,
     rightSection: rightButton ? (
       <UnstyledButton className={classes.Button} onClick={onClick}>
-        <Image
-          src="/images/login/arrow-right.svg"
-          alt=""
-          width={24}
-          height={24}
-        />
+        {loading ? (
+          <Loader size={24} color="var(--main)" />
+        ) : (
+          <Image
+            src="/images/login/arrow-right.svg"
+            alt=""
+            width={24}
+            height={24}
+          />
+        )}
       </UnstyledButton>
     ) : null,
     rightSectionWidth: rightButton ? 60 : 0,
