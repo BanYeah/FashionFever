@@ -20,7 +20,7 @@ export class AuthService {
   // 12자리 랜덤 입장 코드 생성기
   private generateRandomEnterCode(): string {
     const characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+      '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'; // Base58
 
     let result = '';
     for (let i = 0; i < 12; i++)
