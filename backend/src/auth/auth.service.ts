@@ -48,7 +48,7 @@ export class AuthService {
     return await this.userRepository.save(newUser);
   }
 
-  async getUserExist(minicode: string): Promise<boolean> {
+  async checkUserExist(minicode: string): Promise<boolean> {
     const isExist = await this.userRepository.exists({
       where: { minicode },
     });
@@ -58,7 +58,7 @@ export class AuthService {
     return true;
   }
 
-  async getJudgeExist(minicode: string): Promise<boolean> {
+  async checkJudgeExist(minicode: string): Promise<boolean> {
     const isExist = await this.judgeRepository.exists({
       where: { minicode },
     });

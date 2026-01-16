@@ -34,7 +34,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '등록된 유저임' })
   @ApiResponse({ status: 404, description: '등록되지 않은 유저임' })
   async getUserExist(@Param('minicode') minicode: string) {
-    return await this.authService.getUserExist(minicode);
+    return await this.authService.checkUserExist(minicode);
   }
 
   @Get('/judges/exist/:minicode')
@@ -54,6 +54,6 @@ export class AuthController {
     description: '심사위원이 아니거나 존재하지 않는 유저임',
   })
   async getJudgeExist(@Param('minicode') minicode: string) {
-    return await this.authService.getJudgeExist(minicode);
+    return await this.authService.checkJudgeExist(minicode);
   }
 }
