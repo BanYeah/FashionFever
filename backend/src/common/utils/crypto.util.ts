@@ -4,12 +4,15 @@ export class CryptoUtil {
   private static readonly ALGORITHM = 'aes-256-gcm';
   private static readonly IV_LENGTH = 12;
 
-  private static get key(): Buffer {
-    const KEY = process.env.ENCRYPTION_KEY;
-    if (!KEY || KEY.length !== 32) {
+  private static readonly ENCRYPTION_KEY = (() => {
+    const key = process.env.ENCRYPTION_KEY;
+    if (!key || key.length !== 32)
       throw new Error('ENCRYPTION_KEY must be 32 characters long!');
-    }
-    return Buffer.from(KEY);
+    return Buffer.from(key); // 이진 데이터로 변환
+  })();
+
+  private static get key(): Buffer {
+    return this.ENCRYPTION_KEY;
   }
 
   static encrypt(text: string): string {
@@ -26,17 +29,22 @@ export class CryptoUtil {
   }
 
   static decrypt(encryptedText: string): string {
-    const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
+    try {
+      const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
+      if (!ivHex || !authTagHex || !encrypted) throw new Error('Invalid format of encrypted text');
 
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
-    const decipher = crypto.createDecipheriv(this.ALGORITHM, this.key, iv);
+      const iv = Buffer.from(ivHex, 'hex');
+      const authTag = Buffer.from(authTagHex, 'hex');
+      const decipher = crypto.createDecipheriv(this.ALGORITHM, this.key, iv);
 
-    decipher.setAuthTag(authTag);
+      decipher.setAuthTag(authTag);
 
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
 
-    return decrypted;
+      return decrypted;
+    } catch (e) {
+      throw new Error('Decryption failed');
+    }
   }
 }
