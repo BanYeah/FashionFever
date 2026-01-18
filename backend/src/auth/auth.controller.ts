@@ -69,7 +69,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
-  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과 또는 IP 차단)' })
+  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과)' })
   async loginUser(@Body() loginDto: LoginDto, @Request() req: any) {
     const userInfo = await this.authService.validateUser(loginDto);
 
@@ -90,7 +90,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
-  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과 또는 IP 차단)' })
+  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과)' })
   async loginJudge(@Body() loginDto: LoginDto, @Request() req: any) {
     const judgeInfo = await this.authService.validateJudge(loginDto);
 
@@ -110,8 +110,8 @@ export class AuthController {
       '입력받은 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
   })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
-  @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
-  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과 또는 IP 차단)' })
+  @ApiResponse({ status: 401, description: '인증 실패 (잘못된 enter_code)' })
+  @ApiResponse({ status: 423, description: '계정 잠금 (IP 차단)' })
   async loginAdmin(@Body() loginAdminDto: LoginAdminDto, @Request() req: any, @Ip() ip: string) {
     await this.authService.validateAdmin(loginAdminDto, ip);
 
@@ -119,5 +119,14 @@ export class AuthController {
     req.session.save()
 
     return;
+  }
+
+  @Post('/logout')
+  @HttpCode(200)
+  @ApiOperation({ summary: '로그아웃' })
+  @ApiResponse({ status: 200, description: '로그아웃 성공' })
+  async logout(@Request() req: any) {
+    req.session.destroy();
+    return { message: 'Logged out successfully' };
   }
 }
