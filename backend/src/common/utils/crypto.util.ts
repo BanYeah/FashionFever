@@ -4,14 +4,16 @@ export class CryptoUtil {
   private static readonly ALGORITHM = 'aes-256-gcm';
   private static readonly IV_LENGTH = 12;
 
-  private static readonly ENCRYPTION_KEY = (() => {
-    const key = process.env.ENCRYPTION_KEY;
-    if (!key || key.length !== 32)
-      throw new Error('ENCRYPTION_KEY must be 32 characters long!');
-    return Buffer.from(key); // 이진 데이터로 변환
-  })();
-
+  private static ENCRYPTION_KEY: Buffer | null = null;
   private static get key(): Buffer {
+    if (this.ENCRYPTION_KEY) return this.ENCRYPTION_KEY;
+
+    const KEY = process.env.ENCRYPTION_KEY;
+    if (!KEY || KEY.length !== 32) {
+      throw new Error('ENCRYPTION_KEY must be 32 characters long!');
+    }
+
+    this.ENCRYPTION_KEY = Buffer.from(KEY);
     return this.ENCRYPTION_KEY;
   }
 
