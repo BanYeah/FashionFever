@@ -3,8 +3,8 @@ import * as crypto from 'crypto';
 export class CryptoUtil {
   private static readonly ALGORITHM = 'aes-256-gcm';
   private static readonly IV_LENGTH = 12;
-
   private static ENCRYPTION_KEY: Buffer | null = null;
+
   private static get key(): Buffer {
     if (this.ENCRYPTION_KEY) return this.ENCRYPTION_KEY;
 

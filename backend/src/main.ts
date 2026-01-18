@@ -1,19 +1,48 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+
+import { createClient } from 'redis';
+import { RedisStore } from 'connect-redis';
+import session from 'express-session';
+
 import morgan from 'morgan';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Cloudflare 등을 통해 들어오는 실제 IP를 인식하기 위해
+  app.set('trust proxy', true);
+
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:8000'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
 
   const apiPrefix = process.env.API_PREFIX || 'api/v1';
   app.setGlobalPrefix(apiPrefix);
 
-  app.enableCors({
-    origin: 'http://localhost:3000',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  const redisClient = createClient({ url: 'redis://localhost:6379' });
+  await redisClient.connect();
+  redisClient.connect().catch(console.error);
+
+  const redisStore = new RedisStore({ client: redisClient });
+  app.use(
+    session({
+      name: 'ff_session_id',
+      store: redisStore,
+      resave: false,
+      saveUninitialized: false,
+      secret: process.env.SESSION_SECRET || 'secret-key',
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // 배포 환경(HTTPS)에서는 true로
+        maxAge: 1000 * 60 * 60 * 6, // 6시간
+      },
+    }),
+  );
 
   // Logging
   app.use(morgan('dev'));
@@ -25,7 +54,7 @@ async function bootstrap() {
       'Web-based Re-implementation of the Pocket Mini: Fashion Fever Event를 위한 API 명세서입니다.',
     )
     .setVersion('1.0')
-    .addCookieAuth('connect.sid')
+    .addCookieAuth('ff_session_id')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

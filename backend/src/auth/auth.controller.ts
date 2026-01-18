@@ -1,7 +1,10 @@
-import { Body, Controller, Get, Post, Param } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, Request, HttpCode, Ip } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+
 import { CreateUserDto } from './dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { LoginAdminDto } from './dto/login-admin.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -55,5 +58,66 @@ export class AuthController {
   })
   async getJudgeExist(@Param('minicode') minicode: string) {
     return await this.authService.checkJudgeExist(minicode);
+  }
+
+  @Post('/login')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: '일반 유저 로그인',
+    description:
+      '입력받은 minicode와 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
+  })
+  @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
+  @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
+  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과 또는 IP 차단)' })
+  async loginUser(@Body() loginDto: LoginDto, @Request() req: any) {
+    const userInfo = await this.authService.validateUser(loginDto);
+
+    req.session.account = 'user';
+    req.session.user_id = userInfo.user_id;
+    req.session.minicode = userInfo.minicode;
+    req.session.save()
+
+    return;
+  }
+
+  @Post('/judges/login')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: '심사위원 로그인',
+    description:
+      '입력받은 minicode와 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
+  })
+  @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
+  @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
+  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과 또는 IP 차단)' })
+  async loginJudge(@Body() loginDto: LoginDto, @Request() req: any) {
+    const judgeInfo = await this.authService.validateJudge(loginDto);
+
+    req.session.account = 'judge';
+    req.session.user_id = judgeInfo.user_id;
+    req.session.minicode = judgeInfo.minicode;
+    req.session.save()
+
+    return;
+  }
+
+  @Post('/admin/login')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: '관리자 로그인',
+    description:
+      '입력받은 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
+  })
+  @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
+  @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
+  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과 또는 IP 차단)' })
+  async loginAdmin(@Body() loginAdminDto: LoginAdminDto, @Request() req: any, @Ip() ip: string) {
+    await this.authService.validateAdmin(loginAdminDto, ip);
+
+    req.session.account = 'admin';
+    req.session.save()
+
+    return;
   }
 }
