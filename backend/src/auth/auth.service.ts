@@ -1,6 +1,6 @@
 import {
-  ConflictException,
   Injectable,
+  ConflictException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,7 +15,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Judge) private judgeRepository: Repository<Judge>,
-  ) {}
+  ) { }
 
   // 12자리 랜덤 입장 코드 생성기
   private generateRandomEnterCode(): string {
@@ -31,7 +31,7 @@ export class AuthService {
     return result;
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<void> {
     const { minicode } = createUserDto;
 
     const isExist = await this.userRepository.exists({ where: { minicode } });
@@ -45,20 +45,18 @@ export class AuthService {
       enter_code: encryptedCode,
     });
 
-    return await this.userRepository.save(newUser);
+    await this.userRepository.save(newUser);
   }
 
-  async checkUserExist(minicode: string): Promise<boolean> {
+  async checkUserExist(minicode: string): Promise<void> {
     const isExist = await this.userRepository.exists({
       where: { minicode },
     });
 
     if (!isExist) throw new NotFoundException(); // 404
-
-    return true;
   }
 
-  async checkJudgeExist(minicode: string): Promise<boolean> {
+  async checkJudgeExist(minicode: string): Promise<void> {
     const isExist = await this.judgeRepository.exists({
       where: { minicode },
     });
