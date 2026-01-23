@@ -76,7 +76,13 @@ export class AuthController {
     req.session.account = 'user';
     req.session.user_id = userInfo.user_id;
     req.session.minicode = userInfo.minicode;
-    req.session.save()
+
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err: any) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
 
     return;
   }
@@ -97,7 +103,13 @@ export class AuthController {
     req.session.account = 'judge';
     req.session.user_id = judgeInfo.user_id;
     req.session.minicode = judgeInfo.minicode;
-    req.session.save()
+
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err: any) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
 
     return;
   }
@@ -116,7 +128,13 @@ export class AuthController {
     await this.authService.validateAdmin(loginAdminDto, ip);
 
     req.session.account = 'admin';
-    req.session.save()
+
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err: any) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
 
     return;
   }

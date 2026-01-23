@@ -25,8 +25,7 @@ async function bootstrap() {
   app.setGlobalPrefix(apiPrefix);
 
   const redisClient = createClient({ url: 'redis://localhost:6379' });
-  await redisClient.connect();
-  redisClient.connect().catch(console.error);
+  if (!redisClient.isOpen) await redisClient.connect().catch(console.error);
 
   const redisStore = new RedisStore({ client: redisClient });
   app.use(
