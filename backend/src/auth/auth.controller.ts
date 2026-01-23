@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Param, Request, HttpCode, Ip } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, Request, Response, HttpCode, Ip } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
@@ -143,8 +143,12 @@ export class AuthController {
   @HttpCode(200)
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({ status: 200, description: '로그아웃 성공' })
-  async logout(@Request() req: any) {
-    req.session.destroy();
-    return { message: 'Logged out successfully' };
+  async logout(@Request() req: any, @Response() res: any) {
+    res.clearCookie('ff_session_id');
+
+    req.session.destroy((err: any) => {
+      if (err) return res.status(500).send({ message: 'Logout failed' });
+      return res.status(200).send({ message: 'Logged out successfully' });
+    });
   }
 }
