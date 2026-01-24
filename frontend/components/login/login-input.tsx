@@ -2,8 +2,9 @@
 
 import classes from "./login-input.module.css";
 import React, { useState } from "react";
-import { Stack } from "@mantine/core";
+import { useRouter } from "next/navigation";
 import { useDisclosure } from "@mantine/hooks";
+import { Stack } from "@mantine/core";
 import { LoginInputBase } from "./login-input-base";
 import { ModalNoti } from "../common/modal/model-noti";
 import { ModalGoBack } from "../common/modal/modal-go-back";
@@ -11,9 +12,14 @@ import {
   registerUser,
   checkUserExist,
   checkJudgeExist,
+  loginUser,
+  loginJudge,
+  loginAdmin,
 } from "@/utils/api/auth";
 
 export function LoginInput() {
+  const router = useRouter();
+
   const regex = /^[a-z0-9]{5,7}$/;
   const [minicode, setMinicode] = useState("");
 
@@ -61,30 +67,64 @@ export function LoginInput() {
         ? await checkJudgeExist(code)
         : await checkUserExist(code);
 
-      if (result.success) {
+      if (result.success)
         setIsEnter(true); // 입장코드 입력창 등장
-      } else if (result.status === 404) {
+
+      else if (result.status === 404) {
         if (isJudge) {
           setNotiMessage(<p>심사위원으로 임명되지 않은 미니예요!</p>);
           openNoti();
-        } else {
-          openAgree(); // 정보 제공 및 활용 동의 안내
         }
-      } else {
-        handleServerError();
+        else openAgree(); // 정보 제공 및 활용 동의 안내
       }
+      else handleServerError();
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEntercode = () => {
-    if (minicode === "admin_") {
-      // 어드민 로그인
-    } else if (minicode.startsWith("judge_")) {
-      // 심사위원 로그인
-    } else {
-      // 유저 로그인
+  const handleEntercode = async () => {
+    const doLogin = () => {
+      if (minicode === "admin_") return loginAdmin(entercode);
+      if (minicode.startsWith("judge_")) return loginJudge(minicode.slice(6), entercode);
+      return loginUser(minicode, entercode);
+    };
+
+    const result = await doLogin();
+
+    if (result.success)
+      router.push("/home");
+
+    switch (result.status) {
+      case 401:
+        setNotiMessage(<p>미니코드 또는 입장코드가 일치하지 않아요.</p>);
+        openNoti();
+        break;
+
+      case 423:
+        if (minicode === "admin_") {
+          setNotiMessage(
+            <p>
+              과도한 로그인 시도가 감지되어<br />
+              해당 IP의 접속이 일시적으로 차단되었습니다.
+            </p>
+          );
+          openNoti();
+        } else {
+          const timeInfo = result.message?.match(/약 \d+분 후/)?.[0] || "잠시 후";
+          setNotiMessage(
+            <p>
+              과도한 로그인 시도로 접속이 제한되었어요.<br />
+              {timeInfo} 다시 시도해주세요.
+            </p>
+          );
+          openNoti();
+        }
+        break;
+
+      default:
+        handleServerError();
+        return;
     }
   };
 
