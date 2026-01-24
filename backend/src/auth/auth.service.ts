@@ -33,7 +33,7 @@ export class AuthService {
   private readonly redis = new Redis();
 
   // 12자리 랜덤 입장 코드 생성기
-  private generateRandomEnterCode(): string {
+  public generateRandomEnterCode(): string {
     const characters =
       '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'; // Base58
 
