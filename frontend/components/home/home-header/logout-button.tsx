@@ -2,14 +2,12 @@
 
 import classes from "./home-header.module.css";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useDisclosure } from "@mantine/hooks";
 import { UnstyledButton } from "@mantine/core";
 import { ModalNoti } from "@/components/common/modal/model-noti";
 import { logout } from "@/utils/api/auth";
 
 export function LogoutButton() {
-  const router = useRouter();
   const [notiOpened, { open: openNoti, close: closeNoti }] =
     useDisclosure(false);
 
@@ -26,9 +24,7 @@ export function LogoutButton() {
         className={classes.LogoutButton}
         onClick={async () => {
           const result = await logout();
-
-          if (result.success) router.push("/home");
-          else openNoti();
+          if (!result.success) openNoti();
         }}
       >
         <Image

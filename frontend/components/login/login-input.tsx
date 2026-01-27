@@ -2,7 +2,6 @@
 
 import classes from "./login-input.module.css";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useDisclosure } from "@mantine/hooks";
 import { Stack } from "@mantine/core";
 import { LoginInputBase } from "./login-input-base";
@@ -18,8 +17,6 @@ import {
 } from "@/utils/api/auth";
 
 export function LoginInput() {
-  const router = useRouter();
-
   const regex = /^[a-z0-9]{5,7}$/;
   const [minicode, setMinicode] = useState("");
 
@@ -90,11 +87,7 @@ export function LoginInput() {
 
     const result = await doLogin();
 
-    if (result.success) {
-      router.push("/home");
-      return;
-    }
-
+    if (result.success) return;
     switch (result.status) {
       case 401:
         setNotiMessage(<p>미니코드 또는 입장코드가 일치하지 않아요.</p>);
