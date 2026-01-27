@@ -79,7 +79,7 @@ export class AccountService {
       where: { minicode }
     });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(); // 404
 
     try {
       user.enter_code = CryptoUtil.decrypt(user.enter_code);
@@ -95,7 +95,7 @@ export class AccountService {
       where: { minicode }
     });
 
-    if (!judge) throw new NotFoundException();
+    if (!judge) throw new NotFoundException(); // 404
     return judge;
   }
 
@@ -104,7 +104,7 @@ export class AccountService {
       where: { minicode }
     });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(); // 404
 
     const newRawEnterCode = this.authService.generateRandomEnterCode();
 
@@ -117,12 +117,12 @@ export class AccountService {
       where: { minicode }
     });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(); // 404
 
     const isAlreadyJudge = await this.judgeRepository.exists({
       where: { minicode }
     });
-    if (isAlreadyJudge) throw new ConflictException();
+    if (isAlreadyJudge) throw new ConflictException(); // 409
 
     const newJudge = this.judgeRepository.create({
       user_id: user.user_id,
@@ -137,7 +137,7 @@ export class AccountService {
       where: { minicode }
     });
 
-    if (!user) throw new NotFoundException();
+    if (!user) throw new NotFoundException(); // 404
 
     await this.userRepository.remove(user);
   }
@@ -147,7 +147,7 @@ export class AccountService {
       where: { minicode }
     });
 
-    if (!judge) throw new NotFoundException();
+    if (!judge) throw new NotFoundException(); // 404
 
     await this.judgeRepository.remove(judge);
   }
