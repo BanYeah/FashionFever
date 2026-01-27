@@ -1,3 +1,5 @@
+import { useAuthStore } from "../store/authStore";
+
 export async function registerUser(minicode: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,
@@ -6,7 +8,7 @@ export async function registerUser(minicode: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ minicode }),
       cache: "no-store",
-    }
+    },
   );
 
   if (!res.ok) return { success: false, status: res.status };
@@ -16,7 +18,7 @@ export async function registerUser(minicode: string) {
 export async function checkUserExist(minicode: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/exist/${minicode}`,
-    { cache: "no-store" }
+    { cache: "no-store" },
   );
 
   if (!res.ok) return { success: false, status: res.status };
@@ -28,7 +30,7 @@ export async function checkUserExist(minicode: string) {
 export async function checkJudgeExist(minicode: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/judges/exist/${minicode}`,
-    { cache: "no-store" }
+    { cache: "no-store" },
   );
 
   if (!res.ok) return { success: false, status: res.status };
@@ -46,7 +48,7 @@ export async function loginUser(minicode: string, enter_code: string) {
       body: JSON.stringify({ minicode, enter_code }),
       cache: "no-store",
       credentials: "include",
-    }
+    },
   );
 
   if (!res.ok) {
@@ -54,10 +56,15 @@ export async function loginUser(minicode: string, enter_code: string) {
     return {
       success: false,
       status: res.status,
-      message: errorData.message
+      message: errorData.message,
     };
   }
-  else return { success: true };
+
+  const { setUser, setInitialized } = useAuthStore.getState();
+  setUser({ account: "user", minicode: minicode });
+  setInitialized(true);
+
+  return { success: true };
 }
 
 export async function loginJudge(minicode: string, enter_code: string) {
@@ -69,7 +76,7 @@ export async function loginJudge(minicode: string, enter_code: string) {
       body: JSON.stringify({ minicode, enter_code }),
       cache: "no-store",
       credentials: "include",
-    }
+    },
   );
 
   if (!res.ok) {
@@ -77,10 +84,15 @@ export async function loginJudge(minicode: string, enter_code: string) {
     return {
       success: false,
       status: res.status,
-      message: errorData.message
+      message: errorData.message,
     };
   }
-  else return { success: true };
+
+  const { setUser, setInitialized } = useAuthStore.getState();
+  setUser({ account: "judge", minicode: minicode });
+  setInitialized(true);
+
+  return { success: true };
 }
 
 export async function loginAdmin(enter_code: string) {
@@ -92,7 +104,7 @@ export async function loginAdmin(enter_code: string) {
       body: JSON.stringify({ enter_code }),
       cache: "no-store",
       credentials: "include",
-    }
+    },
   );
 
   if (!res.ok) {
@@ -100,10 +112,15 @@ export async function loginAdmin(enter_code: string) {
     return {
       success: false,
       status: res.status,
-      message: errorData.message
+      message: errorData.message,
     };
   }
-  else return { success: true };
+
+  const { setUser, setInitialized } = useAuthStore.getState();
+  setUser({ account: "judge", minicode: null });
+  setInitialized(true);
+
+  return { success: true };
 }
 
 export async function logout() {
@@ -115,16 +132,18 @@ export async function logout() {
       body: JSON.stringify({}),
       cache: "no-store",
       credentials: "include",
-    }
+    },
   );
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
+  if (!res.ok)
     return {
       success: false,
       status: res.status,
-      message: errorData.message
     };
-  }
-  else return { success: true };
+
+  const { setUser, setInitialized } = useAuthStore.getState();
+  setUser(null);
+  setInitialized(true);
+
+  return { success: true };
 }

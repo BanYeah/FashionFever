@@ -13,10 +13,12 @@
     "@mantine/dates": "^8.3.10",
     "@mantine/hooks": "^8.3.10",
     "@mantine/modals": "^8.3.10",
+    "axios": "^1.13.3",
     "dayjs": "^1.11.19",
     "next": "16.1.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

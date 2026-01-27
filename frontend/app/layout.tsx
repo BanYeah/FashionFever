@@ -6,6 +6,7 @@ import React from "react";
 import type { Metadata } from "next";
 import BMJUA from "next/font/local";
 import { MantineProvider } from "@mantine/core";
+import { AuthProvider } from "@/components/auth-provider/auth-provider";
 
 const font = BMJUA({
   src: "../public/fonts/BMJUA.woff",
@@ -32,7 +33,9 @@ export default function RootLayout({
     <html lang="en" className={font.className}>
       <body>
         <main>
-          <MantineProvider>{children}</MantineProvider>
+          <MantineProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </MantineProvider>
         </main>
       </body>
     </html>
