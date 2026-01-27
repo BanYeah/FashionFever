@@ -181,8 +181,8 @@ export function LoginInput() {
         ) : (
           <p>
             <span>입장코드</span>는 패션 피버 운영 계정(미니 코드:{" "}
-            {process.env.MINICODE})으로 친구 신청을 주시면, 확인 후 1:1 메세지로
-            보내드립니다.
+            {process.env.NEXT_PUBLIC_MINICODE})으로 친구 신청을 주시면, 확인 후
+            1:1 메세지로 보내드립니다.
           </p>
         )}
       </Stack>
