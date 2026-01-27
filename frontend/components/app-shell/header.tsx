@@ -1,6 +1,6 @@
 import classes from "./header.module.css";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { UnstyledButton } from "@mantine/core";
 
 export type AppShellVariant = "theme" | "user-setting" | "judge-setting";
@@ -27,15 +27,15 @@ export function AppShellHeader({
     variant === "user-setting"
       ? accountSettingTitle
       : variant === "judge-setting"
-      ? accountSettingTitle
-      : themeTitle;
+        ? accountSettingTitle
+        : themeTitle;
 
   const displaySubTitle =
     variant === "user-setting"
       ? userSettingDesc
       : variant === "judge-setting"
-      ? judgeSettingDesc
-      : themeDesc;
+        ? judgeSettingDesc
+        : themeDesc;
 
   return (
     <div className={classes.Container}>
