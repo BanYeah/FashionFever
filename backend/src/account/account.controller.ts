@@ -1,5 +1,12 @@
-import { Body, Controller, Post, Patch, Delete, HttpCode } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Post,
+  Patch,
+  Delete,
+  HttpCode,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AccountService } from './account.service';
 
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -9,7 +16,7 @@ import { MinicodeDto } from './dto/minicode.dto';
 @ApiTags('account')
 @Controller('account')
 export class AccountController {
-  constructor(private accountService: AccountService) { }
+  constructor(private accountService: AccountService) {}
 
   @Post('/users')
   @HttpCode(200)
@@ -79,7 +86,7 @@ export class AccountController {
   @Roles('admin')
   @ApiOperation({
     summary: '심사위원 임명 (관리자)',
-    description: '특정 유저를 심사위원 목록에 추가합니다.'
+    description: '특정 유저를 심사위원 목록에 추가합니다.',
   })
   @ApiResponse({ status: 200, description: '심사위원 임명 성공' })
   @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
