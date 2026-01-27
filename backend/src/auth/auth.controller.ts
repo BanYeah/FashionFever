@@ -1,4 +1,7 @@
-import { Body, Controller, Get, Post, Param, Request, Response, HttpCode, Ip } from '@nestjs/common';
+import { Controller, Body, Get, Post, Param, Request, Response, HttpCode, Ip } from '@nestjs/common';
+import {
+  UnauthorizedException, // 401
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
@@ -150,5 +153,26 @@ export class AuthController {
       if (err) return res.status(500).send({ message: 'Logout failed' });
       return res.status(200).send({ message: 'Logged out successfully' });
     });
+  }
+
+  @Get('/status')
+  @ApiOperation({
+    summary: '현재 로그인 상태 및 권한 확인',
+    description: '세션에서 현재 로그인된 유저의 정보를 직접 반환합니다.'
+  })
+  @ApiResponse({ status: 200, description: '로그인 상태임' })
+  @ApiResponse({ status: 401, description: '로그인되지 않음' })
+  async getStatus(@Request() req: any, @Response() res: any) {
+    const session = req.session;
+
+    if (!session || !session.account) {
+      res.clearCookie('ff_session_id');
+      throw new UnauthorizedException();
+    }
+
+    return {
+      minicode: session.minicode,
+      account: session.account,
+    };
   }
 }
