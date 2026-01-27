@@ -39,7 +39,7 @@ export function LoginInput() {
       <p>
         서버와의 통신에 실패했습니다.
         <br /> 잠시 후 다시 시도해주세요.
-      </p>
+      </p>,
     );
     openNoti();
   };
@@ -53,7 +53,7 @@ export function LoginInput() {
     const isJudge = minicode.startsWith("judge_");
     const code = isJudge ? minicode.slice(6) : minicode;
 
-    if (minicode !== "admin_" && !regex.test(code)) {
+    if (!regex.test(code)) {
       setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
       openNoti();
       return;
@@ -69,15 +69,12 @@ export function LoginInput() {
 
       if (result.success)
         setIsEnter(true); // 입장코드 입력창 등장
-
       else if (result.status === 404) {
         if (isJudge) {
           setNotiMessage(<p>심사위원으로 임명되지 않은 미니예요!</p>);
           openNoti();
-        }
-        else openAgree(); // 정보 제공 및 활용 동의 안내
-      }
-      else handleServerError();
+        } else openAgree(); // 정보 제공 및 활용 동의 안내
+      } else handleServerError();
     } finally {
       setLoading(false);
     }
@@ -86,14 +83,17 @@ export function LoginInput() {
   const handleEntercode = async () => {
     const doLogin = () => {
       if (minicode === "admin_") return loginAdmin(entercode);
-      if (minicode.startsWith("judge_")) return loginJudge(minicode.slice(6), entercode);
+      if (minicode.startsWith("judge_"))
+        return loginJudge(minicode.slice(6), entercode);
       return loginUser(minicode, entercode);
     };
 
     const result = await doLogin();
 
-    if (result.success)
+    if (result.success) {
       router.push("/home");
+      return;
+    }
 
     switch (result.status) {
       case 401:
@@ -105,18 +105,21 @@ export function LoginInput() {
         if (minicode === "admin_") {
           setNotiMessage(
             <p>
-              과도한 로그인 시도가 감지되어<br />
+              과도한 로그인 시도가 감지되어
+              <br />
               해당 IP의 접속이 일시적으로 차단되었습니다.
-            </p>
+            </p>,
           );
           openNoti();
         } else {
-          const timeInfo = result.message?.match(/약 \d+분 후/)?.[0] || "잠시 후";
+          const timeInfo =
+            result.message?.match(/약 \d+분 후/)?.[0] || "잠시 후";
           setNotiMessage(
             <p>
-              과도한 로그인 시도로 접속이 제한되었어요.<br />
+              과도한 로그인 시도로 접속이 제한되었어요.
+              <br />
               {timeInfo} 다시 시도해주세요.
-            </p>
+            </p>,
           );
           openNoti();
         }
@@ -124,7 +127,6 @@ export function LoginInput() {
 
       default:
         handleServerError();
-        return;
     }
   };
 
@@ -185,8 +187,9 @@ export function LoginInput() {
           </>
         ) : (
           <p>
-            <span>입장코드</span>는 패션 피버 운영 계정(미니 코드: oooooo)으로
-            친구 신청을 주시면, 확인 후 1:1 메세지로 보내드립니다.
+            <span>입장코드</span>는 패션 피버 운영 계정(미니 코드:{" "}
+            {process.env.MINICODE})으로 친구 신청을 주시면, 확인 후 1:1 메세지로
+            보내드립니다.
           </p>
         )}
       </Stack>
