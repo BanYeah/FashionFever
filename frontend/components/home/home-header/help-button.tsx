@@ -13,7 +13,7 @@ export function HelpButton() {
     useDisclosure(false);
 
   const { user } = useAuthStore.getState();
-  if (user?.account === "user" || user?.account == "judge") {
+  if (user?.account === "user" || user?.account === "judge") {
     return (
       <>
         <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
@@ -59,7 +59,7 @@ export function HelpButton() {
         </UnstyledButton>
       </>
     );
-  } else if (user?.account == "admin") {
+  } else if (user?.account === "admin") {
     return (
       <Link className={classes.HelpButton} href="/theme-setting">
         <Image

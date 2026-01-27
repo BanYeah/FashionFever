@@ -36,7 +36,7 @@ export function VoteButton() {
         </UnstyledButton>
       </>
     );
-  } else if (user?.account == "judge") {
+  } else if (user?.account === "judge") {
     return (
       <>
         <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
@@ -59,7 +59,7 @@ export function VoteButton() {
         </UnstyledButton>
       </>
     );
-  } else if (user?.account == "admin") {
+  } else if (user?.account === "admin") {
     return (
       <Link className={classes.VoteButton} href="/account-setting">
         <Stack align="center" gap={0}>

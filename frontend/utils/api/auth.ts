@@ -117,7 +117,7 @@ export async function loginAdmin(enter_code: string) {
   }
 
   const { setUser, setInitialized } = useAuthStore.getState();
-  setUser({ account: "judge", minicode: null });
+  setUser({ account: "admin", minicode: null });
   setInitialized(true);
 
   return { success: true };

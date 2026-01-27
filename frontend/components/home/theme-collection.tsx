@@ -22,7 +22,7 @@ export function ThemeCollection() {
         <ThemeDisplay variant="result" registered={true} point={150} />
       </Stack>
     );
-  } else if (user?.account == "judge") {
+  } else if (user?.account === "judge") {
     return (
       <Stack p={10} gap={10}>
         <ThemeDisplayJudge variant="open" />
@@ -33,7 +33,7 @@ export function ThemeCollection() {
         <ThemeDisplayJudge variant="result" />
       </Stack>
     );
-  } else if (user?.account == "admin") {
+  } else if (user?.account === "admin") {
     return (
       <Stack p={10} gap={10}>
         <ThemeDisplayAdmin variant="unopen" />
