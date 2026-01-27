@@ -18,7 +18,7 @@ export class AccountService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Judge) private judgeRepository: Repository<Judge>,
     private authService: AuthService,
-  ) { }
+  ) {}
 
   async findAllUsers(page: number) {
     const take = 40;
@@ -76,7 +76,7 @@ export class AccountService {
 
   async findUserDetail(minicode: string) {
     const user = await this.userRepository.findOne({
-      where: { minicode }
+      where: { minicode },
     });
 
     if (!user) throw new NotFoundException(); // 404
@@ -92,7 +92,7 @@ export class AccountService {
 
   async findJudgeDetail(minicode: string) {
     const judge = await this.judgeRepository.findOne({
-      where: { minicode }
+      where: { minicode },
     });
 
     if (!judge) throw new NotFoundException(); // 404
@@ -101,7 +101,7 @@ export class AccountService {
 
   async resetUserEnterCode(minicode: string) {
     const user = await this.userRepository.findOne({
-      where: { minicode }
+      where: { minicode },
     });
 
     if (!user) throw new NotFoundException(); // 404
@@ -114,13 +114,13 @@ export class AccountService {
 
   async appointJudge(minicode: string) {
     const user = await this.userRepository.findOne({
-      where: { minicode }
+      where: { minicode },
     });
 
     if (!user) throw new NotFoundException(); // 404
 
     const isAlreadyJudge = await this.judgeRepository.exists({
-      where: { minicode }
+      where: { minicode },
     });
     if (isAlreadyJudge) throw new ConflictException(); // 409
 
@@ -134,7 +134,7 @@ export class AccountService {
 
   async removeUser(minicode: string) {
     const user = await this.userRepository.findOne({
-      where: { minicode }
+      where: { minicode },
     });
 
     if (!user) throw new NotFoundException(); // 404
@@ -144,7 +144,7 @@ export class AccountService {
 
   async expelJudge(minicode: string) {
     const judge = await this.judgeRepository.findOne({
-      where: { minicode }
+      where: { minicode },
     });
 
     if (!judge) throw new NotFoundException(); // 404
