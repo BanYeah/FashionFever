@@ -14,47 +14,44 @@ export function AppShellFooter({
   tabs,
   tabLinks,
 }: AppShellFooterProps) {
-  const renderContent = () => {
-    switch (variant) {
-      case "dressUp":
-        return (
-          <div className={classes.DressUpContainer}>
-            <Link href="/mini-dressup" className={classes.DressUpLink}>
-              미니 꾸미기
-            </Link>
-          </div>
-        );
+  if (variant === "dressUp") {
+    return (
+      <div className={classes.FooterContainer}>
+        <div className={classes.DressUpContainer}>
+          <Link href="/mini-dressup" className={classes.DressUpLink}>
+            미니 꾸미기
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  // tabs
+  else {
+    return (
+      <div className={classes.FooterContainer}>
+        <div className={classes.TabContainer}>
+          {tabs?.map((text, index) => {
+            const isActive = activeTab === index;
+            const tabClassName = `${classes.TabItem} ${
+              isActive ? classes.ActiveTab : classes.InactiveTab
+            }`;
 
-      case "tabs":
-        return (
-          <div className={classes.TabContainer}>
-            {tabs?.map((text, index) => {
-              const isActive = activeTab === index;
-              const tabClassName = `${classes.TabItem} ${
-                isActive ? classes.ActiveTab : classes.InactiveTab
-              }`;
-
-              return isActive ? (
-                <div key={index} className={tabClassName}>
-                  {text}
-                </div>
-              ) : (
-                <Link
-                  key={index}
-                  href={tabLinks?.[index] || "#"}
-                  className={tabClassName}
-                >
-                  {text}
-                </Link>
-              );
-            })}
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return <footer className={classes.FooterContainer}>{renderContent()}</footer>;
+            return isActive ? (
+              <div key={`${index}_${text}`} className={tabClassName}>
+                {text}
+              </div>
+            ) : (
+              <Link
+                key={`${index}_${text}`}
+                href={tabLinks?.[index] || "/home"}
+                className={tabClassName}
+              >
+                {text}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 }

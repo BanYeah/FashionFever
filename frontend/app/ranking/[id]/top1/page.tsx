@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell/app-shell";
+import { AppShellHeader } from "@/components/app-shell/header";
 import { AppShellFooter } from "@/components/app-shell/footer";
 import { RankingDisplay } from "@/components/ranking/ranking-display";
 import { GiftReceive } from "@/components/ranking/gift-receive";
@@ -7,8 +8,7 @@ import { Stack } from "@mantine/core";
 export default function RankingPage() {
   return (
     <AppShell
-      variant="theme"
-      gift
+      header={<AppShellHeader gift />}
       footer={
         <AppShellFooter
           variant="tabs"

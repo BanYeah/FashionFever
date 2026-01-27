@@ -1,12 +1,12 @@
 import { AppShell } from "@/components/app-shell/app-shell";
+import { AppShellHeader } from "@/components/app-shell/header";
 import { AppShellFooter } from "@/components/app-shell/footer";
 import { RankingCollection } from "@/components/ranking/ranking-collection";
 
 export default function RankingPage() {
   return (
     <AppShell
-      variant="theme"
-      gift
+      header={<AppShellHeader gift />}
       footer={
         <AppShellFooter
           variant="tabs"

@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell/app-shell";
+import { SettingHeader } from "@/components/app-shell/setting-header";
 import { AppShellFooter } from "@/components/app-shell/footer";
 import { AccountSetting } from "@/components/account-setting/account-setting";
 
@@ -12,8 +13,7 @@ export default async function AccountSettingPage({
 
   return (
     <AppShell
-      variant={!view || view === "user" ? "user-setting" : "judge-setting"}
-      subHeader
+      header={<SettingHeader variant={variant} />}
       footer={
         <AppShellFooter
           variant="tabs"

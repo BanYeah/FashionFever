@@ -1,45 +1,21 @@
+"use client";
+
 import classes from "./header.module.css";
 import Image from "next/image";
 import Link from "next/link";
-import { UnstyledButton } from "@mantine/core";
-
-export type AppShellVariant = "theme" | "user-setting" | "judge-setting";
 
 interface AppShellHeaderProps {
-  variant: AppShellVariant;
   gift?: boolean;
-  subHeader?: boolean;
+  subheader?: boolean;
 }
 
-export function AppShellHeader({
-  variant,
-  gift,
-  subHeader,
-}: AppShellHeaderProps) {
-  const themeTitle = "두근 두근 핑크빛 병원";
-  const themeDesc = "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
-
-  const accountSettingTitle = "계정 관리";
-  const userSettingDesc = "패션 피버에 참가할 미니는 누구?";
-  const judgeSettingDesc = "패션 피버를 심사할 미니는 누구?";
-
-  const displayTitle =
-    variant === "user-setting"
-      ? accountSettingTitle
-      : variant === "judge-setting"
-        ? accountSettingTitle
-        : themeTitle;
-
-  const displaySubTitle =
-    variant === "user-setting"
-      ? userSettingDesc
-      : variant === "judge-setting"
-        ? judgeSettingDesc
-        : themeDesc;
+export function AppShellHeader({ gift, subheader }: AppShellHeaderProps) {
+  const title = "두근 두근 핑크빛 병원";
+  const description = "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
 
   return (
     <div className={classes.Container}>
-      <header className={classes.MainHeader}>
+      <div className={classes.MainHeader}>
         <Link href="/home" className={classes.BackButton}>
           <Image
             src="/images/app-shell/goback.svg"
@@ -49,26 +25,24 @@ export function AppShellHeader({
             priority
           />
         </Link>
-
-        <div className={classes.Title}>{displayTitle}</div>
-
+        <div className={classes.Title}>{title}</div>
         <div className={classes.RightSection}>
           {gift && (
-            <UnstyledButton w={30} h={30}>
+            <Link href="/">
               <Image
                 src="/images/app-shell/present.svg"
                 alt="선물목록"
                 width={30}
                 height={30}
               />
-            </UnstyledButton>
+            </Link>
           )}
         </div>
-      </header>
+      </div>
 
-      {subHeader && (
-        <div className={classes.SubHeader}>
-          <p className={classes.SubText}>{displaySubTitle}</p>
+      {subheader && (
+        <div className={classes.Subheader}>
+          <p className={classes.Desc}>{description}</p>
         </div>
       )}
     </div>

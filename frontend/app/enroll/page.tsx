@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { SimpleGrid, Flex, Stack } from "@mantine/core";
 import { AppShell } from "@/components/app-shell/app-shell";
+import { AppShellHeader } from "@/components/app-shell/header";
 import { EnrollFooter } from "@/components/app-shell/enroll-footer";
 import { ModalGoBack } from "@/components/common/modal/modal-go-back";
 import { EnrollNoti } from "@/components/enroll/enroll-noti";
@@ -55,7 +56,7 @@ export default function EnrollPage() {
       <EnrollNoti variant="fail" opened={notiOpened} close={closeNoti} />
 
       <AppShell
-        variant="theme"
+        header={<AppShellHeader />}
         footer={
           <EnrollFooter
             text="참 가 하 기"

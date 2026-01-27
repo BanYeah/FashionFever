@@ -1,10 +1,14 @@
 import { AppShell } from "@/components/app-shell/app-shell";
 import { DefaultFooter } from "@/components/app-shell/default-footer";
+import { AppShellHeader } from "@/components/app-shell/header";
 import { VotingDisplay } from "@/components/voting/voting";
 
 export default function RankingPage() {
   return (
-    <AppShell variant="theme" gift subHeader footer={<DefaultFooter />}>
+    <AppShell
+      header={<AppShellHeader gift subheader />}
+      footer={<DefaultFooter />}
+    >
       <VotingDisplay />
     </AppShell>
   );

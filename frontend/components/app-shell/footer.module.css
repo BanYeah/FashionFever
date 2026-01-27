@@ -18,7 +18,7 @@
   z-index: 200;
 }
 
-/* 2. 미니 꾸미기형: 이미지처럼 오른쪽 정렬 */
+/* 미니 꾸미기 */
 .DressUpContainer {
   display: flex;
   justify-content: flex-end;
@@ -43,7 +43,7 @@
   padding-top: 3px;
 }
 
-/* 4. 분리형: n분의 1 및 색상 반전 */
+/* 탭 */
 .TabContainer {
   display: flex;
 

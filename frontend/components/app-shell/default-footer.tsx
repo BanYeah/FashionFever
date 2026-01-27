@@ -7,7 +7,9 @@ export function DefaultFooter() {
 
   return (
     <div className={classes.FooterContainer}>
-      <p className={classes.DefaultText}>공감 포인트 {point}</p>
+      <p style={{ color: "var(--white)", fontSize: "20px" }}>
+        공감 포인트 {point}
+      </p>
     </div>
   );
 }
