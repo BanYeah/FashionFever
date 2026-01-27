@@ -1,5 +1,13 @@
-import { Controller, Body, Get, Post, Param, Request, Response, HttpCode, Ip } from '@nestjs/common';
 import {
+  Controller,
+  Body,
+  Get,
+  Post,
+  Param,
+  Request,
+  Response,
+  HttpCode,
+  Ip,
   UnauthorizedException, // 401
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
@@ -12,7 +20,7 @@ import { LoginAdminDto } from './dto/login-admin.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @Post('/register')
   @ApiOperation({
@@ -71,8 +79,14 @@ export class AuthController {
       '입력받은 minicode와 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
   })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
-  @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
-  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과)' })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)',
+  })
+  @ApiResponse({
+    status: 423,
+    description: '계정 잠금 (로그인 시도 횟수 초과)',
+  })
   async loginUser(@Body() loginDto: LoginDto, @Request() req: any) {
     const userInfo = await this.authService.validateUser(loginDto);
 
@@ -105,8 +119,14 @@ export class AuthController {
       '입력받은 minicode와 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
   })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
-  @ApiResponse({ status: 401, description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)' })
-  @ApiResponse({ status: 423, description: '계정 잠금 (로그인 시도 횟수 초과)' })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)',
+  })
+  @ApiResponse({
+    status: 423,
+    description: '계정 잠금 (로그인 시도 횟수 초과)',
+  })
   async loginJudge(@Body() loginDto: LoginDto, @Request() req: any) {
     const judgeInfo = await this.authService.validateJudge(loginDto);
 
@@ -141,7 +161,11 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({ status: 401, description: '인증 실패 (잘못된 enter_code)' })
   @ApiResponse({ status: 423, description: '계정 잠금 (IP 차단)' })
-  async loginAdmin(@Body() loginAdminDto: LoginAdminDto, @Request() req: any, @Ip() ip: string) {
+  async loginAdmin(
+    @Body() loginAdminDto: LoginAdminDto,
+    @Request() req: any,
+    @Ip() ip: string,
+  ) {
     await this.authService.validateAdmin(loginAdminDto, ip);
 
     await new Promise<void>((resolve, reject) => {
@@ -168,23 +192,30 @@ export class AuthController {
   @HttpCode(200)
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({ status: 200, description: '로그아웃 성공' })
-  async logout(@Request() req: any, @Response() res: any) {
+  async logout(@Request() req: any, @Response({ passthrough: true }) res: any) {
     res.clearCookie('ff_session_id');
 
-    req.session.destroy((err: any) => {
-      if (err) return res.status(500).send({ message: 'Logout failed' });
-      return res.status(200).send({ message: 'Logged out successfully' });
+    await new Promise<void>((resolve, reject) => {
+      req.session.destroy((err: any) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
+
+    return { message: 'Logged out successfully' };
   }
 
   @Get('/status')
   @ApiOperation({
     summary: '현재 로그인 상태 및 권한 확인',
-    description: '세션에서 현재 로그인된 유저의 정보를 직접 반환합니다.'
+    description: '세션에서 현재 로그인된 유저의 정보를 직접 반환합니다.',
   })
   @ApiResponse({ status: 200, description: '로그인 상태임' })
   @ApiResponse({ status: 401, description: '로그인되지 않음' })
-  async getStatus(@Request() req: any, @Response() res: any) {
+  async getStatus(
+    @Request() req: any,
+    @Response({ passthrough: true }) res: any,
+  ) {
     const session = req.session;
 
     if (!session || !session.account) {
