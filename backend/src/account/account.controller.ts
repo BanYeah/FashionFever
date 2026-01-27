@@ -10,7 +10,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AccountService } from './account.service';
 
 import { Roles } from '../auth/decorators/roles.decorator';
-import { PageDto } from './dto/page.dto';
+import { FindDto } from './dto/find.dto';
 import { MinicodeDto } from './dto/minicode.dto';
 
 @ApiTags('account')
@@ -27,8 +27,11 @@ export class AccountController {
   })
   @ApiResponse({ status: 200, description: '유저 목록 반환 성공' })
   @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
-  async getUsers(@Body() pageDto: PageDto) {
-    return await this.accountService.findAllUsers(pageDto.page);
+  async getUsers(@Body() findDto: FindDto) {
+    return await this.accountService.findAllUsers(
+      findDto.page,
+      findDto.minicode,
+    );
   }
 
   @Post('/judges')
@@ -40,36 +43,11 @@ export class AccountController {
   })
   @ApiResponse({ status: 200, description: '심사위원 목록 반환 성공' })
   @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
-  async getJudges(@Body() pageDto: PageDto) {
-    return await this.accountService.findAllJudges(pageDto.page);
-  }
-
-  @Post('/users/detail')
-  @HttpCode(200)
-  @Roles('admin')
-  @ApiOperation({
-    summary: '유저 상세 정보 조회 (관리자)',
-    description: '특정 미니코드를 가진 유저의 전체 정보를 반환합니다.',
-  })
-  @ApiResponse({ status: 200, description: '조회 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
-  @ApiResponse({ status: 404, description: '유저 없음' })
-  async getUserDetail(@Body() minicodeDto: MinicodeDto) {
-    return await this.accountService.findUserDetail(minicodeDto.minicode);
-  }
-
-  @Post('/judges/detail')
-  @HttpCode(200)
-  @Roles('admin')
-  @ApiOperation({
-    summary: '심사위원 상세 정보 조회 (관리자)',
-    description: '특정 미니코드를 가진 심사위원의 전체 정보를 반환합니다.',
-  })
-  @ApiResponse({ status: 200, description: '조회 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
-  @ApiResponse({ status: 404, description: '심사위원 없음' })
-  async getJudgeDetail(@Body() minicodeDto: MinicodeDto) {
-    return await this.accountService.findJudgeDetail(minicodeDto.minicode);
+  async getJudges(@Body() findDto: FindDto) {
+    return await this.accountService.findAllJudges(
+      findDto.page,
+      findDto.minicode,
+    );
   }
 
   @Patch('/users/reset-code')

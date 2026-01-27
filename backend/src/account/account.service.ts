@@ -20,11 +20,13 @@ export class AccountService {
     private authService: AuthService,
   ) {}
 
-  async findAllUsers(page: number) {
+  async findAllUsers(page: number, minicode: string | null) {
+    const whereCondition = minicode?.trim() ? { minicode } : {};
     const take = 40;
     const skip = (page - 1) * take;
 
     const [users, total] = await this.userRepository.findAndCount({
+      where: whereCondition,
       order: { created_at: 'DESC' },
       take: take,
       skip: skip,
@@ -54,11 +56,13 @@ export class AccountService {
     };
   }
 
-  async findAllJudges(page: number) {
+  async findAllJudges(page: number, minicode: string | null) {
+    const whereCondition = minicode?.trim() ? { minicode } : {};
     const take = 40;
     const skip = (page - 1) * take;
 
     const [judges, total] = await this.judgeRepository.findAndCount({
+      where: whereCondition,
       order: { appointed_at: 'DESC' },
       take: take,
       skip: skip,
@@ -72,31 +76,6 @@ export class AccountService {
         last_page: Math.ceil(total / take),
       },
     };
-  }
-
-  async findUserDetail(minicode: string) {
-    const user = await this.userRepository.findOne({
-      where: { minicode },
-    });
-
-    if (!user) throw new NotFoundException(); // 404
-
-    try {
-      user.enter_code = CryptoUtil.decrypt(user.enter_code);
-    } catch (e) {
-      user.enter_code = 'DECRYPT_FAILED';
-    }
-
-    return user;
-  }
-
-  async findJudgeDetail(minicode: string) {
-    const judge = await this.judgeRepository.findOne({
-      where: { minicode },
-    });
-
-    if (!judge) throw new NotFoundException(); // 404
-    return judge;
   }
 
   async resetUserEnterCode(minicode: string) {
