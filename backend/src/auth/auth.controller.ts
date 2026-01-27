@@ -76,13 +76,20 @@ export class AuthController {
   async loginUser(@Body() loginDto: LoginDto, @Request() req: any) {
     const userInfo = await this.authService.validateUser(loginDto);
 
+    await new Promise<void>((resolve, reject) => {
+      req.session.regenerate((err: any) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+
     req.session.account = 'user';
     req.session.user_id = userInfo.user_id;
     req.session.minicode = userInfo.minicode;
 
     await new Promise<void>((resolve, reject) => {
       req.session.save((err: any) => {
-        if (err) return reject(err);
+        if (err) reject(err);
         resolve();
       });
     });
@@ -103,13 +110,20 @@ export class AuthController {
   async loginJudge(@Body() loginDto: LoginDto, @Request() req: any) {
     const judgeInfo = await this.authService.validateJudge(loginDto);
 
+    await new Promise<void>((resolve, reject) => {
+      req.session.regenerate((err: any) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+
     req.session.account = 'judge';
     req.session.user_id = judgeInfo.user_id;
     req.session.minicode = judgeInfo.minicode;
 
     await new Promise<void>((resolve, reject) => {
       req.session.save((err: any) => {
-        if (err) return reject(err);
+        if (err) reject(err);
         resolve();
       });
     });
@@ -130,11 +144,19 @@ export class AuthController {
   async loginAdmin(@Body() loginAdminDto: LoginAdminDto, @Request() req: any, @Ip() ip: string) {
     await this.authService.validateAdmin(loginAdminDto, ip);
 
+    await new Promise<void>((resolve, reject) => {
+      req.session.regenerate((err: any) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+
     req.session.account = 'admin';
+    req.session.minicode = null;
 
     await new Promise<void>((resolve, reject) => {
       req.session.save((err: any) => {
-        if (err) return reject(err);
+        if (err) reject(err);
         resolve();
       });
     });
@@ -171,8 +193,8 @@ export class AuthController {
     }
 
     return {
-      minicode: session.minicode,
       account: session.account,
+      minicode: session.minicode,
     };
   }
 }
