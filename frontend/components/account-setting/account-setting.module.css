@@ -31,6 +31,28 @@
   color: var(--gray-b3);
 }
 
+.CopyText {
+  position: fixed;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  padding: 7px 10px 6px;
+
+  background-color: var(--gray);
+  border-radius: 10px;
+
+  color: var(--white);
+
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.Copied {
+  opacity: 1;
+}
+
 .AccountLine {
   :nth-child(2) {
     margin-left: auto; /* 왼쪽 여백을 자동으로 채워 오른쪽으로 밀어냄 */
@@ -41,6 +63,18 @@
   span {
     color: var(--gray-b3);
   }
+}
+
+.Option {
+  width: 0px;
+  height: 28px;
+
+  transition: width 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.ShowOption {
+  width: 64px;
 }
 
 .AccountDate {

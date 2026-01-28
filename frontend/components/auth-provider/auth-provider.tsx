@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   if (!isInitialized && !PUBLIC_PATHS.includes(pathname))
     return (
-      <Center w={"100%"} mih={"100dvh"}>
+      <Center mih={"100dvh"}>
         <Loader type="dots" color="var(--main)" />
       </Center>
     );
