@@ -22,9 +22,7 @@ export async function checkUserExist(minicode: string) {
   );
 
   if (!res.ok) return { success: false, status: res.status };
-
-  const data = await res.json();
-  return { success: true, data };
+  return { success: true };
 }
 
 export async function checkJudgeExist(minicode: string) {
@@ -34,9 +32,7 @@ export async function checkJudgeExist(minicode: string) {
   );
 
   if (!res.ok) return { success: false, status: res.status };
-
-  const data = await res.json();
-  return { success: true, data };
+  return { success: true };
 }
 
 export async function loginUser(minicode: string, enter_code: string) {
