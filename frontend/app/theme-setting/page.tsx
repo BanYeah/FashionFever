@@ -2,16 +2,17 @@
 
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
+import { useDisclosure } from "@mantine/hooks";
 import {
-  Divider,
   Flex,
   Stack,
   UnstyledButton,
+  Divider,
   useCombobox,
 } from "@mantine/core";
 import { EnrollFooter } from "@/components/app-shell/enroll-footer";
+import { ModalNoti } from "@/components/common/modal/model-noti";
 import { AddFileButton } from "@/components/common/add-file-button/add-file-button";
-import { enrollBgColor } from "@/types/enroll-bg-color";
 import { BgLimitCombobox } from "@/components/theme-setting/bg-limit-combobox";
 import { ThemeInput } from "@/components/theme-setting/theme-input";
 import { ThemeSchedule } from "@/components/theme-setting/theme-schedule";
@@ -23,8 +24,14 @@ import {
   GiftSetting_t,
   ThemeGifts,
 } from "@/components/theme-setting/theme-gifts";
+import { enrollBgColor } from "@/types/enroll-bg-color";
 
 export default function ThemeSettingPage() {
+  /* 알림창 */
+  const [notiMessage, setNotiMessage] = useState<React.ReactNode>(null);
+  const [notiOpened, { open: openNoti, close: closeNoti }] =
+    useDisclosure(false);
+
   /* 테마 배너 */
   const [banner, setBanner] = useState<File[]>([]); // File[] 이지만 단일 File 저장용으로 사용
   const [bannerPreview, setBannerPreview] = useState<string[]>([]);
@@ -91,8 +98,22 @@ export default function ThemeSettingPage() {
     // 유효성 검사 필요! (예. 테마 배너가 없음 등)
   };
 
+  const handleServerError = () => {
+    setNotiMessage(
+      <p>
+        서버와의 통신에 실패했습니다.
+        <br /> 잠시 후 다시 시도해주세요.
+      </p>,
+    );
+    openNoti();
+  };
+
   return (
     <>
+      <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
+        {notiMessage}
+      </ModalNoti>
+
       <section style={{ paddingBottom: "60px" }}>
         <Stack m={10} mb={60} gap={0}>
           {/* 테마 배너 */}
@@ -184,12 +205,14 @@ export default function ThemeSettingPage() {
             label="검수 계정 관리"
             value={reviewer}
             setValue={setReviewer}
+            handleServerError={handleServerError}
           />
           <AccountMultiSelect
             mt={22}
             label="심사 계정 관리"
             value={judge}
             setValue={setJudge}
+            handleServerError={handleServerError}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
           <ThemeGifts ref={themeGiftsRef} />

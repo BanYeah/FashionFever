@@ -25,6 +25,10 @@
   padding: 3px 0px;
 }
 
+.SelectEmpty {
+  color: var(--gray-b3);
+}
+
 .MultiSelectInput {
   display: flex;
   align-items: center;
