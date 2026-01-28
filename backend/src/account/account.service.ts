@@ -4,7 +4,7 @@ import {
   ConflictException, // 409
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 
 import { CryptoUtil } from 'src/common/utils/crypto.util';
 import { AuthService } from 'src/auth/auth.service';
@@ -21,13 +21,21 @@ export class AccountService {
   ) {}
 
   async findAllUsers(page: number, minicode: string | null) {
-    const whereCondition = minicode?.trim() ? { minicode } : {};
+    const minicodeTrim = minicode?.trim();
+
+    const whereCondition = minicodeTrim
+      ? { minicode: Like(`${minicodeTrim}%`) }
+      : {};
+    const orderCondition = minicodeTrim
+      ? { minicode: 'ASC' as const }
+      : { created_at: 'DESC' as const };
+
     const take = 40;
     const skip = (page - 1) * take;
 
     const [users, total] = await this.userRepository.findAndCount({
       where: whereCondition,
-      order: { created_at: 'DESC' },
+      order: orderCondition,
       take: take,
       skip: skip,
     });
@@ -57,13 +65,21 @@ export class AccountService {
   }
 
   async findAllJudges(page: number, minicode: string | null) {
-    const whereCondition = minicode?.trim() ? { minicode } : {};
+    const minicodeTrim = minicode?.trim();
+
+    const whereCondition = minicodeTrim
+      ? { minicode: Like(`${minicodeTrim}%`) }
+      : {};
+    const orderCondition = minicodeTrim
+      ? { minicode: 'ASC' as const }
+      : { appointed_at: 'DESC' as const };
+
     const take = 40;
     const skip = (page - 1) * take;
 
     const [judges, total] = await this.judgeRepository.findAndCount({
       where: whereCondition,
-      order: { appointed_at: 'DESC' },
+      order: orderCondition,
       take: take,
       skip: skip,
     });
