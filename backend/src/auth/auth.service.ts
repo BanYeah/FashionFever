@@ -26,7 +26,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Judge) private judgeRepository: Repository<Judge>,
-  ) { }
+  ) {}
 
   // 로컬 개발 및 단일 서버 배포 환경에서는 localhost:6379가 기본값.
   // 추후 Redis 전용 서버 분리 시 ConfigService를 통한 설정 주입이 필요.
@@ -82,8 +82,7 @@ export class AuthService {
   private verifyEnterCode(rawCode: string, encryptedCode: string): void {
     try {
       const decrypted = CryptoUtil.decrypt(encryptedCode);
-      if (decrypted !== rawCode)
-        throw new UnauthorizedException(); // 401
+      if (decrypted !== rawCode) throw new UnauthorizedException(); // 401
     } catch (e) {
       throw new UnauthorizedException();
     }
@@ -100,7 +99,7 @@ export class AuthService {
 
       throw new HttpException(
         `과도한 로그인 시도로 접속이 제한되었습니다. 약 ${minutes}분 후 다시 시도해주세요.`,
-        HttpStatus.LOCKED
+        HttpStatus.LOCKED,
       ); // 423
     }
 
@@ -132,7 +131,7 @@ export class AuthService {
 
       throw new HttpException(
         `과도한 로그인 시도로 접속이 제한되었습니다. 약 ${minutes}분 후 다시 시도해주세요.`,
-        HttpStatus.LOCKED
+        HttpStatus.LOCKED,
       ); // 423
     }
 
@@ -162,7 +161,10 @@ export class AuthService {
 
     const attempts = await this.redis.get(ipKey);
     if (attempts && parseInt(attempts, 10) >= 10)
-      throw new HttpException('Your IP is temporarily blocked.', HttpStatus.LOCKED); // 423
+      throw new HttpException(
+        'Your IP is temporarily blocked.',
+        HttpStatus.LOCKED,
+      ); // 423
 
     const adminHash = process.env.ADMIN_KEY;
     if (!adminHash)

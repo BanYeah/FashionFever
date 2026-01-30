@@ -8,11 +8,8 @@ import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Judge]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User, Judge]), AuthModule],
   controllers: [AccountController],
   providers: [AccountService],
 })
-export class AccountModule { }
+export class AccountModule {}
