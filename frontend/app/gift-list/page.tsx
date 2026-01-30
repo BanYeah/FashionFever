@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
 import { AppShellFooter } from "@/components/app-shell/footer";
-import { GiftCollection } from "@/components/gift-list/gift-collection";
+import { GiftList } from "@/components/gift-list/gift-list";
 
 interface GiftPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -18,7 +18,7 @@ export default async function GiftPage({ searchParams }: GiftPageProps) {
       header={<AppShellHeader />}
       footer={isBeforeDressUp ? <AppShellFooter variant="dressUp" /> : null}
     >
-      <GiftCollection />
+      <GiftList />
     </AppShell>
   );
 }

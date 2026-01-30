@@ -1,32 +1,40 @@
-import { Stack } from "@mantine/core";
-import { GiftDisplay } from "./gift-display";
+"use client";
+
+import classes from "./gift-collection.module.css";
+import Image from "next/image";
+import { Divider, Group, Stack } from "@mantine/core";
+import { HeartRating } from "../common/heart-rating/heartrating";
 
 export function GiftCollection() {
-  const pStyle: React.CSSProperties = {
-    padding: "0px 6px",
-    color: "var(--gray-8a)",
-    fontSize: "14px",
-    lineHeight: 1.5,
-    wordBreak: "keep-all",
-  };
-
   return (
-    <Stack mx={15} mt={12} mb={60} gap={10}>
-      <GiftDisplay />
-      <GiftDisplay />
-      <Stack gap={6}>
-        <p style={pStyle}>
-          아이템은 달성하신{" "}
-          <span style={{ color: "var(--main)" }}>
-            최고 랭킹의 패션을 기준으로 1개만
-          </span>{" "}
-          지급됩니다.
+    <Stack gap={8}>
+      <Group gap={8}>
+        <HeartRating value={5.0} unitW={25} unitH={22} />
+        <p>5.00</p>
+      </Group>
+      <Gift />
+      <Gift />
+      <Group className={classes.Caption} pl={133} pr={8} gap={5}>
+        <p>등 동일 테마</p>
+        <p>
+          <span>랜덤 일반 레어</span> 아이템
         </p>
-        <p style={pStyle}>
-          또한, 이벤트 상황에 따라 동일한 가치를 지닌 다른 아이템으로 변경될 수
-          있는 점 양해 부탁드립니다.
-        </p>
-      </Stack>
+      </Group>
+      <Divider size={1} color={"var(--gray-d9)"} />
     </Stack>
+  );
+}
+
+function Gift() {
+  return (
+    <Group align="center" gap={8}>
+      <div className={classes.ImageWrapper}>
+        <Image src="/images/gift.png" alt="" width={80} height={80} />
+      </div>
+      <Stack className={classes.GiftCaption} pr={8} gap={8}>
+        <p>[VIP] 성야, 별이 내리는 거리에서</p>
+        <p>별빛이 반짝이는 소녀 아이</p>
+      </Stack>
+    </Group>
   );
 }

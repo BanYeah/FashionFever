@@ -7,7 +7,7 @@ export function GiftReceive() {
     <Stack pb={20} gap={8}>
       <p className={classes.GiftTitle}>선물을 받았어요!</p>
 
-      <GiftDisplay />
+      <GiftCollection />
       <Divider size={1} color={"var(--gray-d9)"} />
 
       <p className={classes.NoticeText}>
@@ -19,11 +19,11 @@ export function GiftReceive() {
   );
 }
 
-function GiftDisplay() {
+function GiftCollection() {
   return (
     <Stack px={12} gap={8}>
-      <GiftUnit />
-      <GiftUnit />
+      <Gift />
+      <Gift />
       <Group className={classes.Caption} pl={108} gap={5}>
         <p>등 동일 테마</p>
         <p>
@@ -34,7 +34,7 @@ function GiftDisplay() {
   );
 }
 
-function GiftUnit() {
+function Gift() {
   return (
     <Group align="center" gap={8}>
       <div className={classes.ImageWrapper}>
