@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const session = request.cookies.get("ff_session_id");
   const { pathname } = request.nextUrl;
 
@@ -14,7 +14,6 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// 미들웨어가 작동할 경로 설정
 export const config = {
   matcher: ["/login", "/home", "/"],
 };
