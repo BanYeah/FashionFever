@@ -48,13 +48,13 @@ export function ThemeSchedule({
             <p className={classes.Label}>참가 기간</p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                variant="start"
+                time="00:00:00"
                 value={enrollStart}
                 setValue={setEnrollStart}
               />
               <p>~</p>
               <ThemeDateInput
-                variant="end"
+                time="23:59:59"
                 value={enrollEnd}
                 setValue={setEnrollEnd}
               />
@@ -64,13 +64,13 @@ export function ThemeSchedule({
             <p className={classes.Label}>검수 기간</p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                variant="start"
+                time="00:00:00"
                 value={reviewStart}
                 setValue={setReviewStart}
               />
               <p>~</p>
               <ThemeDateInput
-                variant="end"
+                time="23:59:59"
                 value={reviewEnd}
                 setValue={setReviewEnd}
               />
@@ -80,13 +80,13 @@ export function ThemeSchedule({
             <p className={classes.Label}>투표 기간</p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                variant="start"
+                time="00:00:00"
                 value={voteStart}
                 setValue={setVoteStart}
               />
               <p>~</p>
               <ThemeDateInput
-                variant="end"
+                time="23:59:59"
                 value={voteEnd}
                 setValue={setVoteEnd}
               />
@@ -99,11 +99,11 @@ export function ThemeSchedule({
 }
 
 interface ThemeDateInputProps {
-  variant: "start" | "end";
+  time: string;
   value: string | null;
   setValue: Dispatch<SetStateAction<string | null>>;
 }
-function ThemeDateInput({ variant, value, setValue }: ThemeDateInputProps) {
+function ThemeDateInput({ time, value, setValue }: ThemeDateInputProps) {
   return (
     <div style={{ position: "relative", flexGrow: 1 }}>
       <DateInput
@@ -113,6 +113,7 @@ function ThemeDateInput({ variant, value, setValue }: ThemeDateInputProps) {
         value={value}
         onChange={setValue}
         valueFormat="YYYY MM DD"
+        firstDayOfWeek={0}
         popoverProps={{
           withinPortal: true, // 달력을 DOM 최상단으로 보냄
           shadow: "md",
@@ -120,7 +121,7 @@ function ThemeDateInput({ variant, value, setValue }: ThemeDateInputProps) {
       />
       {value && (
         <div className={classes.Time}>
-          <p>({variant === "start" ? "00:00:00" : "23:59:59"})</p>
+          <p>({time})</p>
         </div>
       )}
     </div>
