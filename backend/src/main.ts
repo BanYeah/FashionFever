@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
@@ -23,6 +24,14 @@ async function bootstrap() {
 
   const apiPrefix = process.env.API_PREFIX!;
   app.setGlobalPrefix(apiPrefix);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // DTO에 없는 속성 제거
+      forbidNonWhitelisted: true, // DTO에 없는 속성이 있으면 에러
+      transform: true, // 네트워크로 넘어온 데이터를 DTO 타입으로 자동 변환
+    }),
+  );
 
   const redisClient = createClient({ url: 'redis://localhost:6379' });
   if (!redisClient.isOpen) await redisClient.connect().catch(console.error);
