@@ -21,7 +21,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const apiPrefix = process.env.API_PREFIX || 'api/v1';
+  const apiPrefix = process.env.API_PREFIX!;
   app.setGlobalPrefix(apiPrefix);
 
   const redisClient = createClient({ url: 'redis://localhost:6379' });
@@ -34,7 +34,7 @@ async function bootstrap() {
       store: redisStore,
       resave: false,
       saveUninitialized: false,
-      secret: process.env.SESSION_SECRET || 'secret-key',
+      secret: process.env.SESSION_SECRET!,
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // 배포 환경(HTTPS)에서는 true로
