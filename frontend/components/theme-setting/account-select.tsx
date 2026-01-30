@@ -34,7 +34,6 @@ export function AccountSelect({
     const result = await fetchJudges(1, minicode);
     if (result.success) {
       setData([
-        "admin_",
         ...result.data.map((judge: Judge) => "judge_" + judge.minicode),
       ]);
     } else handleServerError();
@@ -105,7 +104,6 @@ export function AccountMultiSelect({
     const result = await fetchJudges(1, minicode);
     if (result.success) {
       setData([
-        "admin_",
         ...result.data.map((judge: Judge) => "judge_" + judge.minicode),
       ]);
     } else handleServerError();
