@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { AccountModule } from './account/account.module';
+import { ThemeModule } from './theme/theme.module';
+import { GiftModule } from './gift/gift.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AccountModule } from './account/account.module';
     }),
     AuthModule,
     AccountModule,
+    ThemeModule,
+    GiftModule,
   ],
   controllers: [AppController],
   providers: [AppService],
