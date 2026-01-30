@@ -232,6 +232,9 @@ export function AccountSetting({ variant }: AccountSettingProps) {
               maxLength={7}
               value={addCode}
               onChange={(event) => setAddCode(event.currentTarget.value)}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === "Enter") handleAddClick();
+              }}
             />
             <UnstyledButton w={28} h={28} onClick={handleAddClick}>
               <Image
