@@ -64,7 +64,7 @@ export function AccountSelect({
         onSearchChange={setSearchValue}
         nothingFoundMessage="검색 결과가 없어요."
         rightSection={
-          value && (
+          value ? (
             <CloseButton
               size="sm"
               variant="transparent"
@@ -73,7 +73,7 @@ export function AccountSelect({
                 setValue(null);
               }}
             />
-          )
+          ) : null
         }
         rightSectionPointerEvents={"all"}
         limit={5} // 검색 결과 수 제한
