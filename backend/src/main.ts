@@ -17,7 +17,7 @@ async function bootstrap() {
   app.set('trust proxy', true);
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:8000'],
+    origin: ['http://localhost:3000', 'http://localhost:8080'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
@@ -66,8 +66,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document); // http://localhost:8000/api로 접속
+  SwaggerModule.setup('api', app, document); // http://localhost:8080/api로 접속
 
-  await app.listen(8000);
+  await app.listen(8080);
 }
 bootstrap();
