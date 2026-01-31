@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/utils/store/authStore";
 import { Center, Loader } from "@mantine/core";
 
+import api from "@/utils/api";
+
 const PUBLIC_PATHS = ["/login", "/ranking", "/gift-list"];
 const USER_PATHS = ["/enroll"];
 const ADMIN_PATHS = ["/account-setting", "/theme-setting"];
@@ -14,6 +16,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isInitialized, setUser, setInitialized } = useAuthStore();
+
+  useEffect(() => {
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const { status } = error.response || {};
+
+        // UnauthorizedException
+        if (status === 401) {
+          setUser(null);
+          setInitialized(true);
+
+          if (pathname !== "/login") router.push("/login");
+        }
+        // ForbiddenException
+        else if (status === 403) {
+          try {
+            const res = await axios.get(
+              `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/status`,
+              {
+                withCredentials: true,
+              },
+            );
+            setUser(res.data);
+          } catch (e) {
+            setUser(null);
+          } finally {
+            setInitialized(true);
+            router.push("/home");
+          }
+        }
+        return Promise.reject(error);
+      },
+    );
+    return () => api.interceptors.response.eject(interceptor);
+  }, [router, pathname, setUser, setInitialized]);
 
   useEffect(() => {
     if (!isInitialized) {
