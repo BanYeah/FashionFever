@@ -1,6 +1,7 @@
 import { Entity, PrimaryColumn, Generated, Column, OneToOne } from 'typeorm';
 import { Banner } from './banner.entity';
 import { Header } from './header.entity';
+import { Reviewer } from './reviewer.entity';
 
 @Entity('Schedule')
 export class Schedule {
@@ -38,4 +39,7 @@ export class Schedule {
 
   @OneToOne(() => Header, (header) => header.schedule)
   header: Header;
+
+  @OneToOne(() => Reviewer, (reviewer) => reviewer.schedule)
+  reviewer: Reviewer;
 }

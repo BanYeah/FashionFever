@@ -17,7 +17,9 @@ export class Reviewer {
   @Column({ type: 'uuid', nullable: true })
   user_id: string | null;
 
-  @OneToOne(() => Schedule, { onDelete: 'CASCADE' })
+  @OneToOne(() => Schedule, (schedule) => schedule.reviewer, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'theme_id' })
   schedule: Schedule;
 
