@@ -40,6 +40,8 @@ export class R2Service {
         Key: fileName,
         Body: file.buffer,
         ContentType: file.mimetype,
+        // 브라우저 1일(86400), CDN 14일(1209600) 캐싱
+        CacheControl: 'public, max-age=86400, s-maxage=1209600',
       });
       await this.s3Client.send(command);
       return `${this.publicEndpoint}/${fileName}`;
