@@ -54,9 +54,10 @@ export class ThemeController {
     if (!files?.giftImages || files.giftImages.length === 0)
       throw new BadRequestException('최소 하나 이상의 선물 이미지가 필요해요!');
 
-    const dto = {
+    const dto: CreateThemeSettingDto = {
       ...body,
-      bg_limit: body.bg_limit === 'null' ? null : Number(body.bg_limit),
+      bg_limit: body.bg_limit ? Number(body.bg_limit) : null,
+      reviewer_minicode: body.reviewer_minicode ? body.reviewer_minicode : null,
       judge_minicodes: Array.isArray(body.judge_minicodes)
         ? body.judge_minicodes
         : body.judge_minicodes
@@ -69,7 +70,7 @@ export class ThemeController {
     };
 
     return this.themeService.createThemeSetting(
-      dto as CreateThemeSettingDto,
+      dto,
       files.banner[0],
       files.giftImages,
     );
