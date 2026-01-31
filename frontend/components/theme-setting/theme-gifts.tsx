@@ -21,27 +21,10 @@ import {
 } from "@mantine/core";
 import { HeartRating } from "../common/heart-rating/heartrating";
 import { AddFileButton } from "../common/add-file-button/add-file-button";
+import { Gift_t, GiftCollection_t } from "@/types/app/theme";
 
-export interface Gift_t {
-  id: string;
-  file: File[];
-  themeName: string;
-  itemName: string;
-}
-
-export interface GiftSetting_t {
-  id: string;
-  heartRate: number;
-  itemTotalNumber: number;
-  isRandom: boolean;
-  isSameTheme: boolean;
-  themeType: "일반" | "VIP" | "럭" | "현질";
-  rarity: "슈레" | "레어" | "노멀";
-  children: Gift_t[];
-}
-
-interface GiftSettingHandle {
-  getData: () => GiftSetting_t;
+interface GiftCollectionHandle {
+  getData: () => GiftCollection_t;
 }
 
 interface GiftHandle {
@@ -51,15 +34,21 @@ interface GiftHandle {
 export const ThemeGifts = forwardRef((props, ref) => {
   const [opened, { toggle }] = useDisclosure(false);
 
-  const [settingIds, setSettingIds] = useState<string[]>([]);
-  const settingRefs = useRef<{ [key: string]: GiftSettingHandle | null }>({});
+  const [collectionIds, setCollectionIds] = useState<string[]>([]);
+  const collectionRefs = useRef<{ [key: string]: GiftCollectionHandle | null }>(
+    {},
+  );
 
-  const addSetting = () =>
-    setSettingIds((prev) => [...prev, crypto.randomUUID()]);
+  const addCollection = () => {
+    setCollectionIds((prev) => [...prev, crypto.randomUUID()]);
+    if (!opened) toggle();
+  };
 
   useImperativeHandle(ref, () => ({
     getAllData: () =>
-      settingIds.map((sid) => settingRefs.current[sid]?.getData()),
+      collectionIds
+        .map((sid) => collectionRefs.current[sid]?.getData())
+        .filter((data): data is GiftCollection_t => data !== undefined),
   }));
 
   return (
@@ -69,7 +58,7 @@ export const ThemeGifts = forwardRef((props, ref) => {
         className={classes.AddGiftSettingButton}
         w={28}
         h={28}
-        onClick={addSetting}
+        onClick={addCollection}
       >
         <Image
           src="/images/theme-setting/add-gift.svg"
@@ -83,18 +72,17 @@ export const ThemeGifts = forwardRef((props, ref) => {
         <p>선물 목록 관리</p>
       </UnstyledButton>
 
-      <Collapse pb={`${settingIds.length == 0 ? 0 : 12}`} in={opened}>
+      <Collapse pb={`${collectionIds.length == 0 ? 0 : 12}`} in={opened}>
         <Stack gap={10}>
-          {settingIds.map((sid) => (
-            <GiftSetting
-              key={sid}
-              id={sid}
+          {collectionIds.map((gcid) => (
+            <GiftCollection
+              key={gcid}
               onDelete={() => {
-                delete settingRefs.current[sid];
-                setSettingIds((prev) => prev.filter((id) => id !== sid));
+                delete collectionRefs.current[gcid];
+                setCollectionIds((prev) => prev.filter((id) => id !== gcid));
               }}
               ref={(el) => {
-                settingRefs.current[sid] = el as GiftSettingHandle;
+                collectionRefs.current[gcid] = el as GiftCollectionHandle;
               }}
             />
           ))}
@@ -104,16 +92,16 @@ export const ThemeGifts = forwardRef((props, ref) => {
   );
 });
 
-export const GiftSetting = forwardRef(
-  ({ id, onDelete }: { id: string; onDelete: () => void }, ref) => {
-    const [heartRate, setHeartRate] = useState<string | number>("");
-    const [itemTotalNumber, setItemTotalNumber] = useState<string | number>("");
+export const GiftCollection = forwardRef(
+  ({ onDelete }: { onDelete: () => void }, ref) => {
+    const [heartRate, setHeartRate] = useState<string | number>(0);
+    const [itemTotalNumber, setItemTotalNumber] = useState<string | number>(0);
 
     const [isRandom, setIsRandom] = useState(false);
     const [isSameTheme, setSameTheme] = useState(false);
 
-    const [themeType, setThemeType] = useState<string | null>("일반");
-    const [rarity, setRarity] = useState<string | null>("슈레");
+    const [themeType, setThemeType] = useState<string | null>("NORMAL");
+    const [rarity, setRarity] = useState<string | null>("SR");
 
     const [giftIds, setGiftIds] = useState<string[]>([]);
     const giftRefs = useRef<{ [key: string]: GiftHandle | null }>({});
@@ -122,14 +110,14 @@ export const GiftSetting = forwardRef(
 
     useImperativeHandle(ref, () => ({
       getData: () => ({
-        id,
-        heartRate: heartRate === "" ? 0 : Number(heartRate),
-        itemTotalNumber: itemTotalNumber === "" ? 0 : Number(itemTotalNumber),
-        isRandom,
-        isSameTheme,
-        themeType: themeType as GiftSetting_t["themeType"],
-        rarity: rarity as GiftSetting_t["rarity"],
-        children: giftIds
+        heart_rate: typeof heartRate === "number" ? heartRate : 0,
+        gift_total_num:
+          typeof itemTotalNumber === "number" ? itemTotalNumber : 0,
+        is_random: isRandom,
+        is_same_theme: isRandom ? isSameTheme : null,
+        theme_type: isRandom ? themeType : null,
+        rarity: isRandom ? rarity : null,
+        gifts: giftIds
           .map((gid) => giftRefs.current[gid]?.getData())
           .filter((data): data is Gift_t => data !== undefined),
       }),
@@ -158,7 +146,7 @@ export const GiftSetting = forwardRef(
             {/* 하트 레이팅 / 하트 레이트 입력 */}
             <Group gap={8}>
               <HeartRating
-                value={typeof heartRate === "string" ? 0.0 : heartRate}
+                value={typeof heartRate === "number" ? heartRate : 0}
                 unitW={25}
                 unitH={22}
               />
@@ -263,14 +251,23 @@ export const GiftSetting = forwardRef(
                   <Group gap={8}>
                     <Select
                       classNames={{ input: classes.SelectInput }}
-                      data={["일반", "VIP", "럭", "현질"]}
+                      data={[
+                        { value: "NORMAL", label: "일반" },
+                        { value: "VIP", label: "VIP" },
+                        { value: "LUCK", label: "럭" },
+                        { value: "CASH", label: "현질" },
+                      ]}
                       value={themeType}
                       onChange={setThemeType}
                       rightSection={null}
                     />
                     <Select
                       classNames={{ input: classes.SelectInput }}
-                      data={["슈레", "레어", "노멀"]}
+                      data={[
+                        { value: "SR", label: "슈레" },
+                        { value: "R", label: "레어" },
+                        { value: "N", label: "노멀" },
+                      ]}
                       value={rarity}
                       onChange={setRarity}
                       rightSection={null}
@@ -283,7 +280,7 @@ export const GiftSetting = forwardRef(
         </Stack>
       </div>
     );
-  }
+  },
 );
 
 const Gift = forwardRef(({ onDelete }: { onDelete: () => void }, ref) => {
@@ -300,7 +297,11 @@ const Gift = forwardRef(({ onDelete }: { onDelete: () => void }, ref) => {
   const [itemName, setItemName] = useState("");
 
   useImperativeHandle(ref, () => ({
-    getData: () => ({ file, themeName, itemName }),
+    getData: () => ({
+      theme_name: themeName,
+      gift_name: itemName,
+      file: file.length !== 0 ? file[0] : null,
+    }),
   }));
 
   return (
