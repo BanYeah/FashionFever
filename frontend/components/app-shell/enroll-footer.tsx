@@ -2,18 +2,33 @@
 
 import classes from "./enroll-footer.module.css";
 import Image from "next/image";
-import { UnstyledButton } from "@mantine/core";
+import { UnstyledButton, Loader } from "@mantine/core";
 
 interface EnrollFooterProps {
   text: string;
+  loading?: boolean;
   disabled?: boolean;
   onClick: () => void;
 }
 
-export function EnrollFooter({ text, disabled, onClick }: EnrollFooterProps) {
-  return (
-    <div className={classes.FooterContainer}>
-      {disabled ? (
+export function EnrollFooter({
+  text,
+  loading,
+  disabled,
+  onClick,
+}: EnrollFooterProps) {
+  if (loading)
+    return (
+      <div className={classes.FooterContainer}>
+        <div className={classes.Button}>
+          <Loader color="var(--white)" type="dots" />
+        </div>
+      </div>
+    );
+
+  if (disabled)
+    return (
+      <div className={classes.FooterContainer}>
         <UnstyledButton
           className={`${classes.Button} ${classes.Disabled}`}
           disabled={disabled}
@@ -26,11 +41,14 @@ export function EnrollFooter({ text, disabled, onClick }: EnrollFooterProps) {
             height={50}
           />
         </UnstyledButton>
-      ) : (
+      </div>
+    );
+  else
+    return (
+      <div className={classes.FooterContainer}>
         <UnstyledButton className={classes.Button} onClick={onClick}>
           <p>{text}</p>
         </UnstyledButton>
-      )}
-    </div>
-  );
+      </div>
+    );
 }
