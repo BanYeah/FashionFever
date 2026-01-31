@@ -25,7 +25,7 @@ export function AddFileButton({
 
   // 이미지 비율(5:4) 및 형식(확장자) 검증
   const validateFile = (
-    file: File
+    file: File,
   ): Promise<{ isValid: boolean; msg: React.ReactNode }> => {
     return new Promise((resolve) => {
       // 형식(확장자) 검사
@@ -36,6 +36,21 @@ export function AddFileButton({
           msg: (
             <p>
               JPG 또는 PNG 형식의 이미지 파일만 <br />
+              업로드할 수 있습니다.
+            </p>
+          ),
+        });
+        return;
+      }
+
+      // 파일 크기 검사 (1MB 제한)
+      const maxSize = 1 * 1024 * 1024; // 1MB를 바이트 단위로 계산
+      if (file.size > maxSize) {
+        resolve({
+          isValid: false,
+          msg: (
+            <p>
+              파일 크기가 1MB 이하인 이미지 파일만 <br />
               업로드할 수 있습니다.
             </p>
           ),
@@ -80,7 +95,6 @@ export function AddFileButton({
     if (!file) return;
 
     const result = await validateFile(file);
-
     if (!result.isValid) {
       setErrorMessage(result.msg);
       open();
