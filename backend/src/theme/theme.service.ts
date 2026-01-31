@@ -170,20 +170,22 @@ export class ThemeService {
       if (!collections) throw new NotFoundException();
 
       return {
-        ...theme,
-        reviewer: theme.reviewer
-          ? {
-              theme_id: theme.reviewer.theme_id,
-              user_id: theme.reviewer.user_id,
-              minicode: theme.reviewer.user?.minicode || null,
-            }
-          : null,
-        judges: judges.map((j) => ({
-          theme_id: j.theme_id,
-          user_id: j.user_id,
-          minicode: j.user?.minicode || null,
-        })),
-        collections,
+        data: {
+          ...theme,
+          reviewer: theme.reviewer
+            ? {
+                theme_id: theme.reviewer.theme_id,
+                user_id: theme.reviewer.user_id,
+                minicode: theme.reviewer.user?.minicode || null,
+              }
+            : null,
+          judges: judges.map((j) => ({
+            theme_id: j.theme_id,
+            user_id: j.user_id,
+            minicode: j.user?.minicode || null,
+          })),
+          collections,
+        },
       };
     } catch (err) {
       throw err;
