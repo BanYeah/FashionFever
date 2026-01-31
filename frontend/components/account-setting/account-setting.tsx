@@ -56,6 +56,24 @@ export function AccountSetting({ variant }: AccountSettingProps) {
 
   const observerRef = useRef<HTMLDivElement>(null);
 
+  // 상태 변수 초기화
+  const reset = () => {
+    setSearchCode(minicode || "");
+    setAddCode("");
+
+    setLoading(false);
+    setData([]);
+    setMeta({
+      total: 0,
+      current: 1,
+      last: 1,
+    });
+  };
+  useEffect(() => {
+    reset();
+  }, [variant, minicode]);
+
+  // 페이지 데이터 로드
   const loadPage = async (page: number) => {
     setLoading(true);
 
@@ -87,11 +105,21 @@ export function AccountSetting({ variant }: AccountSettingProps) {
     setLoading(false);
   };
 
+  // 스크롤/리셋 시 데이터 로드
+  useEffect(() => {
+    if (!data[meta.current - 1]) loadPage(meta.current);
+  }, [meta.current, data.length]);
+
   // 스크롤 관찰자 설정
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !loading && meta.current < meta.last) {
+        if (
+          entries[0].isIntersecting &&
+          !loading &&
+          data.length > 0 &&
+          meta.current < meta.last
+        ) {
           setMeta((prev) => ({
             ...prev,
             current: prev.current + 1,
@@ -103,32 +131,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
 
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, [loading, meta.current, meta.last]);
-
-  // 스크롤될 때마다 데이터 로드
-  useEffect(() => {
-    if (!data[meta.current - 1]) loadPage(meta.current);
-  }, [meta.current]);
-
-  // 탭 또는 미니코드 검색이 변경될 때마다
-  // 상태 변수 초기화 및 첫 페이지 데이터 로드
-  const reset = () => {
-    setSearchCode(minicode || "");
-    setAddCode("");
-
-    setLoading(false);
-    setData([]);
-    setMeta({
-      total: 0,
-      current: 1,
-      last: 1,
-    });
-
-    loadPage(1);
-  };
-  useEffect(() => {
-    reset();
-  }, [variant, minicode]);
+  }, [loading, meta.current, meta.last, data.length]);
 
   const handleServerError = () => {
     setNotiMessage(
