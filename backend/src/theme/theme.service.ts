@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException, // 400
+  NotFoundException, // 404
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, In } from 'typeorm';
 
@@ -128,6 +132,60 @@ export class ThemeService {
       return { success: true, data: { theme_id: themeId } };
     } catch (err) {
       await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async getThemeSetting(themeId: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    try {
+      /* 일정, 배너, 해더, 검수자 */
+      const theme = await queryRunner.manager.findOne(Schedule, {
+        where: { theme_id: themeId },
+        relations: ['banner', 'header', 'reviewer', 'reviewer.user'],
+      });
+      if (!theme) throw new NotFoundException();
+
+      /* 심사위원 */
+      const judges = await queryRunner.manager.find(ThemeJudge, {
+        where: { theme_id: themeId },
+        relations: ['user'],
+      });
+      if (!judges) throw new NotFoundException();
+
+      /* 선물 목록 */
+      const collections = await queryRunner.manager.find(GiftCollection, {
+        where: { theme_id: themeId },
+        relations: ['gifts'],
+        order: {
+          heart_rate: 'DESC',
+          gifts: {
+            collection_order: 'ASC',
+          },
+        },
+      });
+      if (!collections) throw new NotFoundException();
+
+      return {
+        ...theme,
+        reviewer: theme.reviewer
+          ? {
+              theme_id: theme.reviewer.theme_id,
+              user_id: theme.reviewer.user_id,
+              minicode: theme.reviewer.user?.minicode || null,
+            }
+          : null,
+        judges: judges.map((j) => ({
+          theme_id: j.theme_id,
+          user_id: j.user_id,
+          minicode: j.user?.minicode || null,
+        })),
+        collections,
+      };
+    } catch (err) {
       throw err;
     } finally {
       await queryRunner.release();

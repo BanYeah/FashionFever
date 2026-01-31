@@ -6,6 +6,7 @@ import {
   Param,
   Request,
   Response,
+  ParseUUIDPipe,
   UseInterceptors,
   UploadedFiles,
   BadRequestException, // 400
@@ -74,5 +75,20 @@ export class ThemeController {
       files.banner[0],
       files.giftImages,
     );
+  }
+
+  @Get(':theme_id/setting')
+  @Roles('admin')
+  @ApiOperation({ summary: '테마 설정 상세 조회' })
+  @ApiParam({
+    name: 'theme_id',
+    description: '테마 번호',
+  })
+  @ApiResponse({ status: 200, description: '테마 설정 조회 성공' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
+  async getThemeSetting(
+    @Param('theme_id', new ParseUUIDPipe()) themeId: string,
+  ) {
+    return this.themeService.getThemeSetting(themeId);
   }
 }
