@@ -13,7 +13,7 @@ export class Header {
   desc: string;
 
   @Column({ type: 'integer', nullable: true })
-  bg_limit: number;
+  bg_limit: number | null;
 
   @OneToOne(() => Schedule, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'theme_id' })

@@ -27,7 +27,7 @@ export class GiftCollection {
   is_random: boolean;
 
   @Column({ type: 'boolean', nullable: true })
-  is_same_theme: boolean;
+  is_same_theme: boolean | null;
 
   @Column({
     type: 'varchar',
@@ -35,7 +35,7 @@ export class GiftCollection {
     nullable: true,
     comment: 'NORMAL, VIP, LUCK, CASH',
   })
-  theme_type: string;
+  theme_type: string | null;
 
   @Column({
     type: 'varchar',
@@ -43,7 +43,7 @@ export class GiftCollection {
     nullable: true,
     comment: 'N, R, SR',
   })
-  rarity: string;
+  rarity: string | null;
 
   @ManyToOne(() => Schedule, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'theme_id' })
