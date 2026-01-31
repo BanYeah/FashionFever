@@ -351,8 +351,8 @@ export default function ThemeSettingPage() {
         vote_start_at: voteStartDate.toISOString(),
         vote_end_at: voteEndDate.toISOString(),
         reviewer_minicode:
-          reviewer !== null && reviewer.trim() !== "" ? reviewer : null,
-        judge_minicodes: judge,
+          reviewer === null ? null : reviewer.replace(/^judge_/, ""),
+        judge_minicodes: judge.map((code) => code.replace(/^judge_/, "")),
         collections: await convertToWebP_GC(giftsData),
       };
 
