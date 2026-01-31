@@ -19,10 +19,13 @@ export function BgLimitCombobox({
   bgLimit,
   setBgLimit,
 }: BgLimitComboboxProps) {
-  const enrollBgColorbyName = enrollBgLimit.reduce((acc, item) => {
-    acc[item.name] = item.color;
-    return acc;
-  }, {} as Record<string, string>);
+  const enrollBgColorbyName = enrollBgLimit.reduce(
+    (acc, item) => {
+      acc[item.name] = item.color;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
   const options = enrollBgLimit.map((item) => (
     <Combobox.Option
       className={classes.ComboboxOption}
