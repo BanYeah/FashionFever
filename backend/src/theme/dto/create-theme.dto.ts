@@ -6,6 +6,7 @@ import {
   IsBoolean,
   IsArray,
   IsDate,
+  IsOptional,
   IsNotEmpty,
   ValidateNested,
 } from 'class-validator';
@@ -66,6 +67,7 @@ export class CreateGiftCollectionDto {
     example: true,
   })
   @IsBoolean()
+  @IsOptional()
   is_same_theme: boolean | null;
 
   @ApiProperty({
@@ -73,6 +75,7 @@ export class CreateGiftCollectionDto {
     example: 'NORMAL, VIP, LUCK, CASH',
   })
   @IsString()
+  @IsOptional()
   theme_type: string | null;
 
   @ApiProperty({
@@ -80,6 +83,7 @@ export class CreateGiftCollectionDto {
     example: 'N, R, SR',
   })
   @IsString()
+  @IsOptional()
   rarity: string | null;
 
   @ApiProperty({ type: [CreateGiftDto], description: '선물 목록' })
@@ -112,6 +116,7 @@ export class CreateThemeSettingDto {
     example: 0,
   })
   @IsNumber()
+  @IsOptional()
   bg_limit: number | null;
 
   // Schedule
@@ -175,6 +180,7 @@ export class CreateThemeSettingDto {
     example: 'ic57m',
   })
   @IsString()
+  @IsOptional()
   reviewer_minicode: string | null;
 
   @ApiProperty({

@@ -1,10 +1,11 @@
-import { Entity, PrimaryColumn, Column, OneToOne } from 'typeorm';
+import { Entity, PrimaryColumn, Generated, Column, OneToOne } from 'typeorm';
 import { Banner } from './banner.entity';
 import { Header } from './header.entity';
 
 @Entity('Schedule')
 export class Schedule {
   @PrimaryColumn('uuid')
+  @Generated('uuid')
   theme_id: string;
 
   @Column({ type: 'timestamptz' })

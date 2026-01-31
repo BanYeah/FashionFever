@@ -1,6 +1,7 @@
 import {
   Entity,
   PrimaryColumn,
+  Generated,
   Column,
   CreateDateColumn,
   OneToOne,
@@ -10,6 +11,7 @@ import { Judge } from './judge.entity';
 @Entity('User')
 export class User {
   @PrimaryColumn('uuid')
+  @Generated('uuid')
   user_id: string;
 
   @Column({ type: 'varchar', length: 7, unique: true })
