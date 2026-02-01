@@ -45,6 +45,7 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
           width={390}
           height={156}
           style={{ width: "100%", height: "auto" }}
+          loading="eager"
         />
       </div>
 
