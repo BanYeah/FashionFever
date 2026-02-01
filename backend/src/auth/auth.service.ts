@@ -24,8 +24,8 @@ import { LoginAdminDto } from './dto/login-admin.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
-    @InjectRepository(Judge) private judgeRepository: Repository<Judge>,
+    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Judge) private judgeRepo: Repository<Judge>,
   ) {}
 
   // 로컬 개발 및 단일 서버 배포 환경에서는 localhost:6379가 기본값.
@@ -49,22 +49,22 @@ export class AuthService {
   async createUser(createUserDto: CreateUserDto): Promise<void> {
     const { minicode } = createUserDto;
 
-    const isExist = await this.userRepository.exists({ where: { minicode } });
+    const isExist = await this.userRepo.exists({ where: { minicode } });
     if (isExist) throw new ConflictException(); // 409
 
     const rawEnterCode = this.generateRandomEnterCode();
     const encryptedCode = CryptoUtil.encrypt(rawEnterCode);
 
-    const newUser = this.userRepository.create({
+    const newUser = this.userRepo.create({
       minicode,
       enter_code: encryptedCode,
     });
 
-    await this.userRepository.save(newUser);
+    await this.userRepo.save(newUser);
   }
 
   async checkUserExist(minicode: string): Promise<void> {
-    const isExist = await this.userRepository.exists({
+    const isExist = await this.userRepo.exists({
       where: { minicode },
     });
 
@@ -72,7 +72,7 @@ export class AuthService {
   }
 
   async checkJudgeExist(minicode: string): Promise<void> {
-    const isExist = await this.judgeRepository.exists({
+    const isExist = await this.judgeRepo.exists({
       where: { minicode },
     });
 
@@ -103,7 +103,7 @@ export class AuthService {
       ); // 423
     }
 
-    const user = await this.userRepository.findOne({ where: { minicode } });
+    const user = await this.userRepo.findOne({ where: { minicode } });
 
     try {
       if (!user) throw new UnauthorizedException(); // 401
@@ -135,7 +135,7 @@ export class AuthService {
       ); // 423
     }
 
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: { minicode },
       relations: { judge: true }, // Left Join
     });

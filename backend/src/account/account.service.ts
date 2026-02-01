@@ -15,8 +15,8 @@ import { Judge } from '../auth/entities/judge.entity';
 @Injectable()
 export class AccountService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
-    @InjectRepository(Judge) private judgeRepository: Repository<Judge>,
+    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Judge) private judgeRepo: Repository<Judge>,
     private authService: AuthService,
   ) {}
 
@@ -33,7 +33,7 @@ export class AccountService {
     const take = 40;
     const skip = (page - 1) * take;
 
-    const [users, total] = await this.userRepository.findAndCount({
+    const [users, total] = await this.userRepo.findAndCount({
       where: whereCondition,
       order: orderCondition,
       take: take,
@@ -77,7 +77,7 @@ export class AccountService {
     const take = 40;
     const skip = (page - 1) * take;
 
-    const [judges, total] = await this.judgeRepository.findAndCount({
+    const [judges, total] = await this.judgeRepo.findAndCount({
       where: whereCondition,
       order: orderCondition,
       take: take,
@@ -95,7 +95,7 @@ export class AccountService {
   }
 
   async resetUserEnterCode(minicode: string) {
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: { minicode },
     });
 
@@ -104,46 +104,46 @@ export class AccountService {
     const newRawEnterCode = this.authService.generateRandomEnterCode();
 
     user.enter_code = CryptoUtil.encrypt(newRawEnterCode);
-    await this.userRepository.save(user);
+    await this.userRepo.save(user);
   }
 
   async appointJudge(minicode: string) {
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: { minicode },
     });
 
     if (!user) throw new NotFoundException(); // 404
 
-    const isAlreadyJudge = await this.judgeRepository.exists({
+    const isAlreadyJudge = await this.judgeRepo.exists({
       where: { minicode },
     });
     if (isAlreadyJudge) throw new ConflictException(); // 409
 
-    const newJudge = this.judgeRepository.create({
+    const newJudge = this.judgeRepo.create({
       user_id: user.user_id,
       minicode: user.minicode,
     });
 
-    await this.judgeRepository.save(newJudge);
+    await this.judgeRepo.save(newJudge);
   }
 
   async removeUser(minicode: string) {
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: { minicode },
     });
 
     if (!user) throw new NotFoundException(); // 404
 
-    await this.userRepository.remove(user);
+    await this.userRepo.remove(user);
   }
 
   async expelJudge(minicode: string) {
-    const judge = await this.judgeRepository.findOne({
+    const judge = await this.judgeRepo.findOne({
       where: { minicode },
     });
 
     if (!judge) throw new NotFoundException(); // 404
 
-    await this.judgeRepository.remove(judge);
+    await this.judgeRepo.remove(judge);
   }
 }
