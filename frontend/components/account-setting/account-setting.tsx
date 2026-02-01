@@ -17,6 +17,7 @@ import {
 } from "@mantine/core";
 import { ModalNoti } from "@/components/common/modal/model-noti";
 import { AccountLine } from "./account-line";
+import { PageMeta } from "@/types/page-meta";
 import { User } from "@/types/api/user";
 import { Judge } from "@/types/api/judge";
 import { registerUser } from "@/utils/api/auth";
@@ -24,12 +25,6 @@ import { appointJudge, fetchUsers, fetchJudges } from "@/utils/api/account";
 
 interface AccountSettingProps {
   variant: "user" | "judge";
-}
-
-interface PageMeta {
-  total: number;
-  current: number;
-  last: number;
 }
 
 export function AccountSetting({ variant }: AccountSettingProps) {
