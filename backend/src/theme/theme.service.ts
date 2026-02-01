@@ -657,7 +657,7 @@ export class ThemeService {
         );
       });
 
-      return { success: true, data: { theme_id: themeId } };
+      return { success: true };
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
