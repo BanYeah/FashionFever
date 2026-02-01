@@ -1,6 +1,6 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   OneToMany,
@@ -11,7 +11,7 @@ import { Gift } from './gift.entity';
 
 @Entity('GiftCollection')
 export class GiftCollection {
-  @PrimaryColumn({ type: 'bigint' })
+  @PrimaryGeneratedColumn({ type: 'bigint' })
   gift_collection_id: string; // BIGSERIAL은 JS에서 string으로 처리하는 것이 안전
 
   @Column('uuid')

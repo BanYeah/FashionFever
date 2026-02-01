@@ -30,6 +30,6 @@ export class GiftFormDto {
     example: 0,
   })
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   gift_file_order: number | null;
 }

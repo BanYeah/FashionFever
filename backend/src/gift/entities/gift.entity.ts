@@ -1,9 +1,15 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { GiftCollection } from './gift-collection.entity';
 
 @Entity('Gift')
 export class Gift {
-  @PrimaryColumn({ type: 'bigint' })
+  @PrimaryGeneratedColumn({ type: 'bigint' })
   gift_id: string;
 
   @Column({ type: 'bigint' })
