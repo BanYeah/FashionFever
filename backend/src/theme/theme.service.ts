@@ -27,6 +27,7 @@ export class ThemeService {
     private dataSource: DataSource,
     private readonly r2Service: R2Service,
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
   ) {}
 
   private async checkOverlap(
@@ -238,6 +239,40 @@ export class ThemeService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async getThemeSettings(page: number) {
+    const take = 20;
+    const skip = (page - 1) * take;
+
+    const [schedule, total] = await this.scheduleRepo.findAndCount({
+      order: { enroll_start_at: 'DESC' as const },
+      take: take,
+      skip: skip,
+      relations: ['banner'],
+    });
+
+    const data = schedule.map((item) => ({
+      theme_id: item.theme_id,
+      enroll_start_at: item.enroll_start_at,
+      enroll_end_at: item.enroll_end_at,
+      review_start_at: item.review_start_at,
+      review_end_at: item.review_end_at,
+      vote_start_at: item.vote_start_at,
+      vote_end_at: item.vote_end_at,
+      status: item.status,
+
+      banner_url: item.banner.banner_url,
+    }));
+
+    return {
+      data: data,
+      meta: {
+        total,
+        page,
+        last_page: Math.ceil(total / take),
+      },
+    };
   }
 
   async getThemeSetting(themeId: string) {

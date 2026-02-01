@@ -5,6 +5,7 @@ import {
   Post,
   Patch,
   Param,
+  Query,
   Request,
   Response,
   ParseUUIDPipe,
@@ -12,7 +13,13 @@ import {
   UploadedFiles,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { ThemeService } from './theme.service';
 
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -75,6 +82,19 @@ export class ThemeController {
       files.banner && files.banner.length > 0 ? files.banner[0] : null,
       files.gift_files ? files.gift_files : [],
     );
+  }
+
+  @Get('setting')
+  @Roles('admin')
+  @ApiOperation({ summary: '전체 테마 설정 조회 (관리자)' })
+  @ApiQuery({
+    name: 'page',
+    description: '페이지 번호 (1부터 시작)',
+    example: 1,
+  })
+  @ApiResponse({ status: 200, description: '테마 설정 조회 성공' })
+  async getThemeSettings(@Query('page') page: number) {
+    return this.themeService.getThemeSettings(page);
   }
 
   @Get(':theme_id/setting')
