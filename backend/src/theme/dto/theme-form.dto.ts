@@ -3,97 +3,15 @@ import { Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
-  IsBoolean,
   IsArray,
   IsDate,
   IsOptional,
   IsNotEmpty,
   ValidateNested,
 } from 'class-validator';
+import { GiftCollectionFormDto } from 'src/gift/dto/gift-collection-form.dto';
 
-export class CreateGiftDto {
-  @ApiProperty({
-    description: '테마 이름',
-    example: '[VIP] 성야, 별이 내리는 거리에서',
-  })
-  @IsString()
-  @IsNotEmpty()
-  theme_name: string;
-
-  @ApiProperty({
-    description: '선물 이름',
-    example: '별빛이 반짝이는 소녀 아이',
-  })
-  @IsString()
-  @IsNotEmpty()
-  gift_name: string;
-
-  @ApiProperty({
-    description: '선물 컬렉션 내 순서 (1부터 시작)',
-    example: 1,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  collection_order: number;
-}
-
-export class CreateGiftCollectionDto {
-  @ApiProperty({
-    description: '하트 레이트',
-    example: 5.0,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  heart_rate: number;
-
-  @ApiProperty({
-    description: '선물 컬렉션 내 선물의 수 (총합)',
-    example: 10,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  gift_total_num: number;
-
-  @ApiProperty({
-    description: '랜덤 선물 전달 여부',
-    example: true,
-  })
-  @IsBoolean()
-  @IsNotEmpty()
-  is_random: boolean;
-
-  @ApiProperty({
-    description: '동일 테마 여부',
-    example: true,
-  })
-  @IsBoolean()
-  @IsOptional()
-  is_same_theme: boolean | null;
-
-  @ApiProperty({
-    description: '테마 분류',
-    example: 'NORMAL, VIP, LUCK, CASH',
-  })
-  @IsString()
-  @IsOptional()
-  theme_type: string | null;
-
-  @ApiProperty({
-    description: '선물 희귀도',
-    example: 'N, R, SR',
-  })
-  @IsString()
-  @IsOptional()
-  rarity: string | null;
-
-  @ApiProperty({ type: [CreateGiftDto], description: '선물 목록' })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateGiftDto)
-  gifts: CreateGiftDto[];
-}
-
-export class CreateThemeSettingDto {
+export class ThemeFormDto {
   // Header
   @ApiProperty({
     description: '테마 이름',
@@ -118,6 +36,14 @@ export class CreateThemeSettingDto {
   @IsNumber()
   @IsOptional()
   bg_limit: number | null;
+
+  // banner
+  @ApiProperty({
+    description: '배너 이미지 경로',
+  })
+  @IsString()
+  @IsOptional()
+  banner_url: string | null;
 
   // Schedule
   @ApiProperty({
@@ -193,11 +119,11 @@ export class CreateThemeSettingDto {
 
   // Collections
   @ApiProperty({
-    type: [CreateGiftCollectionDto],
+    type: [GiftCollectionFormDto],
     description: '선물 컬렉션 목록',
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateGiftCollectionDto)
-  collections: CreateGiftCollectionDto[];
+  @Type(() => GiftCollectionFormDto)
+  collections: GiftCollectionFormDto[];
 }

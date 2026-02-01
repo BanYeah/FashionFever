@@ -4,7 +4,7 @@ import {
   NotFoundException, // 404
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, In } from 'typeorm';
+import { DataSource, Repository, QueryRunner, In } from 'typeorm';
 
 import { R2Service } from 'src/common/r2/r2.service';
 
@@ -19,7 +19,7 @@ import { ThemeJudge } from './entities/theme-judge.entity';
 import { GiftCollection } from 'src/gift/entities/gift-collection.entity';
 import { Gift } from 'src/gift/entities/gift.entity';
 
-import { CreateThemeSettingDto } from './dto/create-theme.dto';
+import { ThemeFormDto } from './dto/theme-form.dto';
 
 @Injectable()
 export class ThemeService {
@@ -29,9 +29,30 @@ export class ThemeService {
     @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
+  private async checkOverlap(
+    queryRunner: QueryRunner,
+    type: 'enroll' | 'review' | 'vote',
+    start: Date,
+    end: Date,
+    themeId?: string,
+  ) {
+    const query = queryRunner.manager
+      .createQueryBuilder(Schedule, 'schedule')
+      .where(
+        `(schedule.${type}_start_at < :end AND schedule.${type}_end_at > :start)`,
+        { start, end },
+      );
+    if (themeId) query.andWhere('schedule.theme_id != :themeId', { themeId });
+    return await query.getOne();
+  }
+
+  private formatDate(date: Date) {
+    return date.toISOString().split('T')[0].replaceAll('-', '.');
+  }
+
   async createThemeSetting(
-    dto: CreateThemeSettingDto,
-    bannerFile: Express.Multer.File,
+    dto: ThemeFormDto,
+    bannerFile: Express.Multer.File | null,
     giftFiles: Express.Multer.File[],
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -48,10 +69,50 @@ export class ThemeService {
         dto.vote_start_at,
         dto.vote_end_at,
       ];
+
       if (!schedules.every((date) => new Date(date) > now)) {
         throw new BadRequestException(
           '과거 시점으로는 일정을 등록할 수 없어요!',
         );
+      }
+
+      // 기존 테마 일정과 참가/검수/투표 기간과 겹치는지 확인
+      {
+        const eol = await this.checkOverlap(
+          queryRunner,
+          'enroll',
+          dto.enroll_start_at,
+          dto.enroll_end_at,
+        );
+        if (eol) {
+          throw new BadRequestException(
+            `참가 기간이 ${this.formatDate(eol.enroll_start_at)} ~ ${this.formatDate(eol.enroll_end_at)}인 일정이 이미 존재해요.`,
+          );
+        }
+
+        const rol = await this.checkOverlap(
+          queryRunner,
+          'review',
+          dto.review_start_at,
+          dto.review_end_at,
+        );
+        if (rol) {
+          throw new BadRequestException(
+            `검수 기간이 ${this.formatDate(rol.review_start_at)} ~ ${this.formatDate(rol.review_end_at)}인 일정이 이미 존재합니다.`,
+          );
+        }
+
+        const vol = await this.checkOverlap(
+          queryRunner,
+          'vote',
+          dto.vote_start_at,
+          dto.vote_end_at,
+        );
+        if (vol) {
+          throw new BadRequestException(
+            `투표 기간이 ${this.formatDate(vol.vote_start_at)} ~ ${this.formatDate(vol.vote_end_at)}인 일정이 이미 존재합니다.`,
+          );
+        }
       }
 
       const schedule = queryRunner.manager.create(Schedule, {
@@ -62,6 +123,7 @@ export class ThemeService {
       const themeId = savedSchedule.theme_id;
 
       // Banner
+      if (bannerFile !== null) {
       const bannerUrl = await this.r2Service.uploadImage(
         bannerFile,
         'theme-banner',
@@ -70,29 +132,34 @@ export class ThemeService {
         theme_id: themeId,
         banner_url: bannerUrl,
       });
+      } else if (dto.banner_url) {
+        await queryRunner.manager.save(Banner, {
+          theme_id: themeId,
+          banner_url: dto.banner_url,
+        });
+      } else throw new BadRequestException('배너 이미지는 필수예요!');
 
       // Header
       await queryRunner.manager.save(Header, { theme_id: themeId, ...dto });
 
       // Reviewer
-      if (dto.reviewer_minicode === null) {
-        await queryRunner.manager.save(Reviewer, {
-          theme_id: themeId,
-          user_id: null,
-        });
-      } else {
+      if (dto.reviewer_minicode) {
         const reviewerUser = await this.userRepo.findOneBy({
           minicode: dto.reviewer_minicode,
         });
-        if (reviewerUser === null) {
+        if (!reviewerUser) {
           throw new BadRequestException(
             '입력하신 미니코드에 해당하는 심사위원을 찾을 수 없어요.',
           );
         }
-
         await queryRunner.manager.save(Reviewer, {
           theme_id: themeId,
           user_id: reviewerUser.user_id,
+        });
+      } else {
+        await queryRunner.manager.save(Reviewer, {
+          theme_id: themeId,
+          user_id: null,
         });
       }
 
@@ -104,27 +171,47 @@ export class ThemeService {
         theme_id: themeId,
         user_id: user.user_id,
       }));
-      if (judges.length > 0)
+      if (judges.length > 0) {
         await queryRunner.manager.insert(ThemeJudge, judges);
+      }
 
       // GiftCollection & Gift
-      let giftFileIdx = 0;
       for (const colDto of dto.collections) {
+        const { gifts, ...collectionData } = colDto;
+
         const collection = await queryRunner.manager.save(GiftCollection, {
           theme_id: themeId,
-          ...colDto,
+          ...collectionData,
         });
 
-        for (const giftDto of colDto.gifts) {
+        for (const [index, giftDto] of gifts.entries()) {
+          const { gift_url, gift_file_order, ...giftData } = giftDto;
+
+          try {
+            if (gift_file_order !== null) {
           const giftUrl = await this.r2Service.uploadImage(
-            giftFiles[giftFileIdx++],
+                giftFiles[gift_file_order],
             'theme-gift',
           );
           await queryRunner.manager.save(Gift, {
             gift_collection_id: collection.gift_collection_id,
+                ...giftData,
             gift_url: giftUrl,
-            ...giftDto,
+                collection_order: index + 1,
+              });
+            } else if (gift_url) {
+              await queryRunner.manager.save(Gift, {
+                gift_collection_id: collection.gift_collection_id,
+                ...giftData,
+                gift_url: gift_url,
+                collection_order: index + 1,
           });
+            } else throw new Error();
+          } catch {
+            throw new BadRequestException(
+              '선물 이미지가 업로드되지 않은 선물이 있어요!',
+            );
+          }
         }
       }
 

@@ -10,13 +10,13 @@ export class Gift {
   gift_collection_id: string;
 
   @Column('text')
-  gift_url: string;
-
-  @Column('text')
   theme_name: string;
 
   @Column('text')
   gift_name: string;
+
+  @Column('text')
+  gift_url: string;
 
   @Column('integer')
   collection_order: number;

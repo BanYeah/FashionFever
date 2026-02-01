@@ -9,14 +9,14 @@ import {
   ParseUUIDPipe,
   UseInterceptors,
   UploadedFiles,
-  BadRequestException, // 400
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ThemeService } from './theme.service';
 
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { CreateThemeSettingDto } from './dto/create-theme.dto';
+import { ThemeFormDto } from './dto/theme-form.dto';
+import { Banner } from './entities/banner.entity';
 
 @ApiTags('themes')
 @Controller('themes')
@@ -38,26 +38,21 @@ export class ThemeController {
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'banner', maxCount: 1 },
-      { name: 'giftImages', maxCount: 20 },
+      { name: 'gift_files', maxCount: 30 },
     ]),
   )
   async createTheme(
     @UploadedFiles()
     files: {
       banner?: Express.Multer.File[];
-      giftImages?: Express.Multer.File[];
+      gift_files?: Express.Multer.File[];
     },
     @Body() body: any,
   ) {
-    if (!files?.banner || files.banner.length === 0)
-      throw new BadRequestException('배너 이미지는 필수예요!');
-
-    if (!files?.giftImages || files.giftImages.length === 0)
-      throw new BadRequestException('최소 하나 이상의 선물 이미지가 필요해요!');
-
-    const dto: CreateThemeSettingDto = {
+    const dto: ThemeFormDto = {
       ...body,
       bg_limit: body.bg_limit ? Number(body.bg_limit) : null,
+      banner_url: body.banner_url ? body.banner_url : null,
       reviewer_minicode: body.reviewer_minicode ? body.reviewer_minicode : null,
       judge_minicodes: Array.isArray(body.judge_minicodes)
         ? body.judge_minicodes
@@ -72,8 +67,8 @@ export class ThemeController {
 
     return this.themeService.createThemeSetting(
       dto,
-      files.banner[0],
-      files.giftImages,
+      files.banner && files.banner.length > 0 ? files.banner[0] : null,
+      files.gift_files ? files.gift_files : [],
     );
   }
 
