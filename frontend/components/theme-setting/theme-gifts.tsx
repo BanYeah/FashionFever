@@ -107,6 +107,25 @@ export const GiftCollection = forwardRef(
     const giftRefs = useRef<{ [key: string]: GiftHandle | null }>({});
 
     const addGift = () => setGiftIds((prev) => [...prev, crypto.randomUUID()]);
+    const moveGift = (id: string, direction: "up" | "down") => {
+      setGiftIds((prev) => {
+        const currentIndex = prev.indexOf(id);
+        const targetIndex =
+          direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+        // Out-of-range
+        if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+
+        const newIds = [...prev];
+        // Swap (using Array Destructuring)
+        [newIds[currentIndex], newIds[targetIndex]] = [
+          newIds[targetIndex],
+          newIds[currentIndex],
+        ];
+
+        return newIds;
+      });
+    };
 
     useImperativeHandle(ref, () => ({
       getData: () => ({
@@ -180,9 +199,13 @@ export const GiftCollection = forwardRef(
           </Group>
 
           {/* 선물 */}
-          {giftIds.map((gid) => (
+          {giftIds.map((gid, index) => (
             <Gift
               key={gid}
+              isTop={index === 0}
+              isBottom={index === giftIds.length - 1}
+              moveUp={() => moveGift(gid, "up")}
+              moveDown={() => moveGift(gid, "down")}
               onDelete={() => {
                 delete giftRefs.current[gid];
                 setGiftIds((prev) => prev.filter((id) => id !== gid));
@@ -283,80 +306,127 @@ export const GiftCollection = forwardRef(
   },
 );
 
-const Gift = forwardRef(({ onDelete }: { onDelete: () => void }, ref) => {
-  const [file, setFile] = useState<File | string | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+interface GiftProps {
+  isTop: boolean;
+  isBottom: boolean;
+  moveUp: () => void;
+  moveDown: () => void;
+  onDelete: () => void;
+}
 
-  useEffect(() => {
-    if (file instanceof File) {
-      const url = URL.createObjectURL(file);
-      setPreview(url);
-      return () => URL.revokeObjectURL(url); // clean-up
-    }
+const Gift = forwardRef(
+  ({ isTop, isBottom, moveUp, moveDown, onDelete }: GiftProps, ref) => {
+    const [file, setFile] = useState<File | string | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
 
-    setPreview(file);
-  }, [file]);
+    useEffect(() => {
+      if (file instanceof File) {
+        const url = URL.createObjectURL(file);
+        setPreview(url);
+        return () => URL.revokeObjectURL(url); // clean-up
+      }
 
-  const [themeName, setThemeName] = useState("");
-  const [itemName, setItemName] = useState("");
+      setPreview(file);
+    }, [file]);
 
-  useImperativeHandle(ref, () => ({
-    getData: () => ({
-      theme_name: themeName,
-      gift_name: itemName,
-      gift_file: file,
-    }),
-  }));
+    const [themeName, setThemeName] = useState("");
+    const [itemName, setItemName] = useState("");
 
-  return (
-    <Group align="center" gap={8} h={80}>
-      <Flex align="center" justify="center" w={125}>
-        {!preview ? (
-          <AddFileButton
-            icon="/images/add-file-button/add-file.svg"
-            size={28}
-            fileRatio="1:1"
-            setFile={setFile}
+    useImperativeHandle(ref, () => ({
+      getData: () => ({
+        theme_name: themeName,
+        gift_name: itemName,
+        gift_file: file,
+      }),
+    }));
+
+    return (
+      <Group align="center" gap={8} h={80}>
+        <Flex align="center" justify="center" w={125}>
+          {!preview ? (
+            <AddFileButton
+              icon="/images/add-file-button/add-file.svg"
+              size={28}
+              fileRatio="1:1"
+              setFile={setFile}
+            />
+          ) : (
+            <div className={classes.GiftImageWrapper}>
+              {/* 선물 삭제 버튼 */}
+              <UnstyledButton
+                className={classes.DeleteGiftButton}
+                w={20}
+                h={20}
+                onClick={onDelete}
+              >
+                <Image
+                  src="/images/theme-setting/delete-gift.svg"
+                  alt=""
+                  width={20}
+                  height={20}
+                />
+              </UnstyledButton>
+              <Image src={preview} alt="" width={80} height={80} />
+            </div>
+          )}
+        </Flex>
+
+        {/* 테마 이름 / 아이템 이름 */}
+        <Stack gap={0} style={{ flex: 1 }}>
+          <Input
+            classNames={{ input: classes.GiftInput }}
+            styles={{ wrapper: { height: "28px" } }}
+            variant="unstyled"
+            placeholder="테마 이름"
+            value={themeName}
+            onChange={(event) => setThemeName(event.currentTarget.value)}
           />
-        ) : (
-          <div className={classes.GiftImageWrapper}>
-            {/* 선물 삭제 버튼 */}
-            <UnstyledButton
-              className={classes.DeleteGiftButton}
-              w={20}
-              h={20}
-              onClick={onDelete}
-            >
-              <Image
-                src="/images/theme-setting/delete-gift.svg"
-                alt=""
-                width={20}
-                height={20}
-              />
-            </UnstyledButton>
-            <Image src={preview} alt="" width={80} height={80} />
-          </div>
-        )}
-      </Flex>
+          <Input
+            classNames={{ input: classes.GiftInput }}
+            variant="unstyled"
+            placeholder="아이템 이름"
+            value={itemName}
+            onChange={(event) => setItemName(event.currentTarget.value)}
+          />
+        </Stack>
 
-      {/* 테마 이름 / 아이템 이름 */}
-      <Stack gap={0} style={{ flex: 1 }}>
-        <Input
-          classNames={{ input: classes.GiftInput }}
-          styles={{ wrapper: { height: "28px" } }}
-          variant="unstyled"
-          placeholder="테마 이름"
-          value={themeName}
-          onChange={(event) => setThemeName(event.currentTarget.value)}
-        />
-        <Input
-          classNames={{ input: classes.GiftInput }}
-          variant="unstyled"
-          placeholder="아이템 이름"
-          value={itemName}
-          onChange={(event) => setItemName(event.currentTarget.value)}
-        />
-      </Stack>
-    </Group>
-  );
-});
+        <Stack gap={0}>
+          <div style={{ width: "24px", height: "24px" }}>
+            {!isTop && (
+              <UnstyledButton
+                className={classes.GiftAlignButton}
+                w={24}
+                h={24}
+                onClick={moveUp}
+              >
+                <Image
+                  src="/images/theme-setting/arrow-up.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                />
+              </UnstyledButton>
+            )}
+          </div>
+          <div style={{ width: "24px", height: "24px" }}>
+            {!isBottom && (
+              <UnstyledButton
+                className={classes.GiftAlignButton}
+                w={24}
+                h={24}
+                onClick={moveDown}
+              >
+                <Image
+                  src="/images/theme-setting/arrow-down.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                />
+              </UnstyledButton>
+            )}
+          </div>
+        </Stack>
+      </Group>
+    );
+  },
+);

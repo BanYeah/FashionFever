@@ -76,3 +76,8 @@
 .GiftInput::placeholder {
   color: var(--gray-b3);
 }
+
+.GiftAlignButton:hover {
+  background-color: var(--gray-f2);
+  border-radius: 10px;
+}
