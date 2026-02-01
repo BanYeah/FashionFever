@@ -8,6 +8,7 @@ import {
   Flex,
   Stack,
   UnstyledButton,
+  Loader,
   Divider,
   useCombobox,
 } from "@mantine/core";
@@ -24,9 +25,14 @@ import {
 import { ThemeGifts } from "@/components/theme-setting/theme-gifts";
 import { enrollBgColor } from "@/types/enroll-bg-color";
 import { GiftCollection_t } from "@/types/app/theme";
-import { GiftCollection, CreateThemePayload } from "@/types/api/theme";
+import {
+  GiftCollection,
+  CreateThemePayload,
+  GiftCollectionData,
+  ThemeData,
+} from "@/types/api/theme";
 import { convertToWebP, WebPConversionError } from "@/utils/convert-to-webp";
-import { createThemeSetting } from "@/utils/api/theme";
+import { createThemeSetting, getThemeSetting } from "@/utils/api/theme";
 
 export default function ThemeSettingPage() {
   const router = useRouter();
@@ -82,6 +88,49 @@ export default function ThemeSettingPage() {
 
   /* 선물 목록 관리 */
   const themeGiftsRef = useRef<any>(null);
+
+  /* 테마 설정 상세 조회 */
+  const [loading, setLoading] = useState<boolean>(false);
+  const [initialCollections, setInitialCollections] = useState<
+    GiftCollectionData[]
+  >([]);
+
+  useEffect(() => {
+    if (!themeId) return;
+
+    (async () => {
+      setLoading(true);
+      try {
+        const result = await getThemeSetting(themeId);
+        if (result.success) {
+          const data: ThemeData = result.data;
+
+          setName(data.name);
+          setDescription(data.desc);
+          if (data.bg_limit) setBgLimit(enrollBgLimit[data.bg_limit].name);
+
+          setBanner(data.banner_url);
+
+          setEnrollStart(data.enroll_start_at.split("T")[0].replace("-", " "));
+          setEnrollEnd(data.enroll_end_at.split("T")[0].replace("-", " "));
+          setReviewStart(data.review_start_at.split("T")[0].replace("-", " "));
+          setReviewEnd(data.review_end_at.split("T")[0].replace("-", " "));
+          setVoteStart(data.vote_start_at.split("T")[0].replace("-", " "));
+          setVoteEnd(data.vote_end_at.split("T")[0].replace("-", " "));
+
+          if (data.reviewer_minicode)
+            setReviewer("judge_" + data.reviewer_minicode);
+          setJudge(data.judge_minicodes.map((code) => "judge_" + code));
+
+          setInitialCollections(data.collections);
+        } else throw new Error();
+      } catch {
+        handleServerError();
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [themeId]);
 
   /* 저장하기 */
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
@@ -403,6 +452,28 @@ export default function ThemeSettingPage() {
     openNoti();
   };
 
+  /* 테마 설정 상세 조회중 */
+  if (loading) {
+    return (
+      <>
+        <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
+          {notiMessage}
+        </ModalNoti>
+
+        <Loader
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+          type="dots"
+          color="var(--main)"
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
@@ -447,6 +518,7 @@ export default function ThemeSettingPage() {
                   width={390}
                   height={156}
                   style={{ width: "100%", height: "auto" }}
+                  loading="eager"
                 />
               </>
             )}
@@ -510,7 +582,7 @@ export default function ThemeSettingPage() {
             handleServerError={handleServerError}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
-          <ThemeGifts ref={themeGiftsRef} />
+          <ThemeGifts ref={themeGiftsRef} initialData={initialCollections} />
           <Divider size={1} color={"var(--gray-d9)"} />
         </Stack>
       </section>

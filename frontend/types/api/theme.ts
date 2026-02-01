@@ -35,3 +35,42 @@ export interface CreateThemePayload {
 
   collections: GiftCollection[];
 }
+
+/* GET */
+export interface GiftData {
+  theme_name: string;
+  gift_name: string;
+  gift_url: string;
+}
+
+export interface GiftCollectionData {
+  heart_rate: number;
+  gift_total_num: number;
+  is_random: boolean;
+  is_same_theme: boolean | null;
+  theme_type: string | null;
+  rarity: string | null;
+
+  gifts: GiftData[];
+}
+
+export interface ThemeData {
+  name: string;
+  desc: string;
+  bg_limit: number | null;
+
+  banner_url: string;
+
+  enroll_start_at: string; // ISO 문자열
+  enroll_end_at: string;
+  review_start_at: string;
+  review_end_at: string;
+  vote_start_at: string;
+  vote_end_at: string;
+  status: string;
+
+  reviewer_minicode: string | null;
+  judge_minicodes: string[];
+
+  collections: GiftCollectionData[];
+}

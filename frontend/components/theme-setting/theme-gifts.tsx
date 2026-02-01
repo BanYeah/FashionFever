@@ -22,6 +22,7 @@ import {
 import { HeartRating } from "../common/heart-rating/heartrating";
 import { AddFileButton } from "../common/add-file-button/add-file-button";
 import { Gift_t, GiftCollection_t } from "@/types/app/theme";
+import { GiftData, GiftCollectionData } from "@/types/api/theme";
 
 interface GiftCollectionHandle {
   getData: () => GiftCollection_t;
@@ -31,69 +32,84 @@ interface GiftHandle {
   getData: () => Gift_t;
 }
 
-export const ThemeGifts = forwardRef((props, ref) => {
-  const [opened, { toggle }] = useDisclosure(false);
+export const ThemeGifts = forwardRef(
+  ({ initialData }: { initialData: GiftCollectionData[] }, ref) => {
+    const [opened, { toggle }] = useDisclosure(false);
 
-  const [collectionIds, setCollectionIds] = useState<string[]>([]);
-  const collectionRefs = useRef<{ [key: string]: GiftCollectionHandle | null }>(
-    {},
-  );
+    const [collectionIds, setCollectionIds] = useState<string[]>([]);
+    const collectionRefs = useRef<{
+      [key: string]: GiftCollectionHandle | null;
+    }>({});
 
-  const addCollection = () => {
-    setCollectionIds((prev) => [...prev, crypto.randomUUID()]);
-    if (!opened) toggle();
-  };
+    useEffect(() => {
+      if (initialData && initialData.length > 0) {
+        setCollectionIds(initialData.map(() => crypto.randomUUID()));
+        if (!opened) toggle();
+      }
+    }, [initialData]);
 
-  useImperativeHandle(ref, () => ({
-    getAllData: () =>
-      collectionIds
-        .map((sid) => collectionRefs.current[sid]?.getData())
-        .filter((data): data is GiftCollection_t => data !== undefined),
-  }));
+    const addCollection = () => {
+      setCollectionIds((prev) => [...prev, crypto.randomUUID()]);
+      if (!opened) toggle();
+    };
 
-  return (
-    <div style={{ position: "relative" }}>
-      {/* 선물 세팅 추가 버튼 */}
-      <UnstyledButton
-        className={classes.AddGiftSettingButton}
-        w={28}
-        h={28}
-        onClick={addCollection}
-      >
-        <Image
-          src="/images/theme-setting/add-gift.svg"
-          alt=""
-          width={28}
-          height={28}
-        />
-      </UnstyledButton>
+    useImperativeHandle(ref, () => ({
+      getAllData: () =>
+        collectionIds
+          .map((sid) => collectionRefs.current[sid]?.getData())
+          .filter((data): data is GiftCollection_t => data !== undefined),
+    }));
 
-      <UnstyledButton className={classes.Button} onClick={toggle}>
-        <p>선물 목록 관리</p>
-      </UnstyledButton>
+    return (
+      <div style={{ position: "relative" }}>
+        {/* 선물 세팅 추가 버튼 */}
+        <UnstyledButton
+          className={classes.AddGiftSettingButton}
+          w={28}
+          h={28}
+          onClick={addCollection}
+        >
+          <Image
+            src="/images/theme-setting/add-gift.svg"
+            alt=""
+            width={28}
+            height={28}
+          />
+        </UnstyledButton>
 
-      <Collapse pb={`${collectionIds.length == 0 ? 0 : 12}`} in={opened}>
-        <Stack gap={10}>
-          {collectionIds.map((gcid) => (
-            <GiftCollection
-              key={gcid}
-              onDelete={() => {
-                delete collectionRefs.current[gcid];
-                setCollectionIds((prev) => prev.filter((id) => id !== gcid));
-              }}
-              ref={(el) => {
-                collectionRefs.current[gcid] = el as GiftCollectionHandle;
-              }}
-            />
-          ))}
-        </Stack>
-      </Collapse>
-    </div>
-  );
-});
+        <UnstyledButton className={classes.Button} onClick={toggle}>
+          <p>선물 목록 관리</p>
+        </UnstyledButton>
+
+        <Collapse pb={`${collectionIds.length == 0 ? 0 : 12}`} in={opened}>
+          <Stack gap={10}>
+            {collectionIds.map((gcid, index) => (
+              <GiftCollection
+                key={gcid}
+                initialData={initialData[index]}
+                onDelete={() => {
+                  delete collectionRefs.current[gcid];
+                  setCollectionIds((prev) => prev.filter((id) => id !== gcid));
+                }}
+                ref={(el) => {
+                  collectionRefs.current[gcid] = el as GiftCollectionHandle;
+                }}
+              />
+            ))}
+          </Stack>
+        </Collapse>
+      </div>
+    );
+  },
+);
+
+interface GiftCollectionProps {
+  initialData?: GiftCollectionData;
+  onDelete: () => void;
+}
 
 export const GiftCollection = forwardRef(
-  ({ onDelete }: { onDelete: () => void }, ref) => {
+  ({ initialData, onDelete }: GiftCollectionProps, ref) => {
     const [heartRate, setHeartRate] = useState<string | number>(0);
     const [itemTotalNumber, setItemTotalNumber] = useState<string | number>(0);
 
@@ -105,6 +121,21 @@ export const GiftCollection = forwardRef(
 
     const [giftIds, setGiftIds] = useState<string[]>([]);
     const giftRefs = useRef<{ [key: string]: GiftHandle | null }>({});
+
+    useEffect(() => {
+      if (initialData) {
+        setHeartRate(initialData.heart_rate);
+        setItemTotalNumber(initialData.gift_total_num);
+
+        setIsRandom(initialData.is_random);
+        setSameTheme(initialData.is_same_theme ?? false);
+
+        setThemeType(initialData.theme_type);
+        setRarity(initialData.rarity);
+
+        setGiftIds(initialData.gifts.map(() => crypto.randomUUID()));
+      }
+    }, [initialData]);
 
     const addGift = () => setGiftIds((prev) => [...prev, crypto.randomUUID()]);
     const moveGift = (id: string, direction: "up" | "down") => {
@@ -202,6 +233,7 @@ export const GiftCollection = forwardRef(
           {giftIds.map((gid, index) => (
             <Gift
               key={gid}
+              initialData={initialData?.gifts[index]}
               isTop={index === 0}
               isBottom={index === giftIds.length - 1}
               moveUp={() => moveGift(gid, "up")}
@@ -307,6 +339,7 @@ export const GiftCollection = forwardRef(
 );
 
 interface GiftProps {
+  initialData?: GiftData;
   isTop: boolean;
   isBottom: boolean;
   moveUp: () => void;
@@ -315,7 +348,11 @@ interface GiftProps {
 }
 
 const Gift = forwardRef(
-  ({ isTop, isBottom, moveUp, moveDown, onDelete }: GiftProps, ref) => {
+  (
+    { initialData, isTop, isBottom, moveUp, moveDown, onDelete }: GiftProps,
+    ref,
+  ) => {
+    /* 선물 이미지 */
     const [file, setFile] = useState<File | string | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
 
@@ -329,8 +366,17 @@ const Gift = forwardRef(
       setPreview(file);
     }, [file]);
 
+    /* 선물 정보 */
     const [themeName, setThemeName] = useState("");
     const [itemName, setItemName] = useState("");
+
+    useEffect(() => {
+      if (initialData) {
+        setThemeName(initialData.theme_name);
+        setItemName(initialData.gift_name);
+        setFile(initialData.gift_url);
+      }
+    }, [initialData]);
 
     useImperativeHandle(ref, () => ({
       getData: () => ({

@@ -35,11 +35,11 @@ export async function createThemeSetting(payload: CreateThemePayload) {
           gift_file_order: gift_file_order++,
         };
       } else {
-      return {
-        theme_name: gift.theme_name,
-        gift_name: gift.gift_name,
+        return {
+          theme_name: gift.theme_name,
+          gift_name: gift.gift_name,
           gift_url: gift.gift_file,
-      };
+        };
       }
     });
 
@@ -64,6 +64,18 @@ export async function createThemeSetting(payload: CreateThemePayload) {
       message: errorData.message || "테마를 저장하는데 실패했습니다.",
     };
   }
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
+export async function getThemeSetting(theme_id: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/${theme_id}/setting`,
+    { cache: "no-store", credentials: "include" },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
 
   const data = await res.json();
   return { success: true, ...data };
