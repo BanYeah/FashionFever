@@ -64,7 +64,7 @@ export class ThemeService {
     try {
       // Schedule
       const now = new Date();
-      const schedules = [
+      const schedulesDto = [
         dto.enroll_start_at,
         dto.enroll_end_at,
         dto.review_start_at,
@@ -73,11 +73,10 @@ export class ThemeService {
         dto.vote_end_at,
       ];
 
-      if (!schedules.every((date) => new Date(date) > now)) {
+      if (!schedulesDto.every((date) => new Date(date) > now))
         throw new BadRequestException(
           '과거 시점으로는 일정을 등록할 수 없어요!',
         );
-      }
 
       // 기존 테마 일정과 참가/검수/투표 기간과 겹치는지 확인
       {
@@ -132,6 +131,7 @@ export class ThemeService {
           'theme-banner',
         );
         uploadedFiles.push(bannerUrl);
+
         await queryRunner.manager.save(Banner, {
           theme_id: themeId,
           banner_url: bannerUrl,
@@ -151,11 +151,11 @@ export class ThemeService {
         const reviewerUser = await this.userRepo.findOneBy({
           minicode: dto.reviewer_minicode,
         });
-        if (!reviewerUser) {
+        if (!reviewerUser)
           throw new BadRequestException(
             '입력하신 미니코드에 해당하는 심사위원을 찾을 수 없어요.',
           );
-        }
+
         await queryRunner.manager.save(Reviewer, {
           theme_id: themeId,
           user_id: reviewerUser.user_id,
@@ -171,13 +171,14 @@ export class ThemeService {
       const judgeUsers = await this.userRepo.find({
         where: { minicode: In(dto.judge_minicodes) },
       });
+
       const judges = judgeUsers.map((user) => ({
         theme_id: themeId,
         user_id: user.user_id,
       }));
-      if (judges.length > 0) {
+
+      if (judges.length > 0)
         await queryRunner.manager.insert(ThemeJudge, judges);
-      }
 
       // GiftCollection & Gift
       for (const colDto of dto.collections) {
@@ -198,6 +199,7 @@ export class ThemeService {
                 'theme-gift',
               );
               uploadedFiles.push(giftUrl);
+
               await queryRunner.manager.save(Gift, {
                 gift_collection_id: collection.gift_collection_id,
                 ...giftData,
@@ -225,13 +227,12 @@ export class ThemeService {
     } catch (err) {
       await queryRunner.rollbackTransaction();
 
-      if (uploadedFiles.length > 0) {
+      if (uploadedFiles.length > 0)
         this.r2Service.deleteImages(uploadedFiles).catch(() => {
           console.log(
             `[R2_ROLLBACK_ERROR] Failed to delete orphaned files: ${JSON.stringify(uploadedFiles)}`,
           );
         });
-      }
 
       throw err;
     } finally {
