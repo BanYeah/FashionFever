@@ -58,6 +58,9 @@ export class ThemeService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
+    const uploadedFiles: string[] = [];
+
     try {
       // Schedule
       const now = new Date();
@@ -128,6 +131,7 @@ export class ThemeService {
           bannerFile,
           'theme-banner',
         );
+        uploadedFiles.push(bannerUrl);
         await queryRunner.manager.save(Banner, {
           theme_id: themeId,
           banner_url: bannerUrl,
@@ -193,6 +197,7 @@ export class ThemeService {
                 giftFiles[gift_file_order],
                 'theme-gift',
               );
+              uploadedFiles.push(giftUrl);
               await queryRunner.manager.save(Gift, {
                 gift_collection_id: collection.gift_collection_id,
                 ...giftData,
@@ -219,6 +224,15 @@ export class ThemeService {
       return { success: true, data: { theme_id: themeId } };
     } catch (err) {
       await queryRunner.rollbackTransaction();
+
+      if (uploadedFiles.length > 0) {
+        this.r2Service.deleteImages(uploadedFiles).catch(() => {
+          console.log(
+            `[R2_ROLLBACK_ERROR] Failed to delete orphaned files: ${JSON.stringify(uploadedFiles)}`,
+          );
+        });
+      }
+
       throw err;
     } finally {
       await queryRunner.release();

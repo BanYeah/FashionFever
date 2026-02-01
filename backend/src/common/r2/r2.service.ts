@@ -3,7 +3,11 @@ import {
   BadRequestException, // 400
   InternalServerErrorException, // 500
 } from '@nestjs/common';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectsCommand,
+} from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -48,6 +52,29 @@ export class R2Service {
     } catch (error) {
       throw new InternalServerErrorException(
         '파일 업로드 중 오류가 발생했어요!',
+      );
+    }
+  }
+
+  async deleteImages(fileUrls: string[]): Promise<void> {
+    if (fileUrls.length === 0) return;
+
+    const objectsToDelete = fileUrls.map((url) => ({
+      Key: url.replace(`${this.publicEndpoint}/`, ''),
+    }));
+
+    try {
+      const command = new DeleteObjectsCommand({
+        Bucket: this.bucketName,
+        Delete: {
+          Objects: objectsToDelete,
+          Quiet: true, // 성공한 항목은 응답에 포함하지 않음
+        },
+      });
+      await this.s3Client.send(command);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        '이미지 일괄 삭제 중 오류가 발생했어요!',
       );
     }
   }
