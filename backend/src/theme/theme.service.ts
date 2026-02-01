@@ -249,14 +249,14 @@ export class ThemeService {
         where: { theme_id: themeId },
         relations: ['banner', 'header', 'reviewer', 'reviewer.user'],
       });
-      if (!theme) throw new NotFoundException();
+      if (!theme) throw new NotFoundException('존재하지 않는 테마예요!');
 
       /* 심사위원 */
       const judges = await queryRunner.manager.find(ThemeJudge, {
         where: { theme_id: themeId },
         relations: ['user'],
       });
-      if (!judges) throw new NotFoundException();
+      if (!judges) throw new NotFoundException('존재하지 않는 테마예요!');
 
       /* 선물 목록 */
       const collections = await queryRunner.manager.find(GiftCollection, {
@@ -269,7 +269,7 @@ export class ThemeService {
           },
         },
       });
-      if (!collections) throw new NotFoundException();
+      if (!collections) throw new NotFoundException('존재하지 않는 테마예요!');
 
       return {
         data: {
@@ -388,7 +388,7 @@ export class ThemeService {
       const schedule = await queryRunner.manager.findOne(Schedule, {
         where: { theme_id: themeId },
       });
-      if (!schedule) throw new NotFoundException();
+      if (!schedule) throw new NotFoundException('존재하지 않는 테마예요!');
 
       // 이미 시작된 일정이거나 시작하기 1시간 전인 일정을 수정하지는 않는지 확인
       {
@@ -433,7 +433,7 @@ export class ThemeService {
       const banner = await queryRunner.manager.findOne(Banner, {
         where: { theme_id: themeId },
       });
-      if (!banner) throw new NotFoundException();
+      if (!banner) throw new NotFoundException('존재하지 않는 테마예요!');
 
       deletedFiles.add(banner.banner_url);
 
