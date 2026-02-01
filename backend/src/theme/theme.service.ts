@@ -276,7 +276,7 @@ export class ThemeService {
           judge_minicodes: judges.map((j) => j.user.minicode),
 
           collections: collections.map((col) => ({
-            heart_rate: col.heart_rate,
+            heart_rate: Number(col.heart_rate),
             gift_total_num: col.gift_total_num,
             is_random: col.is_random,
             is_same_theme: col.is_same_theme,
