@@ -1,7 +1,8 @@
+/* POST / PATCH */
 export interface Gift {
   theme_name: string;
   gift_name: string;
-  file: File;
+  gift_file: File | string;
 }
 
 export interface GiftCollection {
@@ -20,7 +21,7 @@ export interface CreateThemePayload {
   desc: string;
   bg_limit: number | null;
 
-  banner: File;
+  banner: File | string;
 
   enroll_start_at: string; // ISO 문자열
   enroll_end_at: string;

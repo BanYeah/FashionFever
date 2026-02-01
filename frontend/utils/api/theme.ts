@@ -8,6 +8,9 @@ export async function createThemeSetting(payload: CreateThemePayload) {
   if (payload.bg_limit !== null)
     formData.append("bg_limit", String(payload.bg_limit));
 
+  if (payload.banner instanceof File) formData.append("banner", payload.banner);
+  else formData.append("banner_url", payload.banner);
+
   formData.append("enroll_start_at", payload.enroll_start_at);
   formData.append("enroll_end_at", payload.enroll_end_at);
   formData.append("review_start_at", payload.review_start_at);
@@ -21,18 +24,26 @@ export async function createThemeSetting(payload: CreateThemePayload) {
     formData.append("judge_minicodes", code),
   );
 
-  formData.append("banner", payload.banner);
-
-  const collectionsData = payload.collections.map((col) => {
-    const gifts = col.gifts.map((gift, idx) => {
-      formData.append("giftImages", gift.file);
+  let gift_file_order = 0;
+  const collectionsData = payload.collections.map((collection) => {
+    const gifts = collection.gifts.map((gift) => {
+      if (gift.gift_file instanceof File) {
+        formData.append("gift_files", gift.gift_file);
+        return {
+          theme_name: gift.theme_name,
+          gift_name: gift.gift_name,
+          gift_file_order: gift_file_order++,
+        };
+      } else {
       return {
         theme_name: gift.theme_name,
         gift_name: gift.gift_name,
-        collection_order: idx + 1,
+          gift_url: gift.gift_file,
       };
+      }
     });
-    return { ...col, gifts };
+
+    return { ...collection, gifts };
   });
   formData.append("collections", JSON.stringify(collectionsData));
 

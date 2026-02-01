@@ -34,21 +34,23 @@ export default function ThemeSettingPage() {
   const searchParams = useSearchParams();
   const themeId = searchParams.get("theme_id");
 
-  const [loading, setLoading] = useState<boolean>(false);
-
   /* 알림창 */
   const [notiMessage, setNotiMessage] = useState<React.ReactNode>(null);
   const [notiOpened, { open: openNoti, close: closeNoti }] =
     useDisclosure(false);
 
   /* 테마 배너 */
-  const [banner, setBanner] = useState<File[]>([]); // File[] 이지만 단일 File 저장용으로 사용
-  const [bannerPreview, setBannerPreview] = useState<string[]>([]);
+  const [banner, setBanner] = useState<File | string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    const urls = banner.map((file) => URL.createObjectURL(file));
-    setBannerPreview(urls);
-    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+    if (banner instanceof File) {
+      const url = URL.createObjectURL(banner);
+      setBannerPreview(url);
+      return () => URL.revokeObjectURL(url); // clean-up
+    }
+
+    setBannerPreview(banner);
   }, [banner]);
 
   /* 테마 이름/설명, 배경색 제한 */
@@ -80,23 +82,15 @@ export default function ThemeSettingPage() {
 
   /* 선물 목록 관리 */
   const themeGiftsRef = useRef<any>(null);
+
+  /* 저장하기 */
+  const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const handleSave = async () => {
     const giftsData: GiftCollection_t[] =
       themeGiftsRef.current?.getAllData() || [];
 
     /* 입력값 유효성 검사 */
     {
-      if (banner.length === 0) {
-        handleNoti(
-          <p>
-            <span style={{ color: "var(--main)" }}>테마 배너 이미지</span>가
-            업로드되지 않아
-            <br /> 저장할 수 없어요!
-          </p>,
-        );
-        return;
-      }
-
       if (name.trim() === "") {
         handleNoti(
           <p>
@@ -112,6 +106,17 @@ export default function ThemeSettingPage() {
           <p>
             <span style={{ color: "var(--main)" }}>테마 설명</span>이 입력되지
             않아
+            <br /> 저장할 수 없어요!
+          </p>,
+        );
+        return;
+      }
+
+      if (banner === null) {
+        handleNoti(
+          <p>
+            <span style={{ color: "var(--main)" }}>테마 배너 이미지</span>가
+            업로드되지 않아
             <br /> 저장할 수 없어요!
           </p>,
         );
@@ -228,7 +233,7 @@ export default function ThemeSettingPage() {
         }
 
         for (const [gid, gift] of collection.gifts.entries()) {
-          if (gift.file === null) {
+          if (gift.gift_file === null) {
             handleNoti(
               <p>
                 {cid + 1}번 선물 목록의 {gid + 1}번 선물에
@@ -327,7 +332,10 @@ export default function ThemeSettingPage() {
           gifts: await Promise.all(
             collection.gifts.map(async (gift) => ({
               ...gift,
-              file: await convertToWebP(gift.file as File),
+              gift_file:
+                gift.gift_file instanceof File
+                  ? await convertToWebP(gift.gift_file)
+                  : gift.gift_file,
             })),
           ),
         })),
@@ -338,12 +346,12 @@ export default function ThemeSettingPage() {
     };
 
     try {
-      setLoading(true);
+      setSaveLoading(true);
       const payload: CreateThemePayload = {
         name: name,
         desc: description,
         bg_limit: 0 <= bgIndex && bgIndex <= 10 ? bgIndex : null,
-        banner: await convertToWebP(banner[0]),
+        banner: banner instanceof File ? await convertToWebP(banner) : banner,
         enroll_start_at: enrollStartDate.toISOString(),
         enroll_end_at: enrollEndDate.toISOString(),
         review_start_at: reviewStartDate.toISOString(),
@@ -366,20 +374,17 @@ export default function ThemeSettingPage() {
 
       handleNoti(<p>성공적으로 테마가 저장되었습니다.</p>);
     } catch (e) {
-      if (e instanceof WebPConversionError) {
+      if (e instanceof WebPConversionError)
         handleNoti(
           <p>
             이미지를 WebP 형식으로 변환하는데 실패했습니다.
             <br /> 잠시 후 다시 시도해주세요.
           </p>,
         );
-      } else if (e instanceof Error) {
-        handleNoti(<p>{e.message}</p>);
-      } else {
-        handleNoti(<p>알 수 없는 오류가 발생했습니다.</p>);
-      }
+      else if (e instanceof Error) handleNoti(<p>{e.message}</p>);
+      else handleNoti(<p>알 수 없는 오류가 발생했습니다.</p>);
     } finally {
-      setLoading(false);
+      setSaveLoading(false);
     }
   };
 
@@ -412,12 +417,12 @@ export default function ThemeSettingPage() {
             justify="center"
             style={{ position: "relative", aspectRatio: 5 / 2 }}
           >
-            {banner.length == 0 || !bannerPreview[0] ? (
+            {!bannerPreview ? (
               <AddFileButton
                 icon="/images/add-file-button/add-file.svg"
                 size={40}
                 fileRatio="5:2"
-                setFiles={setBanner}
+                setFile={setBanner}
               />
             ) : (
               <>
@@ -425,7 +430,7 @@ export default function ThemeSettingPage() {
                   w={28}
                   h={28}
                   style={{ position: "absolute", top: 0, right: 0 }}
-                  onClick={() => setBanner([])}
+                  onClick={() => setBanner(null)}
                 >
                   <Image
                     style={{ display: "block" }}
@@ -436,8 +441,8 @@ export default function ThemeSettingPage() {
                   />
                 </UnstyledButton>
                 <Image
-                  key={bannerPreview[0]}
-                  src={bannerPreview[0]}
+                  key={bannerPreview}
+                  src={bannerPreview}
                   alt=""
                   width={390}
                   height={156}
@@ -511,7 +516,7 @@ export default function ThemeSettingPage() {
       </section>
       <EnrollFooter
         text="저 장 하 기"
-        loading={loading}
+        loading={saveLoading}
         disabled={false}
         onClick={handleSave}
       />

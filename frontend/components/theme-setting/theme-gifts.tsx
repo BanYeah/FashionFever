@@ -284,13 +284,17 @@ export const GiftCollection = forwardRef(
 );
 
 const Gift = forwardRef(({ onDelete }: { onDelete: () => void }, ref) => {
-  const [file, setFile] = useState<File[]>([]);
-  const [preview, setPreview] = useState<string[]>([]);
+  const [file, setFile] = useState<File | string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    const urls = file.map((file) => URL.createObjectURL(file));
-    setPreview(urls);
-    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url); // clean-up
+    }
+
+    setPreview(file);
   }, [file]);
 
   const [themeName, setThemeName] = useState("");
@@ -300,19 +304,19 @@ const Gift = forwardRef(({ onDelete }: { onDelete: () => void }, ref) => {
     getData: () => ({
       theme_name: themeName,
       gift_name: itemName,
-      file: file.length !== 0 ? file[0] : null,
+      gift_file: file,
     }),
   }));
 
   return (
     <Group align="center" gap={8} h={80}>
       <Flex align="center" justify="center" w={125}>
-        {file.length === 0 || !preview[0] ? (
+        {!preview ? (
           <AddFileButton
             icon="/images/add-file-button/add-file.svg"
             size={28}
             fileRatio="1:1"
-            setFiles={setFile}
+            setFile={setFile}
           />
         ) : (
           <div className={classes.GiftImageWrapper}>
@@ -330,7 +334,7 @@ const Gift = forwardRef(({ onDelete }: { onDelete: () => void }, ref) => {
                 height={20}
               />
             </UnstyledButton>
-            <Image src={preview[0]} alt="" width={80} height={80} />
+            <Image src={preview} alt="" width={80} height={80} />
           </div>
         )}
       </Flex>

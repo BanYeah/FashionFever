@@ -10,7 +10,7 @@ interface FileDisplayProps {
   index: number;
   setIndex: Dispatch<SetStateAction<number>>;
   preview: string;
-  setFiles: Dispatch<SetStateAction<File[]>>;
+  setFiles: Dispatch<SetStateAction<(File | string)[]>>;
 }
 
 export function FileDisplay({
@@ -24,7 +24,7 @@ export function FileDisplay({
     e.stopPropagation();
 
     setFiles((prev) => {
-      const newFiles = prev.filter((_, i) => i !== idx); // 내 인덱스에 해당하는 파일 제거
+      const newFiles = prev.filter((_, i) => i !== idx);
       return newFiles;
     });
 

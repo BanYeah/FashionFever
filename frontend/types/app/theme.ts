@@ -1,7 +1,7 @@
 export interface Gift_t {
   theme_name: string;
   gift_name: string;
-  file: File | null;
+  gift_file: File | string;
 }
 
 export interface GiftCollection_t {

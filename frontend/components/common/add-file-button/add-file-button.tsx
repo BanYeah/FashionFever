@@ -11,13 +11,15 @@ interface AddFileButtonProps {
   icon: string;
   size: number;
   fileRatio: string;
-  setFiles: Dispatch<SetStateAction<File[]>>;
+  setFile?: Dispatch<SetStateAction<File | string | null>>;
+  setFiles?: Dispatch<SetStateAction<(File | string)[]>>;
 }
 
 export function AddFileButton({
   icon,
   size,
   fileRatio,
+  setFile,
   setFiles,
 }: AddFileButtonProps) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -101,14 +103,17 @@ export function AddFileButton({
       return;
     }
 
-    setFiles((prev) => {
-      if (prev.length >= 4) {
-        setErrorMessage(<p>이미지는 최대 4장까지 등록 가능합니다.</p>);
-        open();
-        return prev;
-      }
-      return [...prev, file];
-    });
+    if (setFile) setFile(file);
+    if (setFiles) {
+      setFiles((prev) => {
+        if (prev.length >= 4) {
+          setErrorMessage(<p>이미지는 최대 4장까지 등록 가능합니다.</p>);
+          open();
+          return prev;
+        }
+        return [...prev, file];
+      });
+    }
   };
 
   return (

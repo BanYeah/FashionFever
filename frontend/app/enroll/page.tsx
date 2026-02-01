@@ -19,13 +19,24 @@ export default function EnrollPage() {
     useDisclosure(false);
 
   const [index, setIndex] = useState<number>(0); // File Index
+  const [files, setFiles] = useState<(File | string)[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
-  const [files, setFiles] = useState<File[]>([]);
 
   useEffect(() => {
-    const urls = files.map((file) => URL.createObjectURL(file));
+    const urls = files.map((file) => {
+      if (file instanceof File) return URL.createObjectURL(file);
+      return file;
+    });
+
     setPreviews(urls);
-    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+
+    // clean-up
+    return () => {
+      urls.forEach((url) => {
+        // blob:으로 시작하는 객체 URL만 해제 (기존 네트워크 URL은 제외)
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+      });
+    };
   }, [files]);
 
   return (
