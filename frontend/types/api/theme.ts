@@ -16,7 +16,7 @@ export interface GiftCollection {
   gifts: Gift[];
 }
 
-export interface CreateThemePayload {
+export interface ThemePayload {
   name: string;
   desc: string;
   bg_limit: number | null;

@@ -27,12 +27,16 @@ import { enrollBgColor } from "@/types/enroll-bg-color";
 import { GiftCollection_t } from "@/types/app/theme";
 import {
   GiftCollection,
-  CreateThemePayload,
+  ThemePayload,
   GiftCollectionData,
   ThemeData,
 } from "@/types/api/theme";
 import { convertToWebP, WebPConversionError } from "@/utils/convert-to-webp";
-import { createThemeSetting, getThemeSetting } from "@/utils/api/theme";
+import {
+  createThemeSetting,
+  getThemeSetting,
+  patchThemeSetting,
+} from "@/utils/api/theme";
 
 export default function ThemeSettingPage() {
   const router = useRouter();
@@ -95,6 +99,18 @@ export default function ThemeSettingPage() {
     GiftCollectionData[]
   >([]);
 
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const formatter = new Intl.DateTimeFormat("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "Asia/Seoul",
+    });
+
+    return formatter.format(date).replace(/\. /g, " ").replace(/\.$/, "");
+  };
+
   useEffect(() => {
     if (!themeId) return;
 
@@ -111,12 +127,12 @@ export default function ThemeSettingPage() {
 
           setBanner(data.banner_url);
 
-          setEnrollStart(data.enroll_start_at.split("T")[0].replace("-", " "));
-          setEnrollEnd(data.enroll_end_at.split("T")[0].replace("-", " "));
-          setReviewStart(data.review_start_at.split("T")[0].replace("-", " "));
-          setReviewEnd(data.review_end_at.split("T")[0].replace("-", " "));
-          setVoteStart(data.vote_start_at.split("T")[0].replace("-", " "));
-          setVoteEnd(data.vote_end_at.split("T")[0].replace("-", " "));
+          setEnrollStart(formatDate(data.enroll_start_at));
+          setEnrollEnd(formatDate(data.enroll_end_at));
+          setReviewStart(formatDate(data.review_start_at));
+          setReviewEnd(formatDate(data.review_end_at));
+          setVoteStart(formatDate(data.vote_start_at));
+          setVoteEnd(formatDate(data.vote_end_at));
 
           if (data.reviewer_minicode)
             setReviewer("judge_" + data.reviewer_minicode);
@@ -324,21 +340,23 @@ export default function ThemeSettingPage() {
 
     /* 일정 유효성 검사 */
     const enrollStartDate = new Date(
-      enrollStart.replace(" ", "-") + "T00:00:00+09:00",
+      enrollStart.replaceAll(" ", "-") + "T00:00:00+09:00",
     );
     const enrollEndDate = new Date(
-      enrollEnd.replace(" ", "-") + "T23:59:59+09:00",
+      enrollEnd.replaceAll(" ", "-") + "T23:59:59+09:00",
     );
     const reviewStartDate = new Date(
-      reviewStart.replace(" ", "-") + "T00:00:00+09:00",
+      reviewStart.replaceAll(" ", "-") + "T00:00:00+09:00",
     );
     const reviewEndDate = new Date(
-      reviewEnd.replace(" ", "-") + "T23:59:59+09:00",
+      reviewEnd.replaceAll(" ", "-") + "T23:59:59+09:00",
     );
     const voteStartDate = new Date(
-      voteStart.replace(" ", "-") + "T00:00:00+09:00",
+      voteStart.replaceAll(" ", "-") + "T00:00:00+09:00",
     );
-    const voteEndDate = new Date(voteEnd.replace(" ", "-") + "T23:59:59+09:00");
+    const voteEndDate = new Date(
+      voteEnd.replaceAll(" ", "-") + "T23:59:59+09:00",
+    );
 
     const now = new Date();
     if (
@@ -396,7 +414,7 @@ export default function ThemeSettingPage() {
 
     try {
       setSaveLoading(true);
-      const payload: CreateThemePayload = {
+      const payload: ThemePayload = {
         name: name,
         desc: description,
         bg_limit: 0 <= bgIndex && bgIndex <= 10 ? bgIndex : null,
@@ -413,7 +431,10 @@ export default function ThemeSettingPage() {
         collections: await convertToWebP_GC(giftsData),
       };
 
-      const result = await createThemeSetting(payload);
+      const result = !themeId
+        ? await createThemeSetting(payload)
+        : await patchThemeSetting(themeId, payload);
+
       if (!result.success)
         throw new Error(result.message || "서버 처리 중 오류가 발생했습니다.");
 

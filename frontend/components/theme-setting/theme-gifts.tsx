@@ -36,27 +36,38 @@ export const ThemeGifts = forwardRef(
   ({ initialData }: { initialData: GiftCollectionData[] }, ref) => {
     const [opened, { toggle }] = useDisclosure(false);
 
-    const [collectionIds, setCollectionIds] = useState<string[]>([]);
+    const [collections, setCollections] = useState<
+      { id: string; data?: GiftCollectionData }[]
+    >([]);
+
     const collectionRefs = useRef<{
       [key: string]: GiftCollectionHandle | null;
     }>({});
 
     useEffect(() => {
       if (initialData && initialData.length > 0) {
-        setCollectionIds(initialData.map(() => crypto.randomUUID()));
+        setCollections(
+          initialData.map((data) => ({
+            id: crypto.randomUUID(),
+            data: data,
+          })),
+        );
         if (!opened) toggle();
       }
     }, [initialData]);
 
     const addCollection = () => {
-      setCollectionIds((prev) => [...prev, crypto.randomUUID()]);
+      setCollections((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), data: undefined },
+      ]);
       if (!opened) toggle();
     };
 
     useImperativeHandle(ref, () => ({
       getAllData: () =>
-        collectionIds
-          .map((sid) => collectionRefs.current[sid]?.getData())
+        collections
+          .map((col) => collectionRefs.current[col.id]?.getData())
           .filter((data): data is GiftCollection_t => data !== undefined),
     }));
 
@@ -81,18 +92,20 @@ export const ThemeGifts = forwardRef(
           <p>선물 목록 관리</p>
         </UnstyledButton>
 
-        <Collapse pb={`${collectionIds.length == 0 ? 0 : 12}`} in={opened}>
+        <Collapse pb={`${collections.length == 0 ? 0 : 12}`} in={opened}>
           <Stack gap={10}>
-            {collectionIds.map((gcid, index) => (
+            {collections.map((col) => (
               <GiftCollection
-                key={gcid}
-                initialData={initialData[index]}
+                key={col.id}
+                initialData={col.data}
                 onDelete={() => {
-                  delete collectionRefs.current[gcid];
-                  setCollectionIds((prev) => prev.filter((id) => id !== gcid));
+                  delete collectionRefs.current[col.id];
+                  setCollections((prev) =>
+                    prev.filter((item) => item.id !== col.id),
+                  );
                 }}
                 ref={(el) => {
-                  collectionRefs.current[gcid] = el as GiftCollectionHandle;
+                  collectionRefs.current[col.id] = el as GiftCollectionHandle;
                 }}
               />
             ))}
@@ -119,7 +132,7 @@ export const GiftCollection = forwardRef(
     const [themeType, setThemeType] = useState<string | null>("NORMAL");
     const [rarity, setRarity] = useState<string | null>("SR");
 
-    const [giftIds, setGiftIds] = useState<string[]>([]);
+    const [gifts, setGifts] = useState<{ id: string; data?: GiftData }[]>([]);
     const giftRefs = useRef<{ [key: string]: GiftHandle | null }>({});
 
     useEffect(() => {
@@ -130,17 +143,27 @@ export const GiftCollection = forwardRef(
         setIsRandom(initialData.is_random);
         setSameTheme(initialData.is_same_theme ?? false);
 
-        setThemeType(initialData.theme_type);
-        setRarity(initialData.rarity);
+        setThemeType(initialData.theme_type ?? "NORMAL");
+        setRarity(initialData.rarity ?? "SR");
 
-        setGiftIds(initialData.gifts.map(() => crypto.randomUUID()));
+        setGifts(
+          initialData.gifts.map((gift) => ({
+            id: crypto.randomUUID(),
+            data: gift,
+          })),
+        );
       }
     }, [initialData]);
 
-    const addGift = () => setGiftIds((prev) => [...prev, crypto.randomUUID()]);
+    const addGift = () =>
+      setGifts((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), data: undefined },
+      ]);
+
     const moveGift = (id: string, direction: "up" | "down") => {
-      setGiftIds((prev) => {
-        const currentIndex = prev.indexOf(id);
+      setGifts((prev) => {
+        const currentIndex = prev.findIndex((item) => item.id === id);
         const targetIndex =
           direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
@@ -167,8 +190,8 @@ export const GiftCollection = forwardRef(
         is_same_theme: isRandom ? isSameTheme : null,
         theme_type: isRandom ? themeType : null,
         rarity: isRandom ? rarity : null,
-        gifts: giftIds
-          .map((gid) => giftRefs.current[gid]?.getData())
+        gifts: gifts
+          .map((gift) => giftRefs.current[gift.id]?.getData())
           .filter((data): data is Gift_t => data !== undefined),
       }),
     }));
@@ -230,20 +253,20 @@ export const GiftCollection = forwardRef(
           </Group>
 
           {/* 선물 */}
-          {giftIds.map((gid, index) => (
+          {gifts.map((gift, index) => (
             <Gift
-              key={gid}
-              initialData={initialData?.gifts[index]}
+              key={gift.id}
+              initialData={gift.data}
               isTop={index === 0}
-              isBottom={index === giftIds.length - 1}
-              moveUp={() => moveGift(gid, "up")}
-              moveDown={() => moveGift(gid, "down")}
+              isBottom={index === gifts.length - 1}
+              moveUp={() => moveGift(gift.id, "up")}
+              moveDown={() => moveGift(gift.id, "down")}
               onDelete={() => {
-                delete giftRefs.current[gid];
-                setGiftIds((prev) => prev.filter((id) => id !== gid));
+                delete giftRefs.current[gift.id];
+                setGifts((prev) => prev.filter((item) => item.id !== gift.id));
               }}
               ref={(el) => {
-                giftRefs.current[gid] = el as GiftHandle;
+                giftRefs.current[gift.id] = el as GiftHandle;
               }}
             />
           ))}

@@ -1,6 +1,6 @@
-import { CreateThemePayload } from "@/types/api/theme";
+import { ThemePayload } from "@/types/api/theme";
 
-export async function createThemeSetting(payload: CreateThemePayload) {
+function themeFormData(payload: ThemePayload): FormData {
   const formData = new FormData();
 
   formData.append("name", payload.name);
@@ -32,6 +32,7 @@ export async function createThemeSetting(payload: CreateThemePayload) {
         return {
           theme_name: gift.theme_name,
           gift_name: gift.gift_name,
+          gift_url: null,
           gift_file_order: gift_file_order++,
         };
       } else {
@@ -39,6 +40,7 @@ export async function createThemeSetting(payload: CreateThemePayload) {
           theme_name: gift.theme_name,
           gift_name: gift.gift_name,
           gift_url: gift.gift_file,
+          gift_file_order: null,
         };
       }
     });
@@ -47,6 +49,11 @@ export async function createThemeSetting(payload: CreateThemePayload) {
   });
   formData.append("collections", JSON.stringify(collectionsData));
 
+  return formData;
+}
+
+export async function createThemeSetting(payload: ThemePayload) {
+  const formData = themeFormData(payload);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/setting`,
     {
@@ -76,6 +83,33 @@ export async function getThemeSetting(theme_id: string) {
   );
 
   if (!res.ok) return { success: false, status: res.status };
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
+export async function patchThemeSetting(
+  theme_id: string,
+  payload: ThemePayload,
+) {
+  const formData = themeFormData(payload);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/${theme_id}/setting`,
+    {
+      method: "PATCH",
+      body: formData, // FormData 사용 시 Content-Type 헤더 설정 금지
+      credentials: "include",
+    },
+  );
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    return {
+      success: false,
+      status: res.status,
+      message: errorData.message || "테마를 수정하는데 실패했습니다.",
+    };
+  }
 
   const data = await res.json();
   return { success: true, ...data };
