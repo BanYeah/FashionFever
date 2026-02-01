@@ -124,14 +124,14 @@ export class ThemeService {
 
       // Banner
       if (bannerFile !== null) {
-      const bannerUrl = await this.r2Service.uploadImage(
-        bannerFile,
-        'theme-banner',
-      );
-      await queryRunner.manager.save(Banner, {
-        theme_id: themeId,
-        banner_url: bannerUrl,
-      });
+        const bannerUrl = await this.r2Service.uploadImage(
+          bannerFile,
+          'theme-banner',
+        );
+        await queryRunner.manager.save(Banner, {
+          theme_id: themeId,
+          banner_url: bannerUrl,
+        });
       } else if (dto.banner_url) {
         await queryRunner.manager.save(Banner, {
           theme_id: themeId,
@@ -189,14 +189,14 @@ export class ThemeService {
 
           try {
             if (gift_file_order !== null) {
-          const giftUrl = await this.r2Service.uploadImage(
+              const giftUrl = await this.r2Service.uploadImage(
                 giftFiles[gift_file_order],
-            'theme-gift',
-          );
-          await queryRunner.manager.save(Gift, {
-            gift_collection_id: collection.gift_collection_id,
+                'theme-gift',
+              );
+              await queryRunner.manager.save(Gift, {
+                gift_collection_id: collection.gift_collection_id,
                 ...giftData,
-            gift_url: giftUrl,
+                gift_url: giftUrl,
                 collection_order: index + 1,
               });
             } else if (gift_url) {
@@ -205,7 +205,7 @@ export class ThemeService {
                 ...giftData,
                 gift_url: gift_url,
                 collection_order: index + 1,
-          });
+              });
             } else throw new Error();
           } catch {
             throw new BadRequestException(
@@ -258,20 +258,37 @@ export class ThemeService {
 
       return {
         data: {
-          ...theme,
-          reviewer: theme.reviewer
-            ? {
-                theme_id: theme.reviewer.theme_id,
-                user_id: theme.reviewer.user_id,
-                minicode: theme.reviewer.user?.minicode || null,
-              }
-            : null,
-          judges: judges.map((j) => ({
-            theme_id: j.theme_id,
-            user_id: j.user_id,
-            minicode: j.user?.minicode || null,
+          name: theme.header.name,
+          desc: theme.header.desc,
+          bg_limt: theme.header.bg_limit,
+
+          banner_url: theme.banner.banner_url,
+
+          enroll_start_at: theme.enroll_start_at,
+          enroll_end_at: theme.enroll_end_at,
+          review_start_at: theme.review_start_at,
+          review_end_at: theme.review_end_at,
+          vote_start_at: theme.vote_start_at,
+          vote_end_at: theme.vote_end_at,
+          status: theme.status,
+
+          reviewer_minicode: theme.reviewer.user?.minicode || null,
+          judge_minicodes: judges.map((j) => j.user.minicode),
+
+          collections: collections.map((col) => ({
+            heart_rate: col.heart_rate,
+            gift_total_num: col.gift_total_num,
+            is_random: col.is_random,
+            is_same_theme: col.is_same_theme,
+            theme_type: col.theme_type,
+            rarity: col.rarity,
+
+            gifts: col.gifts.map((gift) => ({
+              theme_name: gift.theme_name,
+              gift_name: gift.gift_name,
+              gift_url: gift.gift_url,
+            })),
           })),
-          collections,
         },
       };
     } catch (err) {
