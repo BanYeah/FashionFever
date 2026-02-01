@@ -74,3 +74,16 @@ export interface ThemeData {
 
   collections: GiftCollectionData[];
 }
+
+export interface ThemeScheduleData {
+  theme_id: string;
+  banner_url: string;
+
+  enroll_start_at: string; // ISO 문자열
+  enroll_end_at: string;
+  review_start_at: string;
+  review_end_at: string;
+  vote_start_at: string;
+  vote_end_at: string;
+  status: string;
+}

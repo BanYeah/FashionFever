@@ -59,6 +59,7 @@ export async function createThemeSetting(payload: ThemePayload) {
     {
       method: "POST",
       body: formData, // FormData 사용 시 Content-Type 헤더 설정 금지
+      cache: "no-store",
       credentials: "include",
     },
   );
@@ -71,6 +72,18 @@ export async function createThemeSetting(payload: ThemePayload) {
       message: errorData.message || "테마를 저장하는데 실패했습니다.",
     };
   }
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
+export async function getThemeSettings(page: number) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/setting?page=${page}`,
+    { cache: "no-store", credentials: "include" },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
 
   const data = await res.json();
   return { success: true, ...data };
@@ -98,6 +111,7 @@ export async function patchThemeSetting(
     {
       method: "PATCH",
       body: formData, // FormData 사용 시 Content-Type 헤더 설정 금지
+      cache: "no-store",
       credentials: "include",
     },
   );
@@ -113,4 +127,27 @@ export async function patchThemeSetting(
 
   const data = await res.json();
   return { success: true, ...data };
+}
+
+export async function deleteThemeSetting(theme_id: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/${theme_id}/setting`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      credentials: "include",
+    },
+  );
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    return {
+      success: false,
+      status: res.status,
+      message: errorData.message || "테마를 삭제하는데 실패했습니다.",
+    };
+  }
+
+  return { success: true };
 }

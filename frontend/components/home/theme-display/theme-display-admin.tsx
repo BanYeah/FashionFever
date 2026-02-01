@@ -4,21 +4,26 @@ import classes from "./theme-display.module.css";
 import Image from "next/image";
 import Link from "next/link";
 import { useDisclosure } from "@mantine/hooks";
+import { useNotification } from "@/components/notification/notification";
 import { Flex, Group, Stack, UnstyledButton, Divider } from "@mantine/core";
 import { ModalGoBack } from "../../common/modal/modal-go-back";
+import { ThemeScheduleData } from "@/types/api/theme";
+import { formatDueIn } from "@/utils/format-due-in";
+import { deleteThemeSetting } from "@/utils/api/theme";
 
 interface ThemeDisplayAdminProps {
-  variant: "unopen" | "open" | "pending" | "vote" | "result";
+  data: ThemeScheduleData;
+  reload: () => void;
 }
 
-export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
+export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
   return (
     <Stack className={classes.Container} gap={0}>
       {/* classes.Container에서 <p> 태그의 color: var(--gray-8a); font-size: 14px로 설정 */}
 
       {/* 테마 배너 이미지 */}
       <div className={classes.ImageWrapper}>
-        {variant === "pending" ? (
+        {data.status === "REVIEWING" ? (
           <Stack
             className={classes.ImageDark}
             align="center"
@@ -35,7 +40,7 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
           </Stack>
         ) : null}
         <Image
-          src="/images/home/theme-display/image.png"
+          src={data.banner_url}
           alt=""
           width={390}
           height={156}
@@ -44,30 +49,36 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
       </div>
 
       {/* 참가 상태 */}
-      {variant === "unopen" ? (
+      {data.status === "PREPARING" ? (
         // 준 비 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>아직 공개가 되지 않은 테마예요!</p>
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>23시간 35분 남음</p>
+            <p>{formatDueIn(data.enroll_start_at)} 남음</p>
             <Group gap={4}>
-              <ThemeDeleteButton />
-              <ThemeSettingLink href="/theme-setting" />
+              <ThemeDeleteButton themeId={data.theme_id} reload={reload} />
+              <ThemeSettingLink
+                href={`/theme-setting?theme_id=${data.theme_id}`}
+              />
             </Group>
           </Stack>
         </Group>
-      ) : variant === "open" ? (
+      ) : data.status === "ENROLLING" ? (
         // 모 집 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p style={{ color: "var(--black)" }}>
             아직 미니 꾸미기가 진행 중인 테마예요!
           </p>
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p style={{ color: "var(--main)" }}>23시간 35분 남음</p>
-            <ThemeSettingLink href="/theme-setting" />
+            <p style={{ color: "var(--main)" }}>
+              {formatDueIn(data.enroll_end_at)} 남음
+            </p>
+            <ThemeSettingLink
+              href={`/theme-setting?theme_id=${data.theme_id}`}
+            />
           </Stack>
         </Group>
-      ) : variant === "pending" ? (
+      ) : data.status === "REVIEWING" ? (
         // 검 수 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Stack pt={7} pb={7} gap={5}>
@@ -82,20 +93,26 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
             </Group>
           </Stack>
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p style={{ color: "var(--main)" }}>7시간 15분 후 투표 시작</p>
+            <p style={{ color: "var(--main)" }}>
+              {formatDueIn(data.vote_start_at)} 후 투표 시작
+            </p>
             <Group gap={4}>
               <ThemeReviewLink href="/" />
-              <ThemeSettingLink href="/theme-setting" />
+              <ThemeSettingLink
+                href={`/theme-setting?theme_id=${data.theme_id}`}
+              />
             </Group>
           </Stack>
         </Group>
-      ) : variant === "vote" ? (
+      ) : data.status === "VOTING" ? (
         // 투 표 중
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>현재 투표가 진행 중인 테마예요!</p>
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>결과 발표까지 21시간 15분</p>
-            <ThemeSettingLink href="/theme-setting" />
+            <p>결과 발표까지 {formatDueIn(data.vote_end_at)}</p>
+            <ThemeSettingLink
+              href={`/theme-setting?theme_id=${data.theme_id}`}
+            />
           </Stack>
         </Group>
       ) : (
@@ -132,7 +149,13 @@ export function ThemeDisplayAdmin({ variant }: ThemeDisplayAdminProps) {
   );
 }
 
-function ThemeDeleteButton() {
+interface ThemeDeleteButtonProps {
+  themeId: string;
+  reload: () => void;
+}
+
+function ThemeDeleteButton({ themeId, reload }: ThemeDeleteButtonProps) {
+  const { notify, notifyServerError } = useNotification();
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
@@ -142,7 +165,23 @@ function ThemeDeleteButton() {
         go="삭제하기"
         back="그만두기"
         opened={opened}
-        onGo={() => {}}
+        onGo={async () => {
+          const result = await deleteThemeSetting(themeId);
+          if (result.success) {
+            reload();
+            close();
+            return;
+          }
+
+          close();
+          switch (result.status) {
+            case 404:
+              notify(<p>존재하지 않는 테마예요!</p>);
+              return;
+            default:
+              notifyServerError();
+          }
+        }}
         close={close}
       >
         <p>
