@@ -312,4 +312,276 @@ export class ThemeService {
       await queryRunner.release();
     }
   }
+
+  async patchThemeSetting(
+    themeId: string,
+    dto: ThemeFormDto,
+    bannerFile: Express.Multer.File | null,
+    giftFiles: Express.Multer.File[],
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const deletedFiles: Set<string> = new Set<string>();
+    const uploadedFiles: string[] = [];
+
+    try {
+      // Schedule
+      const now = new Date();
+      const schedulesDto = [
+        dto.enroll_start_at,
+        dto.enroll_end_at,
+        dto.review_start_at,
+        dto.review_end_at,
+        dto.vote_start_at,
+        dto.vote_end_at,
+      ];
+
+      if (!schedulesDto.every((date) => new Date(date) > now))
+        throw new BadRequestException(
+          '과거 시점으로는 일정을 등록할 수 없어요!',
+        );
+
+      // 기존 테마 일정과 참가/검수/투표 기간과 겹치는지 확인
+      {
+        const eol = await this.checkOverlap(
+          queryRunner,
+          'enroll',
+          dto.enroll_start_at,
+          dto.enroll_end_at,
+          themeId,
+        );
+        if (eol) {
+          throw new BadRequestException(
+            `참가 기간이 ${this.formatDate(eol.enroll_start_at)} ~ ${this.formatDate(eol.enroll_end_at)}인 일정이 이미 존재해요.`,
+          );
+        }
+
+        const rol = await this.checkOverlap(
+          queryRunner,
+          'review',
+          dto.review_start_at,
+          dto.review_end_at,
+          themeId,
+        );
+        if (rol) {
+          throw new BadRequestException(
+            `검수 기간이 ${this.formatDate(rol.review_start_at)} ~ ${this.formatDate(rol.review_end_at)}인 일정이 이미 존재합니다.`,
+          );
+        }
+
+        const vol = await this.checkOverlap(
+          queryRunner,
+          'vote',
+          dto.vote_start_at,
+          dto.vote_end_at,
+          themeId,
+        );
+        if (vol) {
+          throw new BadRequestException(
+            `투표 기간이 ${this.formatDate(vol.vote_start_at)} ~ ${this.formatDate(vol.vote_end_at)}인 일정이 이미 존재합니다.`,
+          );
+        }
+      }
+
+      const schedule = await queryRunner.manager.findOne(Schedule, {
+        where: { theme_id: themeId },
+      });
+      if (!schedule) throw new NotFoundException();
+
+      // 이미 시작된 일정이거나 시작하기 1시간 전인 일정을 수정하지는 않는지 확인
+      {
+        const ONE_HOUR_MS = 60 * 60 * 1000;
+        const limitTime = new Date(now.getTime() + ONE_HOUR_MS);
+
+        const scheduleChecks = [
+          [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
+          [dto.enroll_end_at, schedule.enroll_end_at, '참가 종료'],
+          [dto.review_start_at, schedule.review_start_at, '검수 시작'],
+          [dto.review_end_at, schedule.review_end_at, '검수 종료'],
+          [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
+          [dto.vote_end_at, schedule.vote_end_at, '투표 종료'],
+        ];
+
+        for (const [newDate, oldDate, label] of scheduleChecks) {
+          const isChanged =
+            new Date(newDate).getTime() !== new Date(oldDate).getTime();
+          const isImminent = new Date(oldDate) < limitTime;
+
+          if (isChanged && isImminent)
+            throw new BadRequestException(
+              `이미 시작되었거나 시작이 1시간 미만으로 남은 '${label}' 일정은 수정할 수 없어요!`,
+            );
+        }
+      }
+
+      await queryRunner.manager.update(
+        Schedule,
+        { theme_id: themeId },
+        {
+          enroll_start_at: dto.enroll_start_at,
+          enroll_end_at: dto.enroll_end_at,
+          review_start_at: dto.review_start_at,
+          review_end_at: dto.review_end_at,
+          vote_start_at: dto.vote_start_at,
+          vote_end_at: dto.vote_end_at,
+        },
+      );
+
+      // Banner
+      const banner = await queryRunner.manager.findOne(Banner, {
+        where: { theme_id: themeId },
+      });
+      if (!banner) throw new NotFoundException();
+
+      deletedFiles.add(banner.banner_url);
+
+      if (bannerFile !== null) {
+        const bannerUrl = await this.r2Service.uploadImage(
+          bannerFile,
+          'theme-banner',
+        );
+        uploadedFiles.push(bannerUrl);
+
+        await queryRunner.manager.update(
+          Banner,
+          { theme_id: themeId },
+          { banner_url: bannerUrl },
+        );
+      } else if (dto.banner_url) {
+        if (banner.banner_url === dto.banner_url)
+          deletedFiles.delete(banner.banner_url);
+        else
+          await queryRunner.manager.update(
+            Banner,
+            { theme_id: themeId },
+            { banner_url: dto.banner_url },
+          );
+      } else throw new BadRequestException('배너 이미지는 필수예요!');
+
+      // Header
+      await queryRunner.manager.update(
+        Header,
+        { theme_id: themeId },
+        { name: dto.name, desc: dto.desc, bg_limit: dto.bg_limit },
+      );
+
+      // Reviewer
+      if (dto.reviewer_minicode) {
+        const reviewerUser = await this.userRepo.findOneBy({
+          minicode: dto.reviewer_minicode,
+        });
+        if (!reviewerUser)
+          throw new BadRequestException(
+            '입력하신 미니코드에 해당하는 심사위원을 찾을 수 없어요.',
+          );
+
+        await queryRunner.manager.update(
+          Reviewer,
+          { theme_id: themeId },
+          { user_id: reviewerUser.user_id },
+        );
+      } else {
+        await queryRunner.manager.update(
+          Reviewer,
+          { theme_id: themeId },
+          { user_id: null },
+        );
+      }
+
+      // ThemeJudge
+      await queryRunner.manager.delete(ThemeJudge, { theme_id: themeId });
+
+      const judgeUsers = await this.userRepo.find({
+        where: { minicode: In(dto.judge_minicodes) },
+      });
+
+      const judges = judgeUsers.map((user) => ({
+        theme_id: themeId,
+        user_id: user.user_id,
+      }));
+
+      if (judges.length > 0)
+        await queryRunner.manager.insert(ThemeJudge, judges);
+
+      // GiftCollection & Gift
+      const giftCollections = await queryRunner.manager.find(GiftCollection, {
+        where: { theme_id: themeId },
+        relations: ['gifts'],
+      });
+
+      for (const collection of giftCollections)
+        collection.gifts.forEach((gift) => {
+          deletedFiles.add(gift.gift_url);
+        });
+
+      await queryRunner.manager.delete(GiftCollection, { theme_id: themeId });
+
+      for (const colDto of dto.collections) {
+        const { gifts, ...collectionData } = colDto;
+
+        const collection = await queryRunner.manager.save(GiftCollection, {
+          theme_id: themeId,
+          ...collectionData,
+        });
+
+        for (const [index, giftDto] of gifts.entries()) {
+          const { gift_url, gift_file_order, ...giftData } = giftDto;
+
+          try {
+            if (gift_file_order !== null) {
+              const giftUrl = await this.r2Service.uploadImage(
+                giftFiles[gift_file_order],
+                'theme-gift',
+              );
+              uploadedFiles.push(giftUrl);
+
+              await queryRunner.manager.save(Gift, {
+                gift_collection_id: collection.gift_collection_id,
+                ...giftData,
+                gift_url: giftUrl,
+                collection_order: index + 1,
+              });
+            } else if (gift_url) {
+              deletedFiles.delete(gift_url);
+
+              await queryRunner.manager.save(Gift, {
+                gift_collection_id: collection.gift_collection_id,
+                ...giftData,
+                gift_url: gift_url,
+                collection_order: index + 1,
+              });
+            } else throw new Error();
+          } catch {
+            throw new BadRequestException(
+              '선물 이미지가 업로드되지 않은 선물이 있어요!',
+            );
+          }
+        }
+      }
+
+      await queryRunner.commitTransaction();
+
+      this.r2Service.deleteImages(Array.from(deletedFiles)).catch(() => {
+        console.log(
+          `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(Array.from(deletedFiles))}`,
+        );
+      });
+
+      return { success: true, data: { theme_id: themeId } };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+
+      this.r2Service.deleteImages(uploadedFiles).catch(() => {
+        console.log(
+          `[R2_ROLLBACK_ERROR] Failed to delete orphaned files: ${JSON.stringify(uploadedFiles)}`,
+        );
+      });
+
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }
