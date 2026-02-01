@@ -17,7 +17,6 @@ import { ThemeService } from './theme.service';
 
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { ThemeFormDto } from './dto/theme-form.dto';
-import { Banner } from './entities/banner.entity';
 
 @ApiTags('themes')
 @Controller('themes')
@@ -47,7 +46,7 @@ export class ThemeController {
   @Post('setting')
   @Roles('admin')
   @ApiOperation({
-    summary: '테마 설정 등록',
+    summary: '테마 설정 등록 (관리자)',
     description:
       '테마 일정, 헤더, 배너 이미지, 리뷰어/심사위원, 선물 컬렉션을 한 번에 등록합니다.',
   })
@@ -80,7 +79,7 @@ export class ThemeController {
 
   @Get(':theme_id/setting')
   @Roles('admin')
-  @ApiOperation({ summary: '테마 설정 상세 조회' })
+  @ApiOperation({ summary: '테마 설정 상세 조회 (관리자)' })
   @ApiParam({
     name: 'theme_id',
     description: '테마 번호',
@@ -96,7 +95,7 @@ export class ThemeController {
   @Patch(':theme_id/setting')
   @Roles('admin')
   @ApiOperation({
-    summary: '테마 설정 수정',
+    summary: '테마 설정 수정 (관리자)',
     description:
       '테마 일정, 헤더, 배너 이미지, 리뷰어/심사위원, 선물 컬렉션을 한 번에 수정합니다.',
   })
