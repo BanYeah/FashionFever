@@ -254,6 +254,8 @@ export class ThemeService {
 
     const data = schedule.map((item) => ({
       theme_id: item.theme_id,
+      banner_url: item.banner.banner_url,
+
       enroll_start_at: item.enroll_start_at,
       enroll_end_at: item.enroll_end_at,
       review_start_at: item.review_start_at,
@@ -261,8 +263,6 @@ export class ThemeService {
       vote_start_at: item.vote_start_at,
       vote_end_at: item.vote_end_at,
       status: item.status,
-
-      banner_url: item.banner.banner_url,
     }));
 
     return {
