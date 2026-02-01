@@ -619,4 +619,50 @@ export class ThemeService {
       await queryRunner.release();
     }
   }
+
+  async deleteThemeSetting(themeId: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const deletedFiles: string[] = [];
+
+    try {
+      // Banner (banner_url)
+      const banner = await queryRunner.manager.findOne(Banner, {
+        where: { theme_id: themeId },
+      });
+      if (!banner) throw new NotFoundException('존재하지 않는 테마예요!');
+
+      deletedFiles.push(banner.banner_url);
+
+      // GiftCollection & Gift (gift_url)
+      const giftCollections = await queryRunner.manager.find(GiftCollection, {
+        where: { theme_id: themeId },
+        relations: ['gifts'],
+      });
+
+      for (const collection of giftCollections)
+        collection.gifts.forEach((gift) => {
+          deletedFiles.push(gift.gift_url);
+        });
+
+      // Schedule (ON DELETE CASCADE)
+      await queryRunner.manager.delete(Schedule, { theme_id: themeId });
+      await queryRunner.commitTransaction();
+
+      this.r2Service.deleteImages(deletedFiles).catch(() => {
+        console.log(
+          `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(deletedFiles)}`,
+        );
+      });
+
+      return { success: true, data: { theme_id: themeId } };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }

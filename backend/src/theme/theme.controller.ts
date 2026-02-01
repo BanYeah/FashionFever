@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Query,
   Request,
@@ -62,6 +63,7 @@ export class ThemeController {
     status: 400,
     description: '잘못된 요청 (필수 파일 누락 또는 데이터 검증 실패)',
   })
+  @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'banner', maxCount: 1 },
@@ -93,6 +95,7 @@ export class ThemeController {
     example: 1,
   })
   @ApiResponse({ status: 200, description: '테마 설정 조회 성공' })
+  @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
   async getThemeSettings(@Query('page') page: number) {
     return this.themeService.getThemeSettings(page);
   }
@@ -105,6 +108,7 @@ export class ThemeController {
     description: '테마 번호',
   })
   @ApiResponse({ status: 200, description: '테마 설정 조회 성공' })
+  @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async getThemeSetting(
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
@@ -124,6 +128,7 @@ export class ThemeController {
     status: 400,
     description: '잘못된 요청 (필수 파일 누락 또는 데이터 검증 실패)',
   })
+  @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
   @ApiResponse({
     status: 404,
     description: '존재하지 않는 테마임',
@@ -150,5 +155,21 @@ export class ThemeController {
       files.banner && files.banner.length > 0 ? files.banner[0] : null,
       files.gift_files ? files.gift_files : [],
     );
+  }
+
+  @Delete(':theme_id/setting')
+  @Roles('admin')
+  @ApiOperation({ summary: '테마 설정 삭제 (관리자)' })
+  @ApiParam({
+    name: 'theme_id',
+    description: '테마 번호',
+  })
+  @ApiResponse({ status: 200, description: '테마 설정 삭제 성공' })
+  @ApiResponse({ status: 403, description: '권한 부족 (어드민 아님)' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
+  async deleteThemeSetting(
+    @Param('theme_id', new ParseUUIDPipe()) themeId: string,
+  ) {
+    return this.themeService.deleteThemeSetting(themeId);
   }
 }
