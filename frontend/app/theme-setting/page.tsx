@@ -108,7 +108,26 @@ export default function ThemeSettingPage() {
   };
 
   useEffect(() => {
-    if (!themeId) return;
+    if (!themeId) {
+      setName("");
+      setDescription("");
+      setBgLimit("배경 제한 없음");
+
+      setBanner(null);
+
+      setEnrollStart(null);
+      setEnrollEnd(null);
+      setReviewStart(null);
+      setReviewEnd(null);
+      setVoteStart(null);
+      setVoteEnd(null);
+
+      setReviewer(null);
+      setJudge([]);
+
+      setInitialCollections([]);
+      return;
+    }
 
     (async () => {
       setLoading(true);

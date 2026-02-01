@@ -45,15 +45,18 @@ export const ThemeGifts = forwardRef(
     }>({});
 
     useEffect(() => {
-      if (initialData && initialData.length > 0) {
-        setCollections(
-          initialData.map((data) => ({
-            id: crypto.randomUUID(),
-            data: data,
-          })),
-        );
-        if (!opened) toggle();
+      if (!initialData || initialData.length <= 0) {
+        setCollections([]);
+        return;
       }
+
+      setCollections(
+        initialData.map((data) => ({
+          id: crypto.randomUUID(),
+          data: data,
+        })),
+      );
+      if (!opened) toggle();
     }, [initialData]);
 
     const addCollection = () => {
@@ -136,23 +139,35 @@ export const GiftCollection = forwardRef(
     const giftRefs = useRef<{ [key: string]: GiftHandle | null }>({});
 
     useEffect(() => {
-      if (initialData) {
-        setHeartRate(initialData.heart_rate);
-        setItemTotalNumber(initialData.gift_total_num);
+      if (!initialData) {
+        setHeartRate(0);
+        setItemTotalNumber(0);
 
-        setIsRandom(initialData.is_random);
-        setSameTheme(initialData.is_same_theme ?? false);
+        setIsRandom(false);
+        setSameTheme(false);
 
-        setThemeType(initialData.theme_type ?? "NORMAL");
-        setRarity(initialData.rarity ?? "SR");
+        setThemeType("NORMAL");
+        setRarity("SR");
 
-        setGifts(
-          initialData.gifts.map((gift) => ({
-            id: crypto.randomUUID(),
-            data: gift,
-          })),
-        );
+        setGifts([]);
+        return;
       }
+
+      setHeartRate(initialData.heart_rate);
+      setItemTotalNumber(initialData.gift_total_num);
+
+      setIsRandom(initialData.is_random);
+      setSameTheme(initialData.is_same_theme ?? false);
+
+      setThemeType(initialData.theme_type ?? "NORMAL");
+      setRarity(initialData.rarity ?? "SR");
+
+      setGifts(
+        initialData.gifts.map((gift) => ({
+          id: crypto.randomUUID(),
+          data: gift,
+        })),
+      );
     }, [initialData]);
 
     const addGift = () =>
@@ -375,7 +390,9 @@ const Gift = forwardRef(
     { initialData, isTop, isBottom, moveUp, moveDown, onDelete }: GiftProps,
     ref,
   ) => {
-    /* 선물 이미지 */
+    const [themeName, setThemeName] = useState("");
+    const [itemName, setItemName] = useState("");
+
     const [file, setFile] = useState<File | string | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
 
@@ -389,16 +406,17 @@ const Gift = forwardRef(
       setPreview(file);
     }, [file]);
 
-    /* 선물 정보 */
-    const [themeName, setThemeName] = useState("");
-    const [itemName, setItemName] = useState("");
-
     useEffect(() => {
-      if (initialData) {
-        setThemeName(initialData.theme_name);
-        setItemName(initialData.gift_name);
-        setFile(initialData.gift_url);
+      if (!initialData) {
+        setThemeName("");
+        setItemName("");
+        setFile(null);
+        return;
       }
+
+      setThemeName(initialData.theme_name);
+      setItemName(initialData.gift_name);
+      setFile(initialData.gift_url);
     }, [initialData]);
 
     useImperativeHandle(ref, () => ({
