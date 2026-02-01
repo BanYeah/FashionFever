@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useDisclosure } from "@mantine/hooks";
+import { useNotification } from "@/components/notification/notification";
 import {
   Flex,
   Stack,
@@ -13,7 +13,6 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { EnrollFooter } from "@/components/app-shell/enroll-footer";
-import { ModalNoti } from "@/components/common/modal/model-noti";
 import { AddFileButton } from "@/components/common/add-file-button/add-file-button";
 import { BgLimitCombobox } from "@/components/theme-setting/bg-limit-combobox";
 import { ThemeInput } from "@/components/theme-setting/theme-input";
@@ -44,10 +43,7 @@ export default function ThemeSettingPage() {
   const searchParams = useSearchParams();
   const themeId = searchParams.get("theme_id");
 
-  /* 알림창 */
-  const [notiMessage, setNotiMessage] = useState<React.ReactNode>(null);
-  const [notiOpened, { open: openNoti, close: closeNoti }] =
-    useDisclosure(false);
+  const { notify, notifyServerError } = useNotification();
 
   /* 테마 배너 */
   const [banner, setBanner] = useState<File | string | null>(null);
@@ -141,7 +137,7 @@ export default function ThemeSettingPage() {
           setInitialCollections(data.collections);
         } else throw new Error();
       } catch {
-        handleServerError();
+        notifyServerError();
       } finally {
         setLoading(false);
       }
@@ -157,7 +153,7 @@ export default function ThemeSettingPage() {
     /* 입력값 유효성 검사 */
     {
       if (name.trim() === "") {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>테마 이름</span>이 입력되지
             않아
@@ -167,7 +163,7 @@ export default function ThemeSettingPage() {
         return;
       }
       if (description.trim() === "") {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>테마 설명</span>이 입력되지
             않아
@@ -178,7 +174,7 @@ export default function ThemeSettingPage() {
       }
 
       if (banner === null) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>테마 배너 이미지</span>가
             업로드되지 않아
@@ -189,7 +185,7 @@ export default function ThemeSettingPage() {
       }
 
       if (!enrollStart) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>참가 시작 시간</span>이
             입력되지 않아
@@ -199,7 +195,7 @@ export default function ThemeSettingPage() {
         return;
       }
       if (!enrollEnd) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>참가 종료 시간</span>이
             입력되지 않아
@@ -209,7 +205,7 @@ export default function ThemeSettingPage() {
         return;
       }
       if (!reviewStart) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>검수 시작 시간</span>이
             입력되지 않아
@@ -219,7 +215,7 @@ export default function ThemeSettingPage() {
         return;
       }
       if (!reviewEnd) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>검수 종료 시간</span>이
             입력되지 않아
@@ -229,7 +225,7 @@ export default function ThemeSettingPage() {
         return;
       }
       if (!voteStart) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>투표 시작 시간</span>이
             입력되지 않아
@@ -239,7 +235,7 @@ export default function ThemeSettingPage() {
         return;
       }
       if (!voteEnd) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>투표 종료 시간</span>이
             입력되지 않아
@@ -250,7 +246,7 @@ export default function ThemeSettingPage() {
       }
 
       if (giftsData.length === 0) {
-        handleNoti(
+        notify(
           <p>
             <span style={{ color: "var(--main)" }}>선물 목록</span>이 입력되지
             않아
@@ -262,7 +258,7 @@ export default function ThemeSettingPage() {
 
       for (const [cid, collection] of giftsData.entries()) {
         if (collection.heart_rate === 0) {
-          handleNoti(
+          notify(
             <p>
               {cid + 1}번 선물 목록에
               <br /> 입력된{" "}
@@ -274,7 +270,7 @@ export default function ThemeSettingPage() {
           return;
         }
         if (collection.gift_total_num === 0) {
-          handleNoti(
+          notify(
             <p>
               {cid + 1}번 선물 목록에
               <br /> 입력된{" "}
@@ -286,7 +282,7 @@ export default function ThemeSettingPage() {
           return;
         }
         if (collection.gifts.length === 0) {
-          handleNoti(
+          notify(
             <p>
               {cid + 1}번 선물 목록에
               <br />
@@ -299,7 +295,7 @@ export default function ThemeSettingPage() {
 
         for (const [gid, gift] of collection.gifts.entries()) {
           if (gift.gift_file === null) {
-            handleNoti(
+            notify(
               <p>
                 {cid + 1}번 선물 목록의 {gid + 1}번 선물에
                 <br />
@@ -311,7 +307,7 @@ export default function ThemeSettingPage() {
             return;
           }
           if (gift.theme_name.trim() === "") {
-            handleNoti(
+            notify(
               <p>
                 {cid + 1}번 선물 목록의 {gid + 1}번 선물에
                 <br />
@@ -323,7 +319,7 @@ export default function ThemeSettingPage() {
             return;
           }
           if (gift.gift_name.trim() === "") {
-            handleNoti(
+            notify(
               <p>
                 {cid + 1}번 선물 목록의 {gid + 1}번 선물에
                 <br />
@@ -367,7 +363,7 @@ export default function ThemeSettingPage() {
       voteStartDate <= now ||
       voteEndDate <= now
     ) {
-      handleNoti(<p>과거 시점으로는 일정을 등록할 수 없어요!</p>);
+      notify(<p>과거 시점으로는 일정을 등록할 수 없어요!</p>);
       return;
     }
 
@@ -380,7 +376,7 @@ export default function ThemeSettingPage() {
         voteStartDate < voteEndDate
       )
     ) {
-      handleNoti(
+      notify(
         <p>
           시작 시간은 종료 시간보다 빨라야 하며,
           <br /> 각 일정은 이전 일정이 끝난 후 시작되어야 해요!
@@ -442,65 +438,40 @@ export default function ThemeSettingPage() {
       params.set("theme_id", result.data.theme_id);
       router.push(`${pathname}?${params.toString()}`);
 
-      handleNoti(<p>성공적으로 테마가 저장되었습니다.</p>);
+      notify(<p>성공적으로 테마가 저장되었습니다.</p>);
     } catch (e) {
       if (e instanceof WebPConversionError)
-        handleNoti(
+        notify(
           <p>
             이미지를 WebP 형식으로 변환하는데 실패했습니다.
             <br /> 잠시 후 다시 시도해주세요.
           </p>,
         );
-      else if (e instanceof Error) handleNoti(<p>{e.message}</p>);
-      else handleNoti(<p>알 수 없는 오류가 발생했습니다.</p>);
+      else if (e instanceof Error) notify(<p>{e.message}</p>);
+      else notify(<p>알 수 없는 오류가 발생했습니다.</p>);
     } finally {
       setSaveLoading(false);
     }
   };
 
-  const handleNoti = (message: React.ReactNode) => {
-    setNotiMessage(message);
-    openNoti();
-  };
-
-  const handleServerError = () => {
-    setNotiMessage(
-      <p>
-        서버와의 통신에 실패했습니다.
-        <br /> 잠시 후 다시 시도해주세요.
-      </p>,
-    );
-    openNoti();
-  };
-
   /* 테마 설정 상세 조회중 */
   if (loading) {
     return (
-      <>
-        <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
-          {notiMessage}
-        </ModalNoti>
-
-        <Loader
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-          type="dots"
-          color="var(--main)"
-        />
-      </>
+      <Loader
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+        type="dots"
+        color="var(--main)"
+      />
     );
   }
 
   return (
     <>
-      <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
-        {notiMessage}
-      </ModalNoti>
-
       <section style={{ paddingBottom: "60px" }}>
         <Stack m={10} mb={60} gap={0}>
           {/* 테마 배너 */}
@@ -593,14 +564,14 @@ export default function ThemeSettingPage() {
             label="검수 계정 관리"
             value={reviewer}
             setValue={setReviewer}
-            handleServerError={handleServerError}
+            handleServerError={notifyServerError}
           />
           <AccountMultiSelect
             mt={22}
             label="심사 계정 관리"
             value={judge}
             setValue={setJudge}
-            handleServerError={handleServerError}
+            handleServerError={notifyServerError}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
           <ThemeGifts ref={themeGiftsRef} initialData={initialCollections} />

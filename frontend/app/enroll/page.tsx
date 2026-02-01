@@ -2,21 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
+import { useNotification } from "@/components/notification/notification";
 import { SimpleGrid, Flex, Stack } from "@mantine/core";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
 import { EnrollFooter } from "@/components/app-shell/enroll-footer";
 import { ModalGoBack } from "@/components/common/modal/modal-go-back";
-import { EnrollNoti } from "@/components/enroll/enroll-noti";
+import { EnrollNotiMessage } from "@/components/enroll/enroll-noti-message";
 import { EnrollTopSection } from "@/components/enroll/enroll-top-section";
 import { FileDisplay } from "@/components/enroll/file-display";
 import { AddFileButton } from "@/components/common/add-file-button/add-file-button";
 
 export default function EnrollPage() {
-  const [enrollOpened, { open: openEnroll, close: closeEnroll }] =
-    useDisclosure(false);
-  const [notiOpened, { open: openNoti, close: closeNoti }] =
-    useDisclosure(false);
+  const { notify } = useNotification();
+  const [opened, { open, close }] = useDisclosure(false);
 
   const [index, setIndex] = useState<number>(0); // File Index
   const [files, setFiles] = useState<(File | string)[]>([]);
@@ -45,12 +44,12 @@ export default function EnrollPage() {
         title="참가 전 안내"
         go="참가하기"
         back="돌아가기"
-        opened={enrollOpened}
+        opened={opened}
         onGo={() => {
-          closeEnroll();
-          openNoti();
+          close();
+          notify(<EnrollNotiMessage variant="fail" />);
         }}
-        close={closeEnroll}
+        close={close}
       >
         <>
           <p>
@@ -64,15 +63,13 @@ export default function EnrollPage() {
         </>
       </ModalGoBack>
 
-      <EnrollNoti variant="fail" opened={notiOpened} close={closeNoti} />
-
       <AppShell
         header={<AppShellHeader />}
         footer={
           <EnrollFooter
             text="참 가 하 기"
             disabled={files.length <= 0}
-            onClick={openEnroll}
+            onClick={open}
           />
         }
       >

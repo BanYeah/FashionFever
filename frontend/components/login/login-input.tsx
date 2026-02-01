@@ -3,9 +3,9 @@
 import classes from "./login-input.module.css";
 import React, { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
+import { useNotification } from "../notification/notification";
 import { Stack } from "@mantine/core";
 import { LoginInputBase } from "./login-input-base";
-import { ModalNoti } from "../common/modal/model-noti";
 import { ModalGoBack } from "../common/modal/modal-go-back";
 import {
   registerUser,
@@ -23,23 +23,10 @@ export function LoginInput() {
   const [isEnter, setIsEnter] = useState(false);
   const [entercode, setEntercode] = useState("");
 
-  const [notiMessage, setNotiMessage] = useState<React.ReactNode>(null);
-  const [notiOpened, { open: openNoti, close: closeNoti }] =
-    useDisclosure(false);
-  const [agreeOpened, { open: openAgree, close: closeAgree }] =
-    useDisclosure(false);
-
   const [loading, setLoading] = useState(false);
+  const [opened, { open, close }] = useDisclosure(false);
 
-  const handleServerError = () => {
-    setNotiMessage(
-      <p>
-        서버와의 통신에 실패했습니다.
-        <br /> 잠시 후 다시 시도해주세요.
-      </p>,
-    );
-    openNoti();
-  };
+  const { notify, notifyServerError } = useNotification();
 
   const handleMinicode = async () => {
     if (minicode === "admin_") {
@@ -51,8 +38,7 @@ export function LoginInput() {
     const code = isJudge ? minicode.slice(6) : minicode;
 
     if (!regex.test(code)) {
-      setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
-      openNoti();
+      notify(<p>유효하지 않은 형식의 미니코드예요!</p>);
       return;
     }
 
@@ -68,10 +54,9 @@ export function LoginInput() {
         setIsEnter(true); // 입장코드 입력창 등장
       else if (result.status === 404) {
         if (isJudge) {
-          setNotiMessage(<p>심사위원으로 임명되지 않은 미니예요!</p>);
-          openNoti();
-        } else openAgree(); // 정보 제공 및 활용 동의 안내
-      } else handleServerError();
+          notify(<p>심사위원으로 임명되지 않은 미니예요!</p>);
+        } else open(); // 정보 제공 및 활용 동의 안내
+      } else notifyServerError();
     } finally {
       setLoading(false);
     }
@@ -90,50 +75,43 @@ export function LoginInput() {
     if (result.success) return;
     switch (result.status) {
       case 401:
-        setNotiMessage(<p>미니코드 또는 입장코드가 일치하지 않아요.</p>);
-        openNoti();
+        notify(<p>미니코드 또는 입장코드가 일치하지 않아요.</p>);
         break;
 
       case 423:
         if (minicode === "admin_") {
-          setNotiMessage(
+          notify(
             <p>
               과도한 로그인 시도가 감지되어
               <br />
               해당 IP의 접속이 일시적으로 차단되었습니다.
             </p>,
           );
-          openNoti();
         } else {
           const timeInfo =
             result.message?.match(/약 \d+분 후/)?.[0] || "잠시 후";
-          setNotiMessage(
+          notify(
             <p>
               과도한 로그인 시도로 접속이 제한되었어요.
               <br />
               {timeInfo} 다시 시도해주세요.
             </p>,
           );
-          openNoti();
         }
         break;
 
       default:
-        handleServerError();
+        notifyServerError();
     }
   };
 
   return (
     <>
-      <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
-        {notiMessage}
-      </ModalNoti>
-
       <ModalGoBack
         title="정보 제공 및 활용 동의 안내"
         go="참여하기"
         back="그만두기"
-        opened={agreeOpened}
+        opened={opened}
         onGo={async () => {
           if (loading) return;
           setLoading(true);
@@ -142,16 +120,16 @@ export function LoginInput() {
 
             if (result.success || result.status === 409) {
               setIsEnter(true); // 입장코드 입력창 등장
-              closeAgree();
+              close();
             } else {
-              closeAgree();
-              handleServerError();
+              close();
+              notifyServerError();
             }
           } finally {
             setLoading(false);
           }
         }}
-        close={closeAgree}
+        close={close}
         loading={loading}
       >
         <>

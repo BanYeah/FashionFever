@@ -4,8 +4,10 @@ import classes from "./modal-noti.module.css";
 import Image from "next/image";
 import { Modal, Stack, Box, UnstyledButton } from "@mantine/core";
 
+export type NotiIconType = "alert" | "info";
+
 interface ModalNotiProps {
-  icon: "alert" | "info";
+  icon: NotiIconType;
   children: React.ReactNode;
   opened: boolean;
   close: () => void;

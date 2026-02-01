@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import BMJUA from "next/font/local";
 import { MantineProvider } from "@mantine/core";
 import { AuthProvider } from "@/components/auth-provider/auth-provider";
+import { NotificationProvider } from "@/components/notification/notification";
 
 const font = BMJUA({
   src: "../public/fonts/BMJUA.woff",
@@ -34,7 +35,9 @@ export default function RootLayout({
       <body>
         <main>
           <MantineProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <NotificationProvider>{children}</NotificationProvider>
+            </AuthProvider>
           </MantineProvider>
         </main>
       </body>

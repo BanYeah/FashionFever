@@ -4,7 +4,7 @@ import classes from "./account-setting.module.css";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useDisclosure } from "@mantine/hooks";
+import { useNotification } from "../notification/notification";
 import {
   Center,
   Flex,
@@ -15,7 +15,6 @@ import {
   Loader,
   Divider,
 } from "@mantine/core";
-import { ModalNoti } from "@/components/common/modal/model-noti";
 import { AccountLine } from "./account-line";
 import { PageMeta } from "@/types/page-meta";
 import { User } from "@/types/api/user";
@@ -33,13 +32,11 @@ export function AccountSetting({ variant }: AccountSettingProps) {
   const searchParams = useSearchParams();
   const minicode = searchParams.get("minicode");
 
+  const { notify, notifyServerError } = useNotification();
+
   const regex = /^[a-z0-9]{5,7}$/;
   const [searchCode, setSearchCode] = useState("");
   const [addCode, setAddCode] = useState("");
-
-  const [notiMessage, setNotiMessage] = useState<React.ReactNode>(null);
-  const [notiOpened, { open: openNoti, close: closeNoti }] =
-    useDisclosure(false);
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<(User[] | Judge[] | "ERROR")[]>([]);
@@ -95,7 +92,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
         newData[page - 1] = "ERROR";
         return newData;
       });
-      handleServerError();
+      notifyServerError();
     }
     setLoading(false);
   };
@@ -128,16 +125,6 @@ export function AccountSetting({ variant }: AccountSettingProps) {
     return () => observer.disconnect();
   }, [loading, meta.current, meta.last, data.length]);
 
-  const handleServerError = () => {
-    setNotiMessage(
-      <p>
-        서버와의 통신에 실패했습니다.
-        <br /> 잠시 후 다시 시도해주세요.
-      </p>,
-    );
-    openNoti();
-  };
-
   const handleSearchCode = () => {
     const params = new URLSearchParams(searchParams);
     if (!searchCode) {
@@ -145,8 +132,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
     } else if (regex.test(searchCode)) {
       params.set("minicode", searchCode);
     } else {
-      setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
-      openNoti();
+      notify(<p>유효하지 않은 형식의 미니코드예요!</p>);
       return;
     }
 
@@ -164,11 +150,10 @@ export function AccountSetting({ variant }: AccountSettingProps) {
         }
         switch (result.status) {
           case 409:
-            setNotiMessage(<p>이미 존재하는 미니코드예요!</p>);
-            openNoti();
+            notify(<p>이미 존재하는 미니코드예요!</p>);
             break;
           default:
-            handleServerError();
+            notifyServerError();
         }
       } else {
         const result = await appointJudge(addCode);
@@ -179,120 +164,108 @@ export function AccountSetting({ variant }: AccountSettingProps) {
         }
         switch (result.status) {
           case 404:
-            setNotiMessage(<p>존재하지 않는 미니코드예요!</p>);
-            openNoti();
+            notify(<p>존재하지 않는 미니코드예요!</p>);
             break;
           case 409:
-            setNotiMessage(<p>이미 심사위원으로 임명된 미니예요!</p>);
-            openNoti();
+            notify(<p>이미 심사위원으로 임명된 미니예요!</p>);
             break;
           default:
-            handleServerError();
+            notifyServerError();
         }
       }
     } else {
-      setNotiMessage(<p>유효하지 않은 형식의 미니코드예요!</p>);
-      openNoti();
+      notify(<p>유효하지 않은 형식의 미니코드예요!</p>);
     }
   };
 
   return (
-    <>
-      <ModalNoti icon="alert" opened={notiOpened} close={closeNoti}>
-        {notiMessage}
-      </ModalNoti>
+    <Stack gap={10} py={12} px={9}>
+      <Stack gap={9}>
+        <p style={{ paddingLeft: "10px" }}>미니 코드 검색 ({meta.total})</p>
+        <Input
+          classNames={{ input: classes.SearchInput }}
+          variant="unstyled"
+          placeholder="미니 코드 입력"
+          maxLength={7}
+          value={searchCode}
+          onChange={(event) => setSearchCode(event.currentTarget.value)}
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter") handleSearchCode();
+          }}
+        />
+      </Stack>
 
-      <Stack gap={10} py={12} px={9}>
-        <Stack gap={9}>
-          <p style={{ paddingLeft: "10px" }}>미니 코드 검색 ({meta.total})</p>
+      <Stack gap={6}>
+        <Divider size={1} color="var(--gray-d9)" />
+        <Group align="center" w="100%" gap={8}>
           <Input
-            classNames={{ input: classes.SearchInput }}
+            classNames={{ input: classes.Input }}
+            style={{ flex: 1 }}
+            ml={10}
             variant="unstyled"
             placeholder="미니 코드 입력"
             maxLength={7}
-            value={searchCode}
-            onChange={(event) => setSearchCode(event.currentTarget.value)}
+            value={addCode}
+            onChange={(event) => setAddCode(event.currentTarget.value)}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-              if (e.key === "Enter") handleSearchCode();
+              if (e.key === "Enter") handleAddClick();
             }}
           />
-        </Stack>
-
-        <Stack gap={6}>
-          <Divider size={1} color="var(--gray-d9)" />
-          <Group align="center" w="100%" gap={8}>
-            <Input
-              classNames={{ input: classes.Input }}
-              style={{ flex: 1 }}
-              ml={10}
-              variant="unstyled"
-              placeholder="미니 코드 입력"
-              maxLength={7}
-              value={addCode}
-              onChange={(event) => setAddCode(event.currentTarget.value)}
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                if (e.key === "Enter") handleAddClick();
-              }}
+          <UnstyledButton w={28} h={28} onClick={handleAddClick}>
+            <Image
+              src="/images/account-setting/plus.svg"
+              alt="Add"
+              width={28}
+              height={28}
             />
-            <UnstyledButton w={28} h={28} onClick={handleAddClick}>
-              <Image
-                src="/images/account-setting/plus.svg"
-                alt="Add"
-                width={28}
-                height={28}
-              />
-            </UnstyledButton>
-          </Group>
-          <Divider size={1} color="var(--gray-d9)" />
-        </Stack>
-
-        <Stack gap={10}>
-          {Array.from({ length: meta.current }).map((_, pageIdx) => {
-            const pageItems = data[pageIdx];
-            if (pageItems === "ERROR") {
-              return (
-                <RetryLine
-                  key={`retry (${pageIdx} page)`}
-                  loadPage={() => loadPage(pageIdx + 1)}
-                />
-              );
-            } else if (pageItems) {
-              return pageItems.map((acnt) => (
-                <AccountLine
-                  key={`${variant}_${acnt.minicode}`}
-                  variant={variant}
-                  account={acnt}
-                  reload={(clear: boolean = false) => {
-                    if (clear) {
-                      setMeta((prev) => ({
-                        ...prev,
-                        current: pageIdx + 1,
-                      }));
-                      setData((prev) => {
-                        return prev.slice(0, pageIdx + 1);
-                      });
-                    }
-
-                    loadPage(pageIdx + 1);
-                  }}
-                  handleError={(message: React.ReactNode) => {
-                    setNotiMessage(message);
-                    openNoti();
-                  }}
-                  handleServerError={handleServerError}
-                />
-              ));
-            }
-          })}
-          <Center ref={observerRef} py={6} h={36}>
-            {loading && <Loader type="dots" color="var(--main)" />}
-            {!loading && meta.total === 0 && (
-              <p style={{ color: "var(--gray-b3)" }}> 검색 결과가 없어요.</p>
-            )}
-          </Center>
-        </Stack>
+          </UnstyledButton>
+        </Group>
+        <Divider size={1} color="var(--gray-d9)" />
       </Stack>
-    </>
+
+      <Stack gap={10}>
+        {Array.from({ length: meta.current }).map((_, pageIdx) => {
+          const pageItems = data[pageIdx];
+          if (pageItems === "ERROR") {
+            return (
+              <RetryLine
+                key={`retry (${pageIdx} page)`}
+                loadPage={() => loadPage(pageIdx + 1)}
+              />
+            );
+          } else if (pageItems) {
+            return pageItems.map((acnt) => (
+              <AccountLine
+                key={`${variant}_${acnt.minicode}`}
+                variant={variant}
+                account={acnt}
+                reload={(clear: boolean = false) => {
+                  if (clear) {
+                    setMeta((prev) => ({
+                      ...prev,
+                      current: pageIdx + 1,
+                    }));
+                    setData((prev) => {
+                      return prev.slice(0, pageIdx + 1);
+                    });
+                  }
+
+                  loadPage(pageIdx + 1);
+                }}
+                handleError={(message: React.ReactNode) => notify(message)}
+                handleServerError={notifyServerError}
+              />
+            ));
+          }
+        })}
+        <Center ref={observerRef} py={6} h={36}>
+          {loading && <Loader type="dots" color="var(--main)" />}
+          {!loading && meta.total === 0 && (
+            <p style={{ color: "var(--gray-b3)" }}> 검색 결과가 없어요.</p>
+          )}
+        </Center>
+      </Stack>
+    </Stack>
   );
 }
 

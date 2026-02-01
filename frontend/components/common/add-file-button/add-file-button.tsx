@@ -2,10 +2,9 @@
 
 import classes from "./add-file-button.module.css";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useState } from "react";
-import { useDisclosure } from "@mantine/hooks";
+import { Dispatch, SetStateAction } from "react";
+import { useNotification } from "@/components/notification/notification";
 import { FileInput } from "@mantine/core";
-import { ModalNoti } from "../modal/model-noti";
 
 interface AddFileButtonProps {
   icon: string;
@@ -22,8 +21,7 @@ export function AddFileButton({
   setFile,
   setFiles,
 }: AddFileButtonProps) {
-  const [opened, { open, close }] = useDisclosure(false);
-  const [errorMessage, setErrorMessage] = useState<React.ReactNode>(null);
+  const { notify } = useNotification();
 
   // 이미지 비율(5:4) 및 형식(확장자) 검증
   const validateFile = (
@@ -98,8 +96,7 @@ export function AddFileButton({
 
     const result = await validateFile(file);
     if (!result.isValid) {
-      setErrorMessage(result.msg);
-      open();
+      notify(result.msg);
       return;
     }
 
@@ -107,8 +104,7 @@ export function AddFileButton({
     if (setFiles) {
       setFiles((prev) => {
         if (prev.length >= 4) {
-          setErrorMessage(<p>이미지는 최대 4장까지 등록 가능합니다.</p>);
-          open();
+          notify(<p>이미지는 최대 4장까지 등록 가능합니다.</p>);
           return prev;
         }
         return [...prev, file];
@@ -117,32 +113,26 @@ export function AddFileButton({
   };
 
   return (
-    <>
-      <ModalNoti icon="alert" opened={opened} close={close}>
-        {errorMessage}
-      </ModalNoti>
-
-      <div
-        style={{
-          position: "relative",
-          width: `${size}px`,
-          height: `${size}px`,
-        }}
-      >
-        <Image
-          className={classes.FileInputIcon}
-          src={icon}
-          alt=""
-          width={size}
-          height={size}
-        />
-        <FileInput
-          styles={{ root: { width: `${size}px`, height: `${size}px` } }}
-          variant="unstyled"
-          value={null}
-          onChange={handleChange}
-        />
-      </div>
-    </>
+    <div
+      style={{
+        position: "relative",
+        width: `${size}px`,
+        height: `${size}px`,
+      }}
+    >
+      <Image
+        className={classes.FileInputIcon}
+        src={icon}
+        alt=""
+        width={size}
+        height={size}
+      />
+      <FileInput
+        styles={{ root: { width: `${size}px`, height: `${size}px` } }}
+        variant="unstyled"
+        value={null}
+        onChange={handleChange}
+      />
+    </div>
   );
 }
