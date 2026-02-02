@@ -11,6 +11,7 @@ import { ThemeJudge } from './entities/theme-judge.entity';
 
 import { ThemeController } from './theme.controller';
 import { ThemeService } from './theme.service';
+import { ThemeCron } from './theme.cron';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { ThemeService } from './theme.service';
     ]),
   ],
   controllers: [ThemeController],
-  providers: [ThemeService],
+  providers: [ThemeService, ThemeCron],
   exports: [ThemeService],
 })
 export class ThemeModule {}
