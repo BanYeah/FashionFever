@@ -79,6 +79,26 @@ export class ThemeService {
           '과거 시점으로는 일정을 등록할 수 없어요!',
         );
 
+      // 참가/검수/투표 기간이 연속인지 확인
+      {
+        // 밀리초 단위로 변환해서 차이 계산 (1초 = 1000ms)
+        const diffER =
+          dto.review_start_at.getTime() - dto.enroll_end_at.getTime();
+
+        if (diffER < 0 || diffER > 1000)
+          throw new BadRequestException(
+            `참가 기간과 검수 기간 일정이 연속되지 않아요.`,
+          );
+
+        const diffRV =
+          dto.vote_start_at.getTime() - dto.review_end_at.getTime();
+
+        if (diffRV < 0 || diffRV > 1000)
+          throw new BadRequestException(
+            `검수 기간과 투표 기간 일정이 연속되지 않아요.`,
+          );
+      }
+
       // 기존 테마 일정과 참가/검수/투표 기간과 겹치는지 확인
       {
         const eol = await this.checkOverlap(
@@ -377,6 +397,26 @@ export class ThemeService {
         throw new BadRequestException(
           '과거 시점으로는 일정을 등록할 수 없어요!',
         );
+
+      // 참가/검수/투표 기간이 연속인지 확인
+      {
+        // 밀리초 단위로 변환해서 차이 계산 (1초 = 1000ms)
+        const diffER =
+          dto.review_start_at.getTime() - dto.enroll_end_at.getTime();
+
+        if (diffER < 0 || diffER > 1000)
+          throw new BadRequestException(
+            `참가 기간과 검수 기간 일정이 연속되지 않아요.`,
+          );
+
+        const diffRV =
+          dto.vote_start_at.getTime() - dto.review_end_at.getTime();
+
+        if (diffRV < 0 || diffRV > 1000)
+          throw new BadRequestException(
+            `검수 기간과 투표 기간 일정이 연속되지 않아요.`,
+          );
+      }
 
       // 기존 테마 일정과 참가/검수/투표 기간과 겹치는지 확인
       {
