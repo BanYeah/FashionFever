@@ -398,9 +398,21 @@ export default function ThemeSettingPage() {
       notify(
         <p>
           시작 시간은 종료 시간보다 빨라야 하며,
-          <br /> 각 일정은 이전 일정이 끝난 후 시작되어야 해요!
+          <br /> 각 기간은 이전 기간이 끝난 후 시작되어야 해요!
         </p>,
       );
+      return;
+    }
+
+    const diffER = reviewStartDate.getTime() - enrollEndDate.getTime();
+    if (diffER < 0 || diffER > 1000) {
+      notify(<p>참가 기간과 검수 기간 일정이 연속되지 않아요.</p>);
+      return;
+    }
+
+    const diffRV = voteStartDate.getTime() - reviewEndDate.getTime();
+    if (diffRV < 0 || diffRV > 1000) {
+      notify(<p>검수 기간과 투표 기간 일정이 연속되지 않아요.</p>);
       return;
     }
 
