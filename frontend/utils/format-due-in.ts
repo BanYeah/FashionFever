@@ -3,7 +3,7 @@ export function formatDueIn(dateStr: string): string {
   const now = new Date();
 
   const diffMs = date.getTime() - now.getTime();
-  if (diffMs <= 0) return "시간 종료";
+  if (diffMs <= 0) return "기간 종료";
 
   const totalMinutes = Math.floor(diffMs / (1000 * 60));
   const hours = Math.floor(totalMinutes / 60);

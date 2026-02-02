@@ -32,8 +32,13 @@ interface GiftHandle {
   getData: () => Gift_t;
 }
 
+interface ThemeGiftsProps {
+  initialData: GiftCollectionData[];
+  disabled?: boolean;
+}
+
 export const ThemeGifts = forwardRef(
-  ({ initialData }: { initialData: GiftCollectionData[] }, ref) => {
+  ({ initialData, disabled }: ThemeGiftsProps, ref) => {
     const [opened, { toggle }] = useDisclosure(false);
 
     const [collections, setCollections] = useState<
@@ -77,19 +82,21 @@ export const ThemeGifts = forwardRef(
     return (
       <div style={{ position: "relative" }}>
         {/* 선물 세팅 추가 버튼 */}
-        <UnstyledButton
-          className={classes.AddGiftSettingButton}
-          w={28}
-          h={28}
-          onClick={addCollection}
-        >
-          <Image
-            src="/images/theme-setting/add-gift.svg"
-            alt=""
-            width={28}
-            height={28}
-          />
-        </UnstyledButton>
+        {!disabled && (
+          <UnstyledButton
+            className={classes.AddGiftSettingButton}
+            w={28}
+            h={28}
+            onClick={addCollection}
+          >
+            <Image
+              src="/images/theme-setting/add-gift.svg"
+              alt=""
+              width={28}
+              height={28}
+            />
+          </UnstyledButton>
+        )}
 
         <UnstyledButton className={classes.Button} onClick={toggle}>
           <p>선물 목록 관리</p>
@@ -101,6 +108,7 @@ export const ThemeGifts = forwardRef(
               <GiftCollection
                 key={col.id}
                 initialData={col.data}
+                disabled={disabled}
                 onDelete={() => {
                   delete collectionRefs.current[col.id];
                   setCollections((prev) =>
@@ -121,11 +129,12 @@ export const ThemeGifts = forwardRef(
 
 interface GiftCollectionProps {
   initialData?: GiftCollectionData;
+  disabled?: boolean;
   onDelete: () => void;
 }
 
 export const GiftCollection = forwardRef(
-  ({ initialData, onDelete }: GiftCollectionProps, ref) => {
+  ({ initialData, disabled, onDelete }: GiftCollectionProps, ref) => {
     const [heartRate, setHeartRate] = useState<string | number>(0);
     const [itemTotalNumber, setItemTotalNumber] = useState<string | number>(0);
 
@@ -214,19 +223,21 @@ export const GiftCollection = forwardRef(
     return (
       <div className={classes.GiftSettingWrapper}>
         {/* 선물 세팅 삭제 버튼 */}
-        <UnstyledButton
-          className={classes.DeleteGiftSettingButton}
-          w={28}
-          h={28}
-          onClick={onDelete}
-        >
-          <Image
-            src="/images/theme-setting/delete-gift.svg"
-            alt=""
-            width={28}
-            height={28}
-          />
-        </UnstyledButton>
+        {!disabled && (
+          <UnstyledButton
+            className={classes.DeleteGiftSettingButton}
+            w={28}
+            h={28}
+            onClick={onDelete}
+          >
+            <Image
+              src="/images/theme-setting/delete-gift.svg"
+              alt=""
+              width={28}
+              height={28}
+            />
+          </UnstyledButton>
+        )}
 
         <Stack gap={12}>
           {/* 하트 레이팅 / 총 아이템 개수 */}
@@ -248,6 +259,7 @@ export const GiftCollection = forwardRef(
                 decimalScale={2}
                 fixedDecimalScale
                 hideControls
+                disabled={disabled}
               />
             </Group>
 
@@ -262,6 +274,7 @@ export const GiftCollection = forwardRef(
                 decimalScale={0}
                 fixedDecimalScale
                 hideControls
+                disabled={disabled}
               />
               <p>개</p>
             </Group>
@@ -276,6 +289,7 @@ export const GiftCollection = forwardRef(
               isBottom={index === gifts.length - 1}
               moveUp={() => moveGift(gift.id, "up")}
               moveDown={() => moveGift(gift.id, "down")}
+              disabled={disabled}
               onDelete={() => {
                 delete giftRefs.current[gift.id];
                 setGifts((prev) => prev.filter((item) => item.id !== gift.id));
@@ -290,14 +304,16 @@ export const GiftCollection = forwardRef(
           <Group justify="flex-start" gap={8} mih={80} wrap="nowrap">
             {/* 선물 추가 버튼 */}
             <Flex align="center" justify="center" w={125} miw={125}>
-              <UnstyledButton w={20} h={20} onClick={addGift}>
-                <Image
-                  src="/images/theme-setting/add-gift.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                />
-              </UnstyledButton>
+              {!disabled && (
+                <UnstyledButton w={20} h={20} onClick={addGift}>
+                  <Image
+                    src="/images/theme-setting/add-gift.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                  />
+                </UnstyledButton>
+              )}
             </Flex>
 
             {/* 선물 세팅들 */}
@@ -318,6 +334,7 @@ export const GiftCollection = forwardRef(
                 checked={isRandom}
                 onChange={(event) => setIsRandom(event.currentTarget.checked)}
                 withThumbIndicator={false}
+                disabled={disabled}
               />
 
               {/* 동일 테마 아이템 여부 / 테마 타입 / 희귀도 */}
@@ -340,6 +357,7 @@ export const GiftCollection = forwardRef(
                       setSameTheme(event.currentTarget.checked)
                     }
                     withThumbIndicator={false}
+                    disabled={disabled}
                   />
                   <Group gap={8}>
                     <Select
@@ -353,6 +371,7 @@ export const GiftCollection = forwardRef(
                       value={themeType}
                       onChange={setThemeType}
                       rightSection={null}
+                      disabled={disabled}
                     />
                     <Select
                       classNames={{ input: classes.SelectInput }}
@@ -364,6 +383,7 @@ export const GiftCollection = forwardRef(
                       value={rarity}
                       onChange={setRarity}
                       rightSection={null}
+                      disabled={disabled}
                     />
                   </Group>
                 </>
@@ -382,12 +402,21 @@ interface GiftProps {
   isBottom: boolean;
   moveUp: () => void;
   moveDown: () => void;
+  disabled?: boolean;
   onDelete: () => void;
 }
 
 const Gift = forwardRef(
   (
-    { initialData, isTop, isBottom, moveUp, moveDown, onDelete }: GiftProps,
+    {
+      initialData,
+      isTop,
+      isBottom,
+      moveUp,
+      moveDown,
+      disabled,
+      onDelete,
+    }: GiftProps,
     ref,
   ) => {
     const [themeName, setThemeName] = useState("");
@@ -440,19 +469,22 @@ const Gift = forwardRef(
           ) : (
             <div className={classes.GiftImageWrapper}>
               {/* 선물 삭제 버튼 */}
-              <UnstyledButton
-                className={classes.DeleteGiftButton}
-                w={20}
-                h={20}
-                onClick={onDelete}
-              >
-                <Image
-                  src="/images/theme-setting/delete-gift.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                />
-              </UnstyledButton>
+              {!disabled && (
+                <UnstyledButton
+                  className={classes.DeleteGiftButton}
+                  w={20}
+                  h={20}
+                  onClick={onDelete}
+                >
+                  <Image
+                    src="/images/theme-setting/delete-gift.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                  />
+                </UnstyledButton>
+              )}
+
               <Image src={preview} alt="" width={80} height={80} />
             </div>
           )}
@@ -467,6 +499,7 @@ const Gift = forwardRef(
             placeholder="테마 이름"
             value={themeName}
             onChange={(event) => setThemeName(event.currentTarget.value)}
+            disabled={disabled}
           />
           <Input
             classNames={{ input: classes.GiftInput }}
@@ -474,12 +507,13 @@ const Gift = forwardRef(
             placeholder="아이템 이름"
             value={itemName}
             onChange={(event) => setItemName(event.currentTarget.value)}
+            disabled={disabled}
           />
         </Stack>
 
         <Stack gap={0}>
           <div style={{ width: "24px", height: "24px" }}>
-            {!isTop && (
+            {!disabled && !isTop && (
               <UnstyledButton
                 className={classes.GiftAlignButton}
                 w={24}
@@ -496,7 +530,7 @@ const Gift = forwardRef(
             )}
           </div>
           <div style={{ width: "24px", height: "24px" }}>
-            {!isBottom && (
+            {!disabled && !isBottom && (
               <UnstyledButton
                 className={classes.GiftAlignButton}
                 w={24}

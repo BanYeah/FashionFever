@@ -10,6 +10,7 @@ interface BgLimitComboboxProps {
   enrollBgLimit: { name: string; color: string }[];
   bgLimit: string | null;
   setBgLimit: Dispatch<SetStateAction<string | null>>;
+  disabled?: boolean;
 }
 
 export function BgLimitCombobox({
@@ -18,6 +19,7 @@ export function BgLimitCombobox({
   enrollBgLimit,
   bgLimit,
   setBgLimit,
+  disabled,
 }: BgLimitComboboxProps) {
   const enrollBgColorbyName = enrollBgLimit.reduce(
     (acc, item) => {
@@ -48,6 +50,7 @@ export function BgLimitCombobox({
           setBgLimit(val);
           combobox.closeDropdown();
         }}
+        disabled={disabled}
       >
         <Combobox.Target>
           <InputBase
@@ -56,9 +59,14 @@ export function BgLimitCombobox({
             }}
             styles={{
               input: {
-                color: bgLimit ? enrollBgColorbyName[bgLimit] : "var(--black)",
+                color: disabled
+                  ? "var(--disabled)"
+                  : bgLimit
+                    ? enrollBgColorbyName[bgLimit]
+                    : "var(--black)",
               },
             }}
+            disabled={disabled}
             component="button"
             type="button"
             pointer

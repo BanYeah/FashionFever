@@ -25,6 +25,8 @@
 
   color: var(--gray-8a);
   font-size: 14px;
+
+  pointer-events: none;
 }
 
 .DateInputInput {

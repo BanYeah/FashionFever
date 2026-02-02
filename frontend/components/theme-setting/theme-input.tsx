@@ -8,6 +8,7 @@ interface ThemeInputProps {
   placeholder: string;
   value: string;
   setValue: Dispatch<SetStateAction<string>>;
+  disabled?: boolean;
 }
 
 export function ThemeInput({
@@ -16,6 +17,7 @@ export function ThemeInput({
   placeholder,
   value,
   setValue,
+  disabled,
 }: ThemeInputProps) {
   return (
     <Stack mt={mt} gap={9}>
@@ -28,6 +30,7 @@ export function ThemeInput({
         placeholder={placeholder}
         value={value}
         onChange={(event) => setValue(event.currentTarget.value)}
+        disabled={disabled}
       />
     </Stack>
   );

@@ -14,6 +14,7 @@ interface AccountSelectProps {
   label: string;
   value: string | null;
   setValue: Dispatch<SetStateAction<string | null>>;
+  disabled?: boolean;
   handleServerError: () => void;
 }
 
@@ -22,6 +23,7 @@ export function AccountSelect({
   label,
   value,
   setValue,
+  disabled,
   handleServerError,
 }: AccountSelectProps) {
   const [data, setData] = useState<string[]>();
@@ -76,6 +78,7 @@ export function AccountSelect({
         }
         rightSectionPointerEvents={"all"}
         limit={5} // 검색 결과 수 제한
+        disabled={disabled}
       />
     </Stack>
   );
@@ -87,6 +90,7 @@ interface AccountMultiSelectProps {
   label: string;
   value: string[];
   setValue: Dispatch<SetStateAction<string[]>>;
+  disabled?: boolean;
   handleServerError: () => void;
 }
 
@@ -95,6 +99,7 @@ export function AccountMultiSelect({
   label,
   value,
   setValue,
+  disabled,
   handleServerError,
 }: AccountMultiSelectProps) {
   const [data, setData] = useState<string[]>();
@@ -136,6 +141,7 @@ export function AccountMultiSelect({
         nothingFoundMessage="검색 결과가 없어요."
         rightSection={null}
         limit={5} // 검색 결과 수 제한
+        disabled={disabled}
       />
     </Stack>
   );

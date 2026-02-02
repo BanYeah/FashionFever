@@ -36,6 +36,7 @@ import {
   getThemeSetting,
   patchThemeSetting,
 } from "@/utils/api/theme";
+import { ThemeStatus } from "@/types/theme-status";
 
 export default function ThemeSettingPage() {
   const router = useRouter();
@@ -91,6 +92,9 @@ export default function ThemeSettingPage() {
 
   /* 테마 설정 상세 조회 */
   const [loading, setLoading] = useState<boolean>(false);
+  const [initialStatus, setInitialStatus] = useState<ThemeStatus>(
+    new ThemeStatus(),
+  );
   const [initialCollections, setInitialCollections] = useState<
     GiftCollectionData[]
   >([]);
@@ -125,6 +129,7 @@ export default function ThemeSettingPage() {
       setReviewer(null);
       setJudge([]);
 
+      setInitialStatus(() => new ThemeStatus());
       setInitialCollections([]);
       return;
     }
@@ -153,6 +158,16 @@ export default function ThemeSettingPage() {
             setReviewer("judge_" + data.reviewer_minicode);
           setJudge(data.judge_minicodes.map((code) => "judge_" + code));
 
+          setInitialStatus(
+            () =>
+              new ThemeStatus(
+                data.status,
+                new Date(data.enroll_start_at),
+                new Date(data.review_start_at),
+                new Date(data.vote_start_at),
+                new Date(data.vote_end_at),
+              ),
+          );
           setInitialCollections(data.collections);
         } else throw new Error();
       } catch {
@@ -520,20 +535,23 @@ export default function ThemeSettingPage() {
               />
             ) : (
               <>
-                <UnstyledButton
-                  w={28}
-                  h={28}
-                  style={{ position: "absolute", top: 0, right: 0 }}
-                  onClick={() => setBanner(null)}
-                >
-                  <Image
-                    style={{ display: "block" }}
-                    src="/images/add-file-button/delete-file.svg"
-                    alt=""
-                    width={28}
-                    height={28}
-                  />
-                </UnstyledButton>
+                {initialStatus.isBeforeStart("ENROLLING") && (
+                  <UnstyledButton
+                    w={28}
+                    h={28}
+                    style={{ position: "absolute", top: 0, right: 0 }}
+                    onClick={() => setBanner(null)}
+                  >
+                    <Image
+                      style={{ display: "block" }}
+                      src="/images/add-file-button/delete-file.svg"
+                      alt=""
+                      width={28}
+                      height={28}
+                    />
+                  </UnstyledButton>
+                )}
+
                 <Image
                   key={bannerPreview}
                   src={bannerPreview}
@@ -555,6 +573,7 @@ export default function ThemeSettingPage() {
             placeholder=""
             value={name}
             setValue={setName}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
           />
           <ThemeInput
             mt={22}
@@ -562,6 +581,7 @@ export default function ThemeSettingPage() {
             placeholder="~ 미니는 누구?"
             value={description}
             setValue={setDescription}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
           />
           <BgLimitCombobox
             mt={22}
@@ -569,6 +589,7 @@ export default function ThemeSettingPage() {
             enrollBgLimit={enrollBgLimit}
             bgLimit={bgLimit}
             setBgLimit={setBgLimit}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
 
@@ -586,6 +607,7 @@ export default function ThemeSettingPage() {
             setVoteStart={setVoteStart}
             voteEnd={voteEnd}
             setVoteEnd={setVoteEnd}
+            status={initialStatus}
           />
           <Divider size={1} color={"var(--gray-d9)"} />
 
@@ -595,6 +617,7 @@ export default function ThemeSettingPage() {
             label="검수 계정 관리"
             value={reviewer}
             setValue={setReviewer}
+            disabled={initialStatus.isAfterStart("REVIEWING")}
             handleServerError={notifyServerError}
           />
           <AccountMultiSelect
@@ -602,10 +625,15 @@ export default function ThemeSettingPage() {
             label="심사 계정 관리"
             value={judge}
             setValue={setJudge}
+            disabled={initialStatus.isAfterStart("VOTING")}
             handleServerError={notifyServerError}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
-          <ThemeGifts ref={themeGiftsRef} initialData={initialCollections} />
+          <ThemeGifts
+            ref={themeGiftsRef}
+            initialData={initialCollections}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
+          />
           <Divider size={1} color={"var(--gray-d9)"} />
         </Stack>
       </section>

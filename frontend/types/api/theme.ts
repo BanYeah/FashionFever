@@ -1,3 +1,5 @@
+import { ThemeStatusType } from "../theme-status";
+
 /* POST / PATCH */
 export interface Gift {
   theme_name: string;
@@ -67,7 +69,7 @@ export interface ThemeData {
   review_end_at: string;
   vote_start_at: string;
   vote_end_at: string;
-  status: string;
+  status: ThemeStatusType;
 
   reviewer_minicode: string | null;
   judge_minicodes: string[];

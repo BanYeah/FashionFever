@@ -68,6 +68,8 @@
 
 .GiftInput {
   width: 100%;
+
+  background-color: transparent !important;
   border: none;
 
   font-size: 14px;
