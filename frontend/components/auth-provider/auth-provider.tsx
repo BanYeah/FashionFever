@@ -97,8 +97,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const minicode = match ? match[1] : null;
 
       if (minicode) {
-        if (user.account === "judge") router.replace("/home");
-        else if (user.account === "user" && user.minicode !== minicode)
+        if (
+          (user.account === "user" && user.minicode !== minicode) ||
+          user.account === "judge"
+        )
           router.replace("/home");
       }
     }

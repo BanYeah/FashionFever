@@ -48,7 +48,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
 
   const observerRef = useRef<HTMLDivElement>(null);
 
-  // 상태 변수 초기화
+  // 상태 변수 초기화 (탭이나 URL 쿼리 변경 시)
   const reset = () => {
     setSearchCode(minicode || "");
     setAddCode("");
@@ -156,6 +156,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
             notifyServerError();
         }
       } else {
+        // variant === "judge"
         const result = await appointJudge(addCode);
 
         if (result.success) {
@@ -173,9 +174,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
             notifyServerError();
         }
       }
-    } else {
-      notify(<p>유효하지 않은 형식의 미니코드예요!</p>);
-    }
+    } else notify(<p>유효하지 않은 형식의 미니코드예요!</p>);
   };
 
   return (
