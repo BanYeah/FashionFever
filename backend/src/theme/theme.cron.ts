@@ -14,6 +14,9 @@ export class ThemeCron {
     private readonly scheduleRepository: Repository<Schedule>,
   ) {}
 
+  // 매 10초마다 실행
+  // @Cron('0/10 * * * * *'
+
   // 매일 자정(00:00) 한국 시간 기준으로 실행
   @Cron('0 0 0 * * *', {
     timeZone: 'Asia/Seoul',
