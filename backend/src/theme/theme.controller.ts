@@ -26,7 +26,7 @@ import { ThemeService } from './theme.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { ThemeFormDto } from './dto/theme-form.dto';
 
-@ApiTags('themes')
+@ApiTags('Theme')
 @Controller('themes')
 export class ThemeController {
   constructor(private themeService: ThemeService) {}
@@ -84,6 +84,20 @@ export class ThemeController {
       files.banner && files.banner.length > 0 ? files.banner[0] : null,
       files.gift_files ? files.gift_files : [],
     );
+  }
+
+  @Get('')
+  @Roles('user', 'judge', 'admin')
+  @ApiOperation({ summary: '전체 테마 조회' })
+  @ApiQuery({
+    name: 'page',
+    description: '페이지 번호 (1부터 시작)',
+    example: 1,
+  })
+  @ApiResponse({ status: 200, description: '테마 설정 조회 성공' })
+  @ApiResponse({ status: 403, description: '권한 부족 (로그인 안됨)' })
+  async getThemes(@Query('page') page: number) {
+    return this.themeService.getThemes(page);
   }
 
   @Get('setting')

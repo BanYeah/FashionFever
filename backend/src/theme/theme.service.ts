@@ -4,7 +4,7 @@ import {
   NotFoundException, // 404
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, QueryRunner, In } from 'typeorm';
+import { DataSource, Repository, QueryRunner, Not, In } from 'typeorm';
 
 import { R2Service } from 'src/common/r2/r2.service';
 
@@ -228,6 +228,39 @@ export class ThemeService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async getThemes(page: number) {
+    const take = 20;
+    const skip = (page - 1) * take;
+
+    const [schedule, total] = await this.scheduleRepo.findAndCount({
+      where: { status: Not('PREPARING') },
+      order: { enroll_start_at: 'DESC' as const },
+      take: take,
+      skip: skip,
+      relations: ['banner'],
+    });
+
+    const data = schedule.map((item) => ({
+      theme_id: item.theme_id,
+      banner_url: item.banner.banner_url,
+
+      enroll_start_at: item.enroll_start_at,
+      review_start_at: item.review_start_at,
+      vote_start_at: item.vote_start_at,
+      result_start_at: item.result_start_at,
+      status: item.status,
+    }));
+
+    return {
+      data: data,
+      meta: {
+        total,
+        page,
+        last_page: Math.ceil(total / take),
+      },
+    };
   }
 
   async getThemeSettings(page: number) {
