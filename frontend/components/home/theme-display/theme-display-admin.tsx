@@ -76,6 +76,18 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
           </Stack>
         </Group>
       );
+    else if (data.status === "VOTING")
+      return (
+        <Group align="center" justify="space-between" p={6} gap={0}>
+          <p>현재 투표가 진행 중인 테마예요!</p>
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p>결과 발표까지 {formatDueIn(data.vote_end_at)}</p>
+            <ThemeSettingLink
+              href={`/theme-setting?theme_id=${data.theme_id}`}
+            />
+          </Stack>
+        </Group>
+      );
     else
       return (
         <Group align="center" justify="space-between" p={6} gap={0}>
