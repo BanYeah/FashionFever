@@ -13,7 +13,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { FindDto } from './dto/find.dto';
 import { MinicodeDto } from './dto/minicode.dto';
 
-@ApiTags('account')
+@ApiTags('Account')
 @Controller('account')
 export class AccountController {
   constructor(private accountService: AccountService) {}
