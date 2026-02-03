@@ -81,7 +81,7 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>현재 투표가 진행 중인 테마예요!</p>
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>결과 집계까지 {formatDueIn(data.result_start_at)}</p>
+            <p>결과 발표까지 {formatDueIn(data.result_start_at)}</p>
             <ThemeSettingLink
               href={`/theme-setting?theme_id=${data.theme_id}`}
             />

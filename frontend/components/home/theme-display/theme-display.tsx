@@ -11,52 +11,19 @@ import {
   UnstyledButton,
   Divider,
 } from "@mantine/core";
+import { ThemeScheduleData } from "@/types/api/theme";
+import { formatDueIn } from "@/utils/format-due-in";
 
 interface ThemeDisplayProps {
-  variant: "open" | "pending" | "vote" | "result";
+  data: ThemeScheduleData;
   registered: boolean;
   point?: number;
 }
 
-export function ThemeDisplay({
-  variant,
-  registered,
-  point,
-}: ThemeDisplayProps) {
-  return (
-    <Stack className={classes.Container} gap={0}>
-      {/* classes.Container에서 <p> 태그의 color: var(--gray-8a); font-size: 14px로 설정 */}
-
-      {/* 테마 배너 이미지 */}
-      <div className={classes.ImageWrapper}>
-        {variant === "vote" ? (
-          <Stack
-            className={classes.ImageDark}
-            align="center"
-            justify="center"
-            gap={6}
-          >
-            <p>투 표 중</p>
-            <Image
-              src="/images/home/theme-display/clock-hour-10.svg"
-              alt=""
-              width={28}
-              height={28}
-            />
-          </Stack>
-        ) : null}
-        <Image
-          src="/images/home/theme-display/image.png"
-          alt=""
-          width={390}
-          height={156}
-          style={{ width: "100%", height: "auto" }}
-        />
-      </div>
-
-      {/* 참가 상태 */}
-      {variant === "open" ? (
-        // 모 집 중
+export function ThemeDisplay({ data, registered, point }: ThemeDisplayProps) {
+  const render = () => {
+    if (data.status === "ENROLLING")
+      return (
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p style={{ color: "var(--black)" }}>
             {registered
@@ -64,7 +31,9 @@ export function ThemeDisplay({
               : "아직 참가하지 않은 테마예요!"}
           </p>
           <Stack align="flex-end" justify="space-between" gap={22}>
-            <p style={{ color: "var(--main)" }}>23시간 35분 남음</p>
+            <p style={{ color: "var(--main)" }}>
+              {formatDueIn(data.review_start_at)} 남음
+            </p>
             <UnstyledButton w={20} h={20}>
               <Image
                 src="/images/home/theme-display/register.svg"
@@ -75,16 +44,20 @@ export function ThemeDisplay({
             </UnstyledButton>
           </Stack>
         </Group>
-      ) : variant === "pending" ? (
-        // 검 수 중
+      );
+    else if (data.status === "REVIEWING")
+      return (
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>{registered ? "참가한 테마예요!" : "참가하지 않은 테마예요!"}</p>
           <Flex align="flex-start" h={56}>
-            <p style={{ color: "var(--main)" }}>7시간 15분 후 투표 시작</p>
+            <p style={{ color: "var(--main)" }}>
+              {formatDueIn(data.vote_start_at)} 후 투표 시작
+            </p>
           </Flex>
         </Group>
-      ) : variant === "vote" ? (
-        // 투 표 중
+      );
+    else if (data.status === "VOTING")
+      return (
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Box pt={7} pb={7} w={"50%"}>
             <Stack w={"fit-content"} gap={5}>
@@ -106,12 +79,41 @@ export function ThemeDisplay({
             </Stack>
           </Box>
           <Stack align="flex-end" justify="space-between" w={"50%"} gap={6}>
-            <p>결과 발표까지 21시간 15분</p>
+            <p>결과 발표까지 {formatDueIn(data.result_start_at)}</p>
             <ProgressBar point={point} />
           </Stack>
         </Group>
-      ) : (
-        // 결 과 발 표
+      );
+    else if (data.status === "RESULTING")
+      return (
+        <Group align="center" justify="space-between" p={6} gap={0}>
+          <Box pt={7} pb={7} w={"50%"}>
+            <Stack w={"fit-content"} gap={5}>
+              <Group pl={3} pr={3} gap={22}>
+                {registered ? (
+                  <>
+                    <p>투표 최고 랭킹</p>
+                    <p>23</p>
+                  </>
+                ) : (
+                  <p>참가하지 않은 테마예요!</p>
+                )}
+              </Group>
+              <Divider size={1.5} color="var(--gray-8a)" />
+              <Group pt={3} pl={3} pr={3} gap={36}>
+                <p>공감 포인트</p>
+                <p>1500</p>
+              </Group>
+            </Stack>
+          </Box>
+          <Stack align="flex-end" justify="space-between" w={"50%"} gap={6}>
+            <p>결과를 집계 중이에요.</p>
+            <ProgressBar point={point} />
+          </Stack>
+        </Group>
+      );
+    else
+      return (
         <Group align="center" justify="space-between" p={6} gap={0}>
           <Box pt={7} pb={7} w={"50%"}>
             <Stack w={"fit-content"} gap={5}>
@@ -160,7 +162,41 @@ export function ThemeDisplay({
             <ProgressBar point={point} />
           </Flex>
         </Group>
-      )}
+      );
+  };
+
+  return (
+    <Stack className={classes.Container} gap={0}>
+      {/* classes.Container에서 <p> 태그의 color: var(--gray-8a); font-size: 14px로 설정 */}
+
+      {/* 테마 배너 이미지 */}
+      <div className={classes.ImageWrapper}>
+        {data.status === "VOTING" ? (
+          <Stack
+            className={classes.ImageDark}
+            align="center"
+            justify="center"
+            gap={6}
+          >
+            <p>투 표 중</p>
+            <Image
+              src="/images/home/theme-display/clock-hour-10.svg"
+              alt=""
+              width={28}
+              height={28}
+            />
+          </Stack>
+        ) : null}
+        <Image
+          src={data.banner_url}
+          alt=""
+          width={390}
+          height={156}
+          style={{ width: "100%", height: "auto" }}
+        />
+      </div>
+
+      {render()}
     </Stack>
   );
 }

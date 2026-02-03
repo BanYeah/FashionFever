@@ -75,6 +75,18 @@ export async function createThemeSetting(payload: ThemePayload) {
   return { success: true, ...data };
 }
 
+export async function getThemes(page: number) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes?page=${page}`,
+    { cache: "no-store", credentials: "include" },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
 export async function getThemeSettings(page: number) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/setting?page=${page}`,
