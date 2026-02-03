@@ -33,12 +33,12 @@ interface GiftHandle {
 }
 
 interface ThemeGiftsProps {
-  initialData: GiftCollectionData[];
   disabled?: boolean;
+  initialData: GiftCollectionData[];
 }
 
 export const ThemeGifts = forwardRef(
-  ({ initialData, disabled }: ThemeGiftsProps, ref) => {
+  ({ disabled, initialData }: ThemeGiftsProps, ref) => {
     const [opened, { toggle }] = useDisclosure(false);
 
     const [collections, setCollections] = useState<
@@ -107,8 +107,8 @@ export const ThemeGifts = forwardRef(
             {collections.map((col) => (
               <GiftCollection
                 key={col.id}
-                initialData={col.data}
                 disabled={disabled}
+                initialData={col.data}
                 onDelete={() => {
                   delete collectionRefs.current[col.id];
                   setCollections((prev) =>
@@ -128,13 +128,14 @@ export const ThemeGifts = forwardRef(
 );
 
 interface GiftCollectionProps {
-  initialData?: GiftCollectionData;
   disabled?: boolean;
+  initialData?: GiftCollectionData;
+
   onDelete: () => void;
 }
 
 export const GiftCollection = forwardRef(
-  ({ initialData, disabled, onDelete }: GiftCollectionProps, ref) => {
+  ({ disabled, initialData, onDelete }: GiftCollectionProps, ref) => {
     const [heartRate, setHeartRate] = useState<string | number>(0);
     const [itemTotalNumber, setItemTotalNumber] = useState<string | number>(0);
 
@@ -251,6 +252,7 @@ export const GiftCollection = forwardRef(
               />
               <NumberInput
                 classNames={{ input: classes.NumberInput }}
+                disabled={disabled}
                 value={heartRate}
                 onChange={setHeartRate}
                 defaultValue={0.0}
@@ -259,7 +261,6 @@ export const GiftCollection = forwardRef(
                 decimalScale={2}
                 fixedDecimalScale
                 hideControls
-                disabled={disabled}
               />
             </Group>
 
@@ -267,6 +268,7 @@ export const GiftCollection = forwardRef(
             <Group align="center" gap={8}>
               <NumberInput
                 classNames={{ input: classes.NumberInput }}
+                disabled={disabled}
                 value={itemTotalNumber}
                 onChange={setItemTotalNumber}
                 defaultValue={0}
@@ -274,7 +276,6 @@ export const GiftCollection = forwardRef(
                 decimalScale={0}
                 fixedDecimalScale
                 hideControls
-                disabled={disabled}
               />
               <p>개</p>
             </Group>
@@ -284,12 +285,12 @@ export const GiftCollection = forwardRef(
           {gifts.map((gift, index) => (
             <Gift
               key={gift.id}
+              disabled={disabled}
               initialData={gift.data}
               isTop={index === 0}
               isBottom={index === gifts.length - 1}
               moveUp={() => moveGift(gift.id, "up")}
               moveDown={() => moveGift(gift.id, "down")}
-              disabled={disabled}
               onDelete={() => {
                 delete giftRefs.current[gift.id];
                 setGifts((prev) => prev.filter((item) => item.id !== gift.id));
@@ -331,10 +332,10 @@ export const GiftCollection = forwardRef(
                   },
                 }}
                 label="랜덤 아이템"
+                disabled={disabled}
                 checked={isRandom}
                 onChange={(event) => setIsRandom(event.currentTarget.checked)}
                 withThumbIndicator={false}
-                disabled={disabled}
               />
 
               {/* 동일 테마 아이템 여부 / 테마 타입 / 희귀도 */}
@@ -352,16 +353,17 @@ export const GiftCollection = forwardRef(
                       },
                     }}
                     label="동일 테마 아이템"
+                    disabled={disabled}
                     checked={isSameTheme}
                     onChange={(event) =>
                       setSameTheme(event.currentTarget.checked)
                     }
                     withThumbIndicator={false}
-                    disabled={disabled}
                   />
                   <Group gap={8}>
                     <Select
                       classNames={{ input: classes.SelectInput }}
+                      disabled={disabled}
                       data={[
                         { value: "NORMAL", label: "일반" },
                         { value: "VIP", label: "VIP" },
@@ -371,10 +373,10 @@ export const GiftCollection = forwardRef(
                       value={themeType}
                       onChange={setThemeType}
                       rightSection={null}
-                      disabled={disabled}
                     />
                     <Select
                       classNames={{ input: classes.SelectInput }}
+                      disabled={disabled}
                       data={[
                         { value: "SR", label: "슈레" },
                         { value: "R", label: "레어" },
@@ -383,7 +385,6 @@ export const GiftCollection = forwardRef(
                       value={rarity}
                       onChange={setRarity}
                       rightSection={null}
-                      disabled={disabled}
                     />
                   </Group>
                 </>
@@ -397,24 +398,24 @@ export const GiftCollection = forwardRef(
 );
 
 interface GiftProps {
+  disabled?: boolean;
   initialData?: GiftData;
   isTop: boolean;
   isBottom: boolean;
   moveUp: () => void;
   moveDown: () => void;
-  disabled?: boolean;
   onDelete: () => void;
 }
 
 const Gift = forwardRef(
   (
     {
+      disabled,
       initialData,
       isTop,
       isBottom,
       moveUp,
       moveDown,
-      disabled,
       onDelete,
     }: GiftProps,
     ref,
@@ -496,18 +497,18 @@ const Gift = forwardRef(
             classNames={{ input: classes.GiftInput }}
             styles={{ wrapper: { height: "28px" } }}
             variant="unstyled"
+            disabled={disabled}
             placeholder="테마 이름"
             value={themeName}
             onChange={(event) => setThemeName(event.currentTarget.value)}
-            disabled={disabled}
           />
           <Input
             classNames={{ input: classes.GiftInput }}
             variant="unstyled"
+            disabled={disabled}
             placeholder="아이템 이름"
             value={itemName}
             onChange={(event) => setItemName(event.currentTarget.value)}
-            disabled={disabled}
           />
         </Stack>
 

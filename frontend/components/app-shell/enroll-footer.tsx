@@ -6,26 +6,17 @@ import { UnstyledButton, Loader } from "@mantine/core";
 
 interface EnrollFooterProps {
   text: string;
-  loading?: boolean;
   disabled?: boolean;
+  loading?: boolean;
   onClick: () => void;
 }
 
 export function EnrollFooter({
   text,
-  loading,
   disabled,
+  loading,
   onClick,
 }: EnrollFooterProps) {
-  if (loading)
-    return (
-      <div className={classes.FooterContainer}>
-        <div className={classes.Button}>
-          <Loader color="var(--white)" type="dots" />
-        </div>
-      </div>
-    );
-
   if (disabled)
     return (
       <div className={classes.FooterContainer}>
@@ -41,6 +32,14 @@ export function EnrollFooter({
             height={50}
           />
         </UnstyledButton>
+      </div>
+    );
+  else if (loading)
+    return (
+      <div className={classes.FooterContainer}>
+        <div className={classes.Button}>
+          <Loader color="var(--white)" type="dots" />
+        </div>
       </div>
     );
   else

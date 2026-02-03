@@ -12,18 +12,18 @@ import { fetchJudges } from "@/utils/api/account";
 interface AccountSelectProps {
   mt?: number;
   label: string;
+  disabled?: boolean;
   value: string | null;
   setValue: Dispatch<SetStateAction<string | null>>;
-  disabled?: boolean;
   handleServerError: () => void;
 }
 
 export function AccountSelect({
   mt = 0,
   label,
+  disabled,
   value,
   setValue,
-  disabled,
   handleServerError,
 }: AccountSelectProps) {
   const [data, setData] = useState<string[]>();
@@ -57,6 +57,7 @@ export function AccountSelect({
           empty: classes.SelectEmpty,
         }}
         placeholder="admin_"
+        disabled={disabled}
         data={data}
         value={value}
         onChange={setValue}
@@ -65,7 +66,7 @@ export function AccountSelect({
         onSearchChange={setSearchValue}
         nothingFoundMessage="검색 결과가 없어요."
         rightSection={
-          value ? (
+          !disabled && value ? (
             <CloseButton
               size="sm"
               variant="transparent"
@@ -78,7 +79,6 @@ export function AccountSelect({
         }
         rightSectionPointerEvents={"all"}
         limit={5} // 검색 결과 수 제한
-        disabled={disabled}
       />
     </Stack>
   );
@@ -88,18 +88,18 @@ export function AccountSelect({
 interface AccountMultiSelectProps {
   mt?: number;
   label: string;
+  disabled?: boolean;
   value: string[];
   setValue: Dispatch<SetStateAction<string[]>>;
-  disabled?: boolean;
   handleServerError: () => void;
 }
 
 export function AccountMultiSelect({
   mt = 0,
   label,
+  disabled,
   value,
   setValue,
-  disabled,
   handleServerError,
 }: AccountMultiSelectProps) {
   const [data, setData] = useState<string[]>();
@@ -132,6 +132,7 @@ export function AccountMultiSelect({
           empty: classes.SelectEmpty,
           pill: classes.MultiSelectPill,
         }}
+        disabled={disabled}
         data={data}
         value={value}
         onChange={setValue}
@@ -141,7 +142,6 @@ export function AccountMultiSelect({
         nothingFoundMessage="검색 결과가 없어요."
         rightSection={null}
         limit={5} // 검색 결과 수 제한
-        disabled={disabled}
       />
     </Stack>
   );

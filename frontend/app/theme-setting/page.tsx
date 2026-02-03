@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useNotification } from "@/components/notification/notification";
 import {
@@ -184,7 +184,7 @@ export default function ThemeSettingPage() {
     const giftsData: GiftCollection_t[] =
       themeGiftsRef.current?.getAllData() || [];
 
-    /* 입력값 유효성 검사 */
+    /* 입력값 존재 확인 */
     {
       if (name.trim() === "") {
         notify(
@@ -388,48 +388,16 @@ export default function ThemeSettingPage() {
       voteEnd.replaceAll(" ", "-") + "T23:59:59+09:00",
     );
 
-    const now = new Date();
-    if (
-      enrollStartDate <= now ||
-      enrollEndDate <= now ||
-      reviewStartDate <= now ||
-      reviewEndDate <= now ||
-      voteStartDate <= now ||
-      voteEndDate <= now
-    ) {
-      notify(<p>과거 시점으로는 일정을 등록할 수 없어요!</p>);
-      return;
-    }
-
-    if (
-      !(
-        enrollStartDate < enrollEndDate &&
-        enrollEndDate <= reviewStartDate &&
-        reviewStartDate < reviewEndDate &&
-        reviewEndDate <= voteStartDate &&
-        voteStartDate < voteEndDate
-      )
-    ) {
-      notify(
-        <p>
-          시작 시간은 종료 시간보다 빨라야 하며,
-          <br /> 각 기간은 이전 기간이 끝난 후 시작되어야 해요!
-        </p>,
-      );
-      return;
-    }
-
-    const diffER = reviewStartDate.getTime() - enrollEndDate.getTime();
-    if (diffER < 0 || diffER > 1000) {
-      notify(<p>참가 기간과 검수 기간 일정이 연속되지 않아요.</p>);
-      return;
-    }
-
-    const diffRV = voteStartDate.getTime() - reviewEndDate.getTime();
-    if (diffRV < 0 || diffRV > 1000) {
-      notify(<p>검수 기간과 투표 기간 일정이 연속되지 않아요.</p>);
-      return;
-    }
+    // const isValidSchedule = checkSchedule(
+    //   enrollStartDate,
+    //   enrollEndDate,
+    //   reviewStartDate,
+    //   reviewEndDate,
+    //   voteStartDate,
+    //   voteEndDate,
+    //   notify,
+    // );
+    // if (!isValidSchedule) return;
 
     const bgIndex = enrollBgLimit.findIndex((item) => item.name === bgLimit);
     const convertToWebP_GC = async (
@@ -450,8 +418,7 @@ export default function ThemeSettingPage() {
         })),
       );
 
-      // heart_rate 기준 내림차순 정렬
-      return result.sort((a, b) => b.heart_rate - a.heart_rate);
+      return result.sort((a, b) => b.heart_rate - a.heart_rate); // 내림차순 정렬
     };
 
     try {
@@ -570,31 +537,32 @@ export default function ThemeSettingPage() {
           <ThemeInput
             mt={16}
             label="테마 이름"
+            // disabled={initialStatus.isAfterStart("ENROLLING")}
             placeholder=""
             value={name}
             setValue={setName}
-            disabled={initialStatus.isAfterStart("ENROLLING")}
           />
           <ThemeInput
             mt={22}
             label="테마 설명"
+            // disabled={initialStatus.isAfterStart("ENROLLING")}
             placeholder="~ 미니는 누구?"
             value={description}
             setValue={setDescription}
-            disabled={initialStatus.isAfterStart("ENROLLING")}
           />
           <BgLimitCombobox
             mt={22}
+            // disabled={initialStatus.isAfterStart("ENROLLING")}
             combobox={combobox}
             enrollBgLimit={enrollBgLimit}
             bgLimit={bgLimit}
             setBgLimit={setBgLimit}
-            disabled={initialStatus.isAfterStart("ENROLLING")}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
 
           {/* 일정 관리 */}
           <ThemeSchedule
+            status={initialStatus}
             enrollStart={enrollStart}
             setEnrollStart={setEnrollStart}
             enrollEnd={enrollEnd}
@@ -607,7 +575,6 @@ export default function ThemeSettingPage() {
             setVoteStart={setVoteStart}
             voteEnd={voteEnd}
             setVoteEnd={setVoteEnd}
-            status={initialStatus}
           />
           <Divider size={1} color={"var(--gray-d9)"} />
 
@@ -615,34 +582,91 @@ export default function ThemeSettingPage() {
           <AccountSelect
             mt={16}
             label="검수 계정 관리"
+            // disabled={initialStatus.isAfterStart("REVIEWING")}
             value={reviewer}
             setValue={setReviewer}
-            disabled={initialStatus.isAfterStart("REVIEWING")}
             handleServerError={notifyServerError}
           />
           <AccountMultiSelect
             mt={22}
             label="심사 계정 관리"
+            // disabled={initialStatus.isAfterStart("VOTING")}
             value={judge}
             setValue={setJudge}
-            disabled={initialStatus.isAfterStart("VOTING")}
             handleServerError={notifyServerError}
           />
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
           <ThemeGifts
             ref={themeGiftsRef}
+            // disabled={initialStatus.isAfterStart("ENROLLING")}
             initialData={initialCollections}
-            disabled={initialStatus.isAfterStart("ENROLLING")}
           />
           <Divider size={1} color={"var(--gray-d9)"} />
         </Stack>
       </section>
       <EnrollFooter
         text="저 장 하 기"
-        loading={saveLoading}
         disabled={false}
+        loading={saveLoading}
         onClick={handleSave}
       />
     </>
   );
+}
+
+function validateSchedule(
+  enrollStartDate: Date,
+  enrollEndDate: Date,
+  reviewStartDate: Date,
+  reviewEndDate: Date,
+  voteStartDate: Date,
+  voteEndDate: Date,
+  notify: (message: React.ReactNode) => void,
+): boolean {
+  const schedules = [
+    enrollStartDate,
+    enrollEndDate,
+    reviewStartDate,
+    reviewEndDate,
+    voteStartDate,
+    voteEndDate,
+  ];
+
+  const now = new Date();
+  if (!schedules.every((date) => date > now)) {
+    notify(<p>과거 시점으로는 일정을 등록할 수 없어요!</p>);
+    return false;
+  }
+
+  if (
+    !(
+      enrollStartDate < enrollEndDate &&
+      enrollEndDate <= reviewStartDate &&
+      reviewStartDate < reviewEndDate &&
+      reviewEndDate <= voteStartDate &&
+      voteStartDate < voteEndDate
+    )
+  ) {
+    notify(
+      <p>
+        시작 시간은 종료 시간보다 빨라야 하며,
+        <br /> 각 기간은 이전 기간이 끝난 후 시작되어야 해요!
+      </p>,
+    );
+    return false;
+  }
+
+  const diffER = reviewStartDate.getTime() - enrollEndDate.getTime();
+  if (diffER < 0 || diffER > 1000) {
+    notify(<p>참가 기간과 검수 기간 일정이 연속되지 않아요.</p>);
+    return false;
+  }
+
+  const diffRV = voteStartDate.getTime() - reviewEndDate.getTime();
+  if (diffRV < 0 || diffRV > 1000) {
+    notify(<p>검수 기간과 투표 기간 일정이 연속되지 않아요.</p>);
+    return false;
+  }
+
+  return true;
 }

@@ -6,20 +6,20 @@ import { InputBase, Combobox, ComboboxStore, Stack, Box } from "@mantine/core";
 
 interface BgLimitComboboxProps {
   mt?: number;
+  disabled?: boolean;
   combobox: ComboboxStore;
   enrollBgLimit: { name: string; color: string }[];
   bgLimit: string | null;
   setBgLimit: Dispatch<SetStateAction<string | null>>;
-  disabled?: boolean;
 }
 
 export function BgLimitCombobox({
   mt = 0,
+  disabled,
   combobox,
   enrollBgLimit,
   bgLimit,
   setBgLimit,
-  disabled,
 }: BgLimitComboboxProps) {
   const enrollBgColorbyName = enrollBgLimit.reduce(
     (acc, item) => {
@@ -45,12 +45,12 @@ export function BgLimitCombobox({
         <p>배경색 제한</p>
       </Box>
       <Combobox
+        disabled={disabled}
         store={combobox}
         onOptionSubmit={(val) => {
           setBgLimit(val);
           combobox.closeDropdown();
         }}
-        disabled={disabled}
       >
         <Combobox.Target>
           <InputBase

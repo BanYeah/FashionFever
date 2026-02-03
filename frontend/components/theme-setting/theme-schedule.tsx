@@ -7,6 +7,7 @@ import { DateInput } from "@mantine/dates";
 import { ThemeStatus } from "@/types/theme-status";
 
 interface ThemeScheduleProps {
+  status: ThemeStatus;
   enrollStart: string | null;
   setEnrollStart: Dispatch<SetStateAction<string | null>>;
   enrollEnd: string | null;
@@ -19,10 +20,10 @@ interface ThemeScheduleProps {
   setVoteStart: Dispatch<SetStateAction<string | null>>;
   voteEnd: string | null;
   setVoteEnd: Dispatch<SetStateAction<string | null>>;
-  status: ThemeStatus;
 }
 
 export function ThemeSchedule({
+  status,
   enrollStart,
   setEnrollStart,
   enrollEnd,
@@ -35,7 +36,6 @@ export function ThemeSchedule({
   setVoteStart,
   voteEnd,
   setVoteEnd,
-  status,
 }: ThemeScheduleProps) {
   const [opened, { toggle }] = useDisclosure(false);
 
@@ -51,17 +51,17 @@ export function ThemeSchedule({
             <p className={classes.Label}>참가 기간</p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
+                // disabled={status.isImminent("ENROLLING")}
                 time="00:00:00"
                 value={enrollStart}
                 setValue={setEnrollStart}
-                disabled={status.isImminent("ENROLLING")}
               />
               <p>~</p>
               <ThemeDateInput
+                // disabled={status.isImminent("REVIEWING")}
                 time="23:59:59"
                 value={enrollEnd}
                 setValue={setEnrollEnd}
-                disabled={status.isImminent("REVIEWING")}
               />
             </Group>
           </Stack>
@@ -69,17 +69,17 @@ export function ThemeSchedule({
             <p className={classes.Label}>검수 기간</p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
+                // disabled={status.isImminent("REVIEWING")}
                 time="00:00:00"
                 value={reviewStart}
                 setValue={setReviewStart}
-                disabled={status.isImminent("REVIEWING")}
               />
               <p>~</p>
               <ThemeDateInput
+                // disabled={status.isImminent("VOTING")}
                 time="23:59:59"
                 value={reviewEnd}
                 setValue={setReviewEnd}
-                disabled={status.isImminent("VOTING")}
               />
             </Group>
           </Stack>
@@ -87,17 +87,17 @@ export function ThemeSchedule({
             <p className={classes.Label}>투표 기간</p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
+                // disabled={status.isImminent("VOTING")}
                 time="00:00:00"
                 value={voteStart}
                 setValue={setVoteStart}
-                disabled={status.isImminent("VOTING")}
               />
               <p>~</p>
               <ThemeDateInput
+                // disabled={status.isImminent("COMPLETE")}
                 time="23:59:59"
                 value={voteEnd}
                 setValue={setVoteEnd}
-                disabled={status.isImminent("COMPLETE")}
               />
             </Group>
           </Stack>
@@ -108,16 +108,16 @@ export function ThemeSchedule({
 }
 
 interface ThemeDateInputProps {
+  disabled?: boolean;
   time: string;
   value: string | null;
   setValue: Dispatch<SetStateAction<string | null>>;
-  disabled?: boolean;
 }
 function ThemeDateInput({
+  disabled,
   time,
   value,
   setValue,
-  disabled,
 }: ThemeDateInputProps) {
   return (
     <div style={{ position: "relative", flexGrow: 1 }}>
@@ -125,6 +125,7 @@ function ThemeDateInput({
         classNames={{
           input: classes.DateInputInput,
         }}
+        disabled={disabled}
         value={value}
         onChange={setValue}
         valueFormat="YYYY MM DD"
@@ -133,7 +134,6 @@ function ThemeDateInput({
           withinPortal: true, // 달력을 DOM 최상단으로 보냄
           shadow: "md",
         }}
-        disabled={disabled}
       />
       {value && (
         <div
