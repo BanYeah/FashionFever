@@ -41,7 +41,7 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
           </p>
           <Stack align="flex-end" justify="space-between" gap={12}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.enroll_end_at)} 남음
+              {formatDueIn(data.review_start_at)} 남음
             </p>
             <ThemeSettingLink
               href={`/theme-setting?theme_id=${data.theme_id}`}
@@ -81,7 +81,18 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
         <Group align="center" justify="space-between" p={6} gap={0}>
           <p>현재 투표가 진행 중인 테마예요!</p>
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>결과 발표까지 {formatDueIn(data.vote_end_at)}</p>
+            <p>결과 집계까지 {formatDueIn(data.result_start_at)}</p>
+            <ThemeSettingLink
+              href={`/theme-setting?theme_id=${data.theme_id}`}
+            />
+          </Stack>
+        </Group>
+      );
+    else if (data.status === "RESULTING")
+      return (
+        <Group align="center" justify="space-between" p={6} gap={0}>
+          <p>현재 결과 집계가 진행 중인 테마예요!</p>
+          <Stack justify="flex-end" h={56.5}>
             <ThemeSettingLink
               href={`/theme-setting?theme_id=${data.theme_id}`}
             />
@@ -102,7 +113,7 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
               <p>100/150</p>
             </Group>
           </Stack>
-          <Flex style={{ position: "relative" }} align="flex-end" h={56}>
+          <Flex style={{ position: "relative" }} align="flex-end" h={56.5}>
             <UnstyledButton
               style={{ position: "absolute", top: "-28px", right: "-6px" }}
               w={61}
@@ -115,6 +126,11 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
                 height={61}
               />
             </UnstyledButton>
+
+            <ThemeSettingLink
+              href={`/theme-setting?theme_id=${data.theme_id}`}
+              blur
+            />
           </Flex>
         </Group>
       );
@@ -218,11 +234,15 @@ export function ThemeReviewLink({ href }: { href: string }) {
   );
 }
 
-function ThemeSettingLink({ href }: { href: string }) {
+function ThemeSettingLink({ href, blur }: { href: string; blur?: boolean }) {
   return (
-    <Link style={{ width: "30px", height: "30px" }} href={href}>
+    <Link style={{ height: "30px" }} href={href}>
       <Image
-        src="/images/home/theme-display/theme-setting.svg"
+        src={
+          blur
+            ? "/images/home/theme-display/theme-setting-blur.svg"
+            : "/images/home/theme-display/theme-setting.svg"
+        }
         alt=""
         width={30}
         height={30}

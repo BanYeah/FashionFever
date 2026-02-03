@@ -77,9 +77,7 @@ export default function ThemeSettingPage() {
 
   /* 일정 관리 */
   const [enrollStart, setEnrollStart] = useState<string | null>(null);
-  const [enrollEnd, setEnrollEnd] = useState<string | null>(null);
   const [reviewStart, setReviewStart] = useState<string | null>(null);
-  const [reviewEnd, setReviewEnd] = useState<string | null>(null);
   const [voteStart, setVoteStart] = useState<string | null>(null);
   const [voteEnd, setVoteEnd] = useState<string | null>(null);
 
@@ -99,16 +97,18 @@ export default function ThemeSettingPage() {
     GiftCollectionData[]
   >([]);
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string, offset: number = 0) => {
     const date = new Date(dateStr);
-    const formatter = new Intl.DateTimeFormat("ko-KR", {
+    date.setDate(date.getDate() + offset);
+
+    const formatter = new Intl.DateTimeFormat("en-CA", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       timeZone: "Asia/Seoul",
     });
 
-    return formatter.format(date).replace(/\. /g, " ").replace(/\.$/, "");
+    return formatter.format(date);
   };
 
   useEffect(() => {
@@ -120,9 +120,7 @@ export default function ThemeSettingPage() {
       setBanner(null);
 
       setEnrollStart(null);
-      setEnrollEnd(null);
       setReviewStart(null);
-      setReviewEnd(null);
       setVoteStart(null);
       setVoteEnd(null);
 
@@ -148,11 +146,9 @@ export default function ThemeSettingPage() {
           setBanner(data.banner_url);
 
           setEnrollStart(formatDate(data.enroll_start_at));
-          setEnrollEnd(formatDate(data.enroll_end_at));
           setReviewStart(formatDate(data.review_start_at));
-          setReviewEnd(formatDate(data.review_end_at));
           setVoteStart(formatDate(data.vote_start_at));
-          setVoteEnd(formatDate(data.vote_end_at));
+          setVoteEnd(formatDate(data.result_start_at, -1));
 
           if (data.reviewer_minicode)
             setReviewer("judge_" + data.reviewer_minicode);
@@ -165,7 +161,7 @@ export default function ThemeSettingPage() {
                 new Date(data.enroll_start_at),
                 new Date(data.review_start_at),
                 new Date(data.vote_start_at),
-                new Date(data.vote_end_at),
+                new Date(data.result_start_at),
               ),
           );
           setInitialCollections(data.collections);
@@ -228,30 +224,10 @@ export default function ThemeSettingPage() {
         );
         return;
       }
-      if (!enrollEnd) {
-        notify(
-          <p>
-            <span style={{ color: "var(--main)" }}>참가 종료 시간</span>이
-            입력되지 않아
-            <br /> 저장할 수 없어요!
-          </p>,
-        );
-        return;
-      }
       if (!reviewStart) {
         notify(
           <p>
             <span style={{ color: "var(--main)" }}>검수 시작 시간</span>이
-            입력되지 않아
-            <br /> 저장할 수 없어요!
-          </p>,
-        );
-        return;
-      }
-      if (!reviewEnd) {
-        notify(
-          <p>
-            <span style={{ color: "var(--main)" }}>검수 종료 시간</span>이
             입력되지 않아
             <br /> 저장할 수 없어요!
           </p>,
@@ -368,33 +344,18 @@ export default function ThemeSettingPage() {
       }
     }
 
-    /* 일정 유효성 검사 */
-    const enrollStartDate = new Date(
-      enrollStart.replaceAll(" ", "-") + "T00:00:00+09:00",
-    );
-    const enrollEndDate = new Date(
-      enrollEnd.replaceAll(" ", "-") + "T23:59:59+09:00",
-    );
-    const reviewStartDate = new Date(
-      reviewStart.replaceAll(" ", "-") + "T00:00:00+09:00",
-    );
-    const reviewEndDate = new Date(
-      reviewEnd.replaceAll(" ", "-") + "T23:59:59+09:00",
-    );
-    const voteStartDate = new Date(
-      voteStart.replaceAll(" ", "-") + "T00:00:00+09:00",
-    );
-    const voteEndDate = new Date(
-      voteEnd.replaceAll(" ", "-") + "T23:59:59+09:00",
-    );
+    const enrollStartDate = new Date(enrollStart + "T00:00:00+09:00");
+    const reviewStartDate = new Date(reviewStart + "T00:00:00+09:00");
+    const voteStartDate = new Date(voteStart + "T00:00:00+09:00");
+    const resultStartDate = new Date(voteEnd + "T00:00:00+09:00");
+    resultStartDate.setDate(resultStartDate.getDate() + 1);
 
-    // const isValidSchedule = checkSchedule(
+    /* 일정 유효성 검사 */
+    // const isValidSchedule = validateSchedule(
     //   enrollStartDate,
-    //   enrollEndDate,
     //   reviewStartDate,
-    //   reviewEndDate,
     //   voteStartDate,
-    //   voteEndDate,
+    //   resultStartDate,
     //   notify,
     // );
     // if (!isValidSchedule) return;
@@ -429,11 +390,9 @@ export default function ThemeSettingPage() {
         bg_limit: 0 <= bgIndex && bgIndex <= 10 ? bgIndex : null,
         banner: banner instanceof File ? await convertToWebP(banner) : banner,
         enroll_start_at: enrollStartDate.toISOString(),
-        enroll_end_at: enrollEndDate.toISOString(),
         review_start_at: reviewStartDate.toISOString(),
-        review_end_at: reviewEndDate.toISOString(),
         vote_start_at: voteStartDate.toISOString(),
-        vote_end_at: voteEndDate.toISOString(),
+        result_start_at: resultStartDate.toISOString(),
         reviewer_minicode:
           reviewer === null ? null : reviewer.replace(/^judge_/, ""),
         judge_minicodes: judge.map((code) => code.replace(/^judge_/, "")),
@@ -565,12 +524,8 @@ export default function ThemeSettingPage() {
             status={initialStatus}
             enrollStart={enrollStart}
             setEnrollStart={setEnrollStart}
-            enrollEnd={enrollEnd}
-            setEnrollEnd={setEnrollEnd}
             reviewStart={reviewStart}
             setReviewStart={setReviewStart}
-            reviewEnd={reviewEnd}
-            setReviewEnd={setReviewEnd}
             voteStart={voteStart}
             setVoteStart={setVoteStart}
             voteEnd={voteEnd}
@@ -616,20 +571,16 @@ export default function ThemeSettingPage() {
 
 function validateSchedule(
   enrollStartDate: Date,
-  enrollEndDate: Date,
   reviewStartDate: Date,
-  reviewEndDate: Date,
   voteStartDate: Date,
-  voteEndDate: Date,
+  resultStartDate: Date,
   notify: (message: React.ReactNode) => void,
 ): boolean {
   const schedules = [
     enrollStartDate,
-    enrollEndDate,
     reviewStartDate,
-    reviewEndDate,
     voteStartDate,
-    voteEndDate,
+    resultStartDate,
   ];
 
   const now = new Date();
@@ -639,13 +590,9 @@ function validateSchedule(
   }
 
   if (
-    !(
-      enrollStartDate < enrollEndDate &&
-      enrollEndDate <= reviewStartDate &&
-      reviewStartDate < reviewEndDate &&
-      reviewEndDate <= voteStartDate &&
-      voteStartDate < voteEndDate
-    )
+    enrollStartDate >= reviewStartDate ||
+    reviewStartDate >= voteStartDate ||
+    voteStartDate >= resultStartDate
   ) {
     notify(
       <p>
@@ -653,18 +600,6 @@ function validateSchedule(
         <br /> 각 기간은 이전 기간이 끝난 후 시작되어야 해요!
       </p>,
     );
-    return false;
-  }
-
-  const diffER = reviewStartDate.getTime() - enrollEndDate.getTime();
-  if (diffER < 0 || diffER > 1000) {
-    notify(<p>참가 기간과 검수 기간 일정이 연속되지 않아요.</p>);
-    return false;
-  }
-
-  const diffRV = voteStartDate.getTime() - reviewEndDate.getTime();
-  if (diffRV < 0 || diffRV > 1000) {
-    notify(<p>검수 기간과 투표 기간 일정이 연속되지 않아요.</p>);
     return false;
   }
 

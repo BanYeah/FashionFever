@@ -11,6 +11,10 @@
 
   color: var(--main);
   font-size: 14px;
+
+  span {
+    color: var(--main-light);
+  }
 }
 
 .Time {

@@ -55,3 +55,7 @@ a {
 p {
   line-height: 1;
 }
+
+[disabled] {
+  cursor: default !important;
+}

@@ -61,7 +61,6 @@ export const ThemeGifts = forwardRef(
           data: data,
         })),
       );
-      if (!opened) toggle();
     }, [initialData]);
 
     const addCollection = () => {

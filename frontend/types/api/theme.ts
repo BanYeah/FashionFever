@@ -26,11 +26,9 @@ export interface ThemePayload {
   banner: File | string;
 
   enroll_start_at: string; // ISO 문자열
-  enroll_end_at: string;
   review_start_at: string;
-  review_end_at: string;
   vote_start_at: string;
-  vote_end_at: string;
+  result_start_at: string;
 
   reviewer_minicode: string | null;
   judge_minicodes: string[];
@@ -64,11 +62,9 @@ export interface ThemeData {
   banner_url: string;
 
   enroll_start_at: string; // ISO 문자열
-  enroll_end_at: string;
   review_start_at: string;
-  review_end_at: string;
   vote_start_at: string;
-  vote_end_at: string;
+  result_start_at: string;
   status: ThemeStatusType;
 
   reviewer_minicode: string | null;
@@ -82,10 +78,8 @@ export interface ThemeScheduleData {
   banner_url: string;
 
   enroll_start_at: string; // ISO 문자열
-  enroll_end_at: string;
   review_start_at: string;
-  review_end_at: string;
   vote_start_at: string;
-  vote_end_at: string;
+  result_start_at: string;
   status: string;
 }

@@ -12,11 +12,9 @@ function themeFormData(payload: ThemePayload): FormData {
   else formData.append("banner_url", payload.banner);
 
   formData.append("enroll_start_at", payload.enroll_start_at);
-  formData.append("enroll_end_at", payload.enroll_end_at);
   formData.append("review_start_at", payload.review_start_at);
-  formData.append("review_end_at", payload.review_end_at);
   formData.append("vote_start_at", payload.vote_start_at);
-  formData.append("vote_end_at", payload.vote_end_at);
+  formData.append("result_start_at", payload.result_start_at);
 
   if (payload.reviewer_minicode !== null)
     formData.append("reviewer_minicode", payload.reviewer_minicode);
