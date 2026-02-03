@@ -56,15 +56,6 @@ export class ThemeFormDto {
   enroll_start_at: Date;
 
   @ApiProperty({
-    description: '참가 종료 시간',
-    example: '2026-01-03T23:59:59Z',
-  })
-  @Type(() => Date)
-  @IsDate()
-  @IsNotEmpty()
-  enroll_end_at: Date;
-
-  @ApiProperty({
     description: '검수 시작 시간',
     example: '2026-01-04T00:00:00Z',
   })
@@ -72,15 +63,6 @@ export class ThemeFormDto {
   @IsDate()
   @IsNotEmpty()
   review_start_at: Date;
-
-  @ApiProperty({
-    description: '검수 시작 시간',
-    example: '2026-01-04T23:59:59Z',
-  })
-  @Type(() => Date)
-  @IsDate()
-  @IsNotEmpty()
-  review_end_at: Date;
 
   @ApiProperty({
     description: '투표 시작 시간',
@@ -92,13 +74,13 @@ export class ThemeFormDto {
   vote_start_at: Date;
 
   @ApiProperty({
-    description: '투표 종료 시간',
+    description: '결과 집계 시작 시간',
     example: '2026-01-07T23:59:59Z',
   })
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
-  vote_end_at: Date;
+  result_start_at: Date;
 
   // Accounts
   @ApiProperty({

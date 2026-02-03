@@ -28,13 +28,13 @@ export class ThemeCron {
       UPDATE "Schedule"
       SET "status" = CASE 
         WHEN CURRENT_TIMESTAMP < "enroll_start_at" THEN 'PREPARING'
-        WHEN CURRENT_TIMESTAMP >= "enroll_start_at" AND CURRENT_TIMESTAMP < "enroll_end_at" THEN 'ENROLLING'
-        WHEN CURRENT_TIMESTAMP >= "review_start_at" AND CURRENT_TIMESTAMP < "review_end_at" THEN 'REVIEWING'
-        WHEN CURRENT_TIMESTAMP >= "vote_start_at" AND CURRENT_TIMESTAMP < "vote_end_at" THEN 'VOTING'
-        WHEN CURRENT_TIMESTAMP >= "vote_end_at" THEN 'COMPLETE'
+        WHEN CURRENT_TIMESTAMP >= "enroll_start_at" AND CURRENT_TIMESTAMP < "review_start_at" THEN 'ENROLLING'
+        WHEN CURRENT_TIMESTAMP >= "review_start_at" AND CURRENT_TIMESTAMP < "vote_start_at" THEN 'REVIEWING'
+        WHEN CURRENT_TIMESTAMP >= "vote_start_at" AND CURRENT_TIMESTAMP < "result_start_at" THEN 'VOTING'
+        WHEN CURRENT_TIMESTAMP >= "result_start_at" THEN 'RESULTING'
         ELSE "status"
       END
-      WHERE "status" != 'COMPLETE';
+      WHERE "status" != 'RESULTING' AND "status" != 'COMPLETE';
     `);
 
     this.logger.log('테마 일정 상태 업데이트 완료');

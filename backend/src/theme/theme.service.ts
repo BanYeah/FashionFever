@@ -32,100 +32,60 @@ export class ThemeService {
 
   private async validateSchedule(
     queryRunner: QueryRunner,
-    enrollStartDate: Date,
-    enrollEndDate: Date,
-    reviewStartDate: Date,
-    reviewEndDate: Date,
-    voteStartDate: Date,
-    voteEndDate: Date,
+    enrollStartAt: Date,
+    reviewStartAt: Date,
+    voteStartAt: Date,
+    resultStartAt: Date,
+    themeId?: string,
   ) {
     const now = new Date();
     const schedules = [
-      enrollStartDate,
-      enrollEndDate,
-      reviewStartDate,
-      reviewEndDate,
-      voteStartDate,
-      voteEndDate,
+      enrollStartAt,
+      reviewStartAt,
+      voteStartAt,
+      resultStartAt,
     ];
 
     if (!schedules.every((date) => date > now))
       throw new BadRequestException('과거 시점으로는 일정을 등록할 수 없어요!');
 
-    // 참가/검수/투표 기간이 연속인지 확인
-    {
-      // 밀리초 단위로 변환해서 차이 계산 (1초 = 1000ms)
-      const diffER = reviewStartDate.getTime() - enrollEndDate.getTime();
-
-      if (diffER < 0 || diffER > 1000)
-        throw new BadRequestException(
-          `참가 기간과 검수 기간 일정이 연속되지 않아요.`,
-        );
-
-      const diffRV = voteStartDate.getTime() - reviewEndDate.getTime();
-
-      if (diffRV < 0 || diffRV > 1000)
-        throw new BadRequestException(
-          `검수 기간과 투표 기간 일정이 연속되지 않아요.`,
-        );
-    }
-
-    // 기존 테마 일정과 참가/검수/투표 기간이 겹치는지 확인
-    {
-      const eol = await this.checkOverlap(
-        queryRunner,
-        'enroll',
-        enrollStartDate,
-        enrollEndDate,
+    if (
+      enrollStartAt >= reviewStartAt ||
+      reviewStartAt >= voteStartAt ||
+      voteStartAt >= resultStartAt
+    )
+      throw new BadRequestException(
+        '각 기간은 이전 기간이 끝난 후 시작되어야 하며, 시작 시간은 종료 시간보다 빨라야 해요!',
       );
-      if (eol)
-        throw new BadRequestException(
-          `참가 기간이 ${this.formatDate(eol.enroll_start_at)} ~ ${this.formatDate(eol.enroll_end_at)}인 일정이 이미 존재해요.`,
-        );
 
-      const rol = await this.checkOverlap(
-        queryRunner,
-        'review',
-        reviewStartDate,
-        reviewEndDate,
-      );
-      if (rol)
-        throw new BadRequestException(
-          `검수 기간이 ${this.formatDate(rol.review_start_at)} ~ ${this.formatDate(rol.review_end_at)}인 일정이 이미 존재합니다.`,
-        );
+    // 기존 테마 일정과 겹치는지 확인
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'Asia/Seoul',
+    });
 
-      const vol = await this.checkOverlap(
-        queryRunner,
-        'vote',
-        voteStartDate,
-        voteEndDate,
-      );
-      if (vol)
-        throw new BadRequestException(
-          `투표 기간이 ${this.formatDate(vol.vote_start_at)} ~ ${this.formatDate(vol.vote_end_at)}인 일정이 이미 존재합니다.`,
-        );
-    }
-  }
-
-  private async checkOverlap(
-    queryRunner: QueryRunner,
-    type: 'enroll' | 'review' | 'vote',
-    start: Date,
-    end: Date,
-    themeId?: string,
-  ) {
     const query = queryRunner.manager
       .createQueryBuilder(Schedule, 'schedule')
       .where(
-        `(schedule.${type}_start_at < :end AND schedule.${type}_end_at > :start)`,
-        { start, end },
+        `(:start_at < schedule.result_start_at AND schedule.enroll_start_at < :end_at)`,
+        { start_at: enrollStartAt, end_at: resultStartAt },
       );
     if (themeId) query.andWhere('schedule.theme_id != :themeId', { themeId });
-    return await query.getOne();
-  }
+    const overlap = await query.getOne();
 
-  private formatDate(date: Date) {
-    return date.toISOString().split('T')[0].replaceAll('-', '.');
+    if (overlap) {
+      const otherStartAt =
+        formatter.format(overlap.enroll_start_at) + ' (00:00:00)';
+
+      const otherEndAt =
+        formatter.format(overlap.result_start_at) + ' (00:00:00)';
+
+      throw new BadRequestException(
+        `일정이 ${otherStartAt} ~ ${otherEndAt}인 테마가 이미 존재해요.`,
+      );
+    }
   }
 
   async createThemeSetting(
@@ -144,11 +104,9 @@ export class ThemeService {
       // this.validateSchedule(
       //   queryRunner,
       //   dto.enroll_start_at,
-      //   dto.enroll_end_at,
       //   dto.review_start_at,
-      //   dto.review_end_at,
       //   dto.vote_start_at,
-      //   dto.vote_end_at,
+      //   dto.result_start_at,
       // );
 
       const schedule = queryRunner.manager.create(Schedule, {
@@ -226,29 +184,27 @@ export class ThemeService {
         for (const [index, giftDto] of gifts.entries()) {
           const { gift_url, gift_file_order, ...giftData } = giftDto;
 
-          try {
-            if (gift_file_order !== null) {
-              const giftUrl = await this.r2Service.uploadImage(
-                giftFiles[gift_file_order],
-                'theme-gift',
-              );
-              uploadedFiles.push(giftUrl);
+          if (gift_file_order !== null) {
+            const giftUrl = await this.r2Service.uploadImage(
+              giftFiles[gift_file_order],
+              'theme-gift',
+            );
+            uploadedFiles.push(giftUrl);
 
-              await queryRunner.manager.save(Gift, {
-                gift_collection_id: collection.gift_collection_id,
-                ...giftData,
-                gift_url: giftUrl,
-                collection_order: index + 1,
-              });
-            } else if (gift_url) {
-              await queryRunner.manager.save(Gift, {
-                gift_collection_id: collection.gift_collection_id,
-                ...giftData,
-                gift_url: gift_url,
-                collection_order: index + 1,
-              });
-            } else throw new Error();
-          } catch {
+            await queryRunner.manager.save(Gift, {
+              gift_collection_id: collection.gift_collection_id,
+              ...giftData,
+              gift_url: giftUrl,
+              collection_order: index + 1,
+            });
+          } else if (gift_url) {
+            await queryRunner.manager.save(Gift, {
+              gift_collection_id: collection.gift_collection_id,
+              ...giftData,
+              gift_url: gift_url,
+              collection_order: index + 1,
+            });
+          } else {
             throw new BadRequestException(
               '선물 이미지가 업로드되지 않은 선물이 있어요!',
             );
@@ -290,11 +246,9 @@ export class ThemeService {
       banner_url: item.banner.banner_url,
 
       enroll_start_at: item.enroll_start_at,
-      enroll_end_at: item.enroll_end_at,
       review_start_at: item.review_start_at,
-      review_end_at: item.review_end_at,
       vote_start_at: item.vote_start_at,
-      vote_end_at: item.vote_end_at,
+      result_start_at: item.result_start_at,
       status: item.status,
     }));
 
@@ -348,11 +302,9 @@ export class ThemeService {
           banner_url: theme.banner.banner_url,
 
           enroll_start_at: theme.enroll_start_at,
-          enroll_end_at: theme.enroll_end_at,
           review_start_at: theme.review_start_at,
-          review_end_at: theme.review_end_at,
           vote_start_at: theme.vote_start_at,
-          vote_end_at: theme.vote_end_at,
+          result_start_at: theme.result_start_at,
           status: theme.status,
 
           reviewer_minicode: theme.reviewer.user?.minicode || null,
@@ -399,11 +351,9 @@ export class ThemeService {
       // this.validateSchedule(
       //   queryRunner,
       //   dto.enroll_start_at,
-      //   dto.enroll_end_at,
       //   dto.review_start_at,
-      //   dto.review_end_at,
       //   dto.vote_start_at,
-      //   dto.vote_end_at,
+      //   dto.result_start_at,
       // );
 
       const schedule = await queryRunner.manager.findOne(Schedule, {
@@ -411,19 +361,17 @@ export class ThemeService {
       });
       if (!schedule) throw new NotFoundException('존재하지 않는 테마예요!');
 
-      // const now = new Date();
-      // // 이미 시작된 일정이거나 시작하기 1시간 전인 일정을 수정하지는 않는지 확인
+      // 이미 시작된 일정이거나 시작하기 1시간 전인 일정을 수정하지는 않는지 확인
       // {
+      //   const now = new Date();
       //   const ONE_HOUR_MS = 60 * 60 * 1000;
       //   const limitTime = new Date(now.getTime() + ONE_HOUR_MS);
 
       //   const scheduleChecks = [
       //     [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
-      //     [dto.enroll_end_at, schedule.enroll_end_at, '참가 종료'],
       //     [dto.review_start_at, schedule.review_start_at, '검수 시작'],
-      //     [dto.review_end_at, schedule.review_end_at, '검수 종료'],
       //     [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
-      //     [dto.vote_end_at, schedule.vote_end_at, '투표 종료'],
+      //     [dto.result_start_at, schedule.result_start_at, '결과 집계 시작'],
       //   ];
 
       //   for (const [newDate, oldDate, label] of scheduleChecks) {
@@ -443,11 +391,9 @@ export class ThemeService {
         { theme_id: themeId },
         {
           enroll_start_at: dto.enroll_start_at,
-          enroll_end_at: dto.enroll_end_at,
           review_start_at: dto.review_start_at,
-          review_end_at: dto.review_end_at,
           vote_start_at: dto.vote_start_at,
-          vote_end_at: dto.vote_end_at,
+          result_start_at: dto.result_start_at,
         },
       );
 
@@ -551,31 +497,29 @@ export class ThemeService {
         for (const [index, giftDto] of gifts.entries()) {
           const { gift_url, gift_file_order, ...giftData } = giftDto;
 
-          try {
-            if (gift_file_order !== null) {
-              const giftUrl = await this.r2Service.uploadImage(
-                giftFiles[gift_file_order],
-                'theme-gift',
-              );
-              uploadedFiles.push(giftUrl);
+          if (gift_file_order !== null) {
+            const giftUrl = await this.r2Service.uploadImage(
+              giftFiles[gift_file_order],
+              'theme-gift',
+            );
+            uploadedFiles.push(giftUrl);
 
-              await queryRunner.manager.save(Gift, {
-                gift_collection_id: collection.gift_collection_id,
-                ...giftData,
-                gift_url: giftUrl,
-                collection_order: index + 1,
-              });
-            } else if (gift_url) {
-              deletedFiles.delete(gift_url);
+            await queryRunner.manager.save(Gift, {
+              gift_collection_id: collection.gift_collection_id,
+              ...giftData,
+              gift_url: giftUrl,
+              collection_order: index + 1,
+            });
+          } else if (gift_url) {
+            deletedFiles.delete(gift_url);
 
-              await queryRunner.manager.save(Gift, {
-                gift_collection_id: collection.gift_collection_id,
-                ...giftData,
-                gift_url: gift_url,
-                collection_order: index + 1,
-              });
-            } else throw new Error();
-          } catch {
+            await queryRunner.manager.save(Gift, {
+              gift_collection_id: collection.gift_collection_id,
+              ...giftData,
+              gift_url: gift_url,
+              collection_order: index + 1,
+            });
+          } else {
             throw new BadRequestException(
               '선물 이미지가 업로드되지 않은 선물이 있어요!',
             );

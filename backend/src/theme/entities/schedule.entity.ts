@@ -13,19 +13,13 @@ export class Schedule {
   enroll_start_at: Date;
 
   @Column({ type: 'timestamptz' })
-  enroll_end_at: Date;
-
-  @Column({ type: 'timestamptz' })
   review_start_at: Date;
-
-  @Column({ type: 'timestamptz' })
-  review_end_at: Date;
 
   @Column({ type: 'timestamptz' })
   vote_start_at: Date;
 
   @Column({ type: 'timestamptz' })
-  vote_end_at: Date;
+  result_start_at: Date;
 
   @Column({
     type: 'varchar',
