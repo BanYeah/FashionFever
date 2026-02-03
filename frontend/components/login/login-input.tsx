@@ -53,9 +53,8 @@ export function LoginInput() {
       if (result.success)
         setIsEnter(true); // 입장코드 입력창 등장
       else if (result.status === 404) {
-        if (isJudge) {
-          notify(<p>심사위원으로 임명되지 않은 미니예요!</p>);
-        } else open(); // 정보 제공 및 활용 동의 안내
+        if (isJudge) notify(<p>심사위원으로 임명되지 않은 미니예요!</p>);
+        else open(); // 정보 제공 및 활용 동의 안내
       } else notifyServerError();
     } finally {
       setLoading(false);
@@ -79,7 +78,7 @@ export function LoginInput() {
         break;
 
       case 423:
-        if (minicode === "admin_") {
+        if (minicode === "admin_")
           notify(
             <p>
               과도한 로그인 시도가 감지되어
@@ -87,7 +86,7 @@ export function LoginInput() {
               해당 IP의 접속이 일시적으로 차단되었습니다.
             </p>,
           );
-        } else {
+        else {
           const timeInfo =
             result.message?.match(/약 \d+분 후/)?.[0] || "잠시 후";
           notify(
