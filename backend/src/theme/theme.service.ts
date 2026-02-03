@@ -30,6 +30,83 @@ export class ThemeService {
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
   ) {}
 
+  private async validateSchedule(
+    queryRunner: QueryRunner,
+    enrollStartDate: Date,
+    enrollEndDate: Date,
+    reviewStartDate: Date,
+    reviewEndDate: Date,
+    voteStartDate: Date,
+    voteEndDate: Date,
+  ) {
+    const now = new Date();
+    const schedules = [
+      enrollStartDate,
+      enrollEndDate,
+      reviewStartDate,
+      reviewEndDate,
+      voteStartDate,
+      voteEndDate,
+    ];
+
+    if (!schedules.every((date) => date > now))
+      throw new BadRequestException('과거 시점으로는 일정을 등록할 수 없어요!');
+
+    // 참가/검수/투표 기간이 연속인지 확인
+    {
+      // 밀리초 단위로 변환해서 차이 계산 (1초 = 1000ms)
+      const diffER = reviewStartDate.getTime() - enrollEndDate.getTime();
+
+      if (diffER < 0 || diffER > 1000)
+        throw new BadRequestException(
+          `참가 기간과 검수 기간 일정이 연속되지 않아요.`,
+        );
+
+      const diffRV = voteStartDate.getTime() - reviewEndDate.getTime();
+
+      if (diffRV < 0 || diffRV > 1000)
+        throw new BadRequestException(
+          `검수 기간과 투표 기간 일정이 연속되지 않아요.`,
+        );
+    }
+
+    // 기존 테마 일정과 참가/검수/투표 기간이 겹치는지 확인
+    {
+      const eol = await this.checkOverlap(
+        queryRunner,
+        'enroll',
+        enrollStartDate,
+        enrollEndDate,
+      );
+      if (eol)
+        throw new BadRequestException(
+          `참가 기간이 ${this.formatDate(eol.enroll_start_at)} ~ ${this.formatDate(eol.enroll_end_at)}인 일정이 이미 존재해요.`,
+        );
+
+      const rol = await this.checkOverlap(
+        queryRunner,
+        'review',
+        reviewStartDate,
+        reviewEndDate,
+      );
+      if (rol)
+        throw new BadRequestException(
+          `검수 기간이 ${this.formatDate(rol.review_start_at)} ~ ${this.formatDate(rol.review_end_at)}인 일정이 이미 존재합니다.`,
+        );
+
+      const vol = await this.checkOverlap(
+        queryRunner,
+        'vote',
+        voteStartDate,
+        voteEndDate,
+      );
+      if (vol)
+        throw new BadRequestException(
+          `투표 기간이 ${this.formatDate(vol.vote_start_at)} ~ ${this.formatDate(vol.vote_end_at)}인 일정이 이미 존재합니다.`,
+        );
+    }
+  }
+
   private async checkOverlap(
     queryRunner: QueryRunner,
     type: 'enroll' | 'review' | 'vote',
@@ -64,79 +141,15 @@ export class ThemeService {
 
     try {
       // Schedule
-      const now = new Date();
-      const schedulesDto = [
-        dto.enroll_start_at,
-        dto.enroll_end_at,
-        dto.review_start_at,
-        dto.review_end_at,
-        dto.vote_start_at,
-        dto.vote_end_at,
-      ];
-
-      if (!schedulesDto.every((date) => new Date(date) > now))
-        throw new BadRequestException(
-          '과거 시점으로는 일정을 등록할 수 없어요!',
-        );
-
-      // 참가/검수/투표 기간이 연속인지 확인
-      {
-        // 밀리초 단위로 변환해서 차이 계산 (1초 = 1000ms)
-        const diffER =
-          dto.review_start_at.getTime() - dto.enroll_end_at.getTime();
-
-        if (diffER < 0 || diffER > 1000)
-          throw new BadRequestException(
-            `참가 기간과 검수 기간 일정이 연속되지 않아요.`,
-          );
-
-        const diffRV =
-          dto.vote_start_at.getTime() - dto.review_end_at.getTime();
-
-        if (diffRV < 0 || diffRV > 1000)
-          throw new BadRequestException(
-            `검수 기간과 투표 기간 일정이 연속되지 않아요.`,
-          );
-      }
-
-      // 기존 테마 일정과 참가/검수/투표 기간과 겹치는지 확인
-      {
-        const eol = await this.checkOverlap(
-          queryRunner,
-          'enroll',
-          dto.enroll_start_at,
-          dto.enroll_end_at,
-        );
-        if (eol) {
-          throw new BadRequestException(
-            `참가 기간이 ${this.formatDate(eol.enroll_start_at)} ~ ${this.formatDate(eol.enroll_end_at)}인 일정이 이미 존재해요.`,
-          );
-        }
-
-        const rol = await this.checkOverlap(
-          queryRunner,
-          'review',
-          dto.review_start_at,
-          dto.review_end_at,
-        );
-        if (rol) {
-          throw new BadRequestException(
-            `검수 기간이 ${this.formatDate(rol.review_start_at)} ~ ${this.formatDate(rol.review_end_at)}인 일정이 이미 존재합니다.`,
-          );
-        }
-
-        const vol = await this.checkOverlap(
-          queryRunner,
-          'vote',
-          dto.vote_start_at,
-          dto.vote_end_at,
-        );
-        if (vol) {
-          throw new BadRequestException(
-            `투표 기간이 ${this.formatDate(vol.vote_start_at)} ~ ${this.formatDate(vol.vote_end_at)}인 일정이 이미 존재합니다.`,
-          );
-        }
-      }
+      // this.validateSchedule(
+      //   queryRunner,
+      //   dto.enroll_start_at,
+      //   dto.enroll_end_at,
+      //   dto.review_start_at,
+      //   dto.review_end_at,
+      //   dto.vote_start_at,
+      //   dto.vote_end_at,
+      // );
 
       const schedule = queryRunner.manager.create(Schedule, {
         ...dto,
@@ -383,113 +396,47 @@ export class ThemeService {
 
     try {
       // Schedule
-      const now = new Date();
-      const schedulesDto = [
-        dto.enroll_start_at,
-        dto.enroll_end_at,
-        dto.review_start_at,
-        dto.review_end_at,
-        dto.vote_start_at,
-        dto.vote_end_at,
-      ];
-
-      if (!schedulesDto.every((date) => new Date(date) > now))
-        throw new BadRequestException(
-          '과거 시점으로는 일정을 등록할 수 없어요!',
-        );
-
-      // 참가/검수/투표 기간이 연속인지 확인
-      {
-        // 밀리초 단위로 변환해서 차이 계산 (1초 = 1000ms)
-        const diffER =
-          dto.review_start_at.getTime() - dto.enroll_end_at.getTime();
-
-        if (diffER < 0 || diffER > 1000)
-          throw new BadRequestException(
-            `참가 기간과 검수 기간 일정이 연속되지 않아요.`,
-          );
-
-        const diffRV =
-          dto.vote_start_at.getTime() - dto.review_end_at.getTime();
-
-        if (diffRV < 0 || diffRV > 1000)
-          throw new BadRequestException(
-            `검수 기간과 투표 기간 일정이 연속되지 않아요.`,
-          );
-      }
-
-      // 기존 테마 일정과 참가/검수/투표 기간과 겹치는지 확인
-      {
-        const eol = await this.checkOverlap(
-          queryRunner,
-          'enroll',
-          dto.enroll_start_at,
-          dto.enroll_end_at,
-          themeId,
-        );
-        if (eol) {
-          throw new BadRequestException(
-            `참가 기간이 ${this.formatDate(eol.enroll_start_at)} ~ ${this.formatDate(eol.enroll_end_at)}인 일정이 이미 존재해요.`,
-          );
-        }
-
-        const rol = await this.checkOverlap(
-          queryRunner,
-          'review',
-          dto.review_start_at,
-          dto.review_end_at,
-          themeId,
-        );
-        if (rol) {
-          throw new BadRequestException(
-            `검수 기간이 ${this.formatDate(rol.review_start_at)} ~ ${this.formatDate(rol.review_end_at)}인 일정이 이미 존재합니다.`,
-          );
-        }
-
-        const vol = await this.checkOverlap(
-          queryRunner,
-          'vote',
-          dto.vote_start_at,
-          dto.vote_end_at,
-          themeId,
-        );
-        if (vol) {
-          throw new BadRequestException(
-            `투표 기간이 ${this.formatDate(vol.vote_start_at)} ~ ${this.formatDate(vol.vote_end_at)}인 일정이 이미 존재합니다.`,
-          );
-        }
-      }
+      // this.validateSchedule(
+      //   queryRunner,
+      //   dto.enroll_start_at,
+      //   dto.enroll_end_at,
+      //   dto.review_start_at,
+      //   dto.review_end_at,
+      //   dto.vote_start_at,
+      //   dto.vote_end_at,
+      // );
 
       const schedule = await queryRunner.manager.findOne(Schedule, {
         where: { theme_id: themeId },
       });
       if (!schedule) throw new NotFoundException('존재하지 않는 테마예요!');
 
-      // 이미 시작된 일정이거나 시작하기 1시간 전인 일정을 수정하지는 않는지 확인
-      {
-        const ONE_HOUR_MS = 60 * 60 * 1000;
-        const limitTime = new Date(now.getTime() + ONE_HOUR_MS);
+      // const now = new Date();
+      // // 이미 시작된 일정이거나 시작하기 1시간 전인 일정을 수정하지는 않는지 확인
+      // {
+      //   const ONE_HOUR_MS = 60 * 60 * 1000;
+      //   const limitTime = new Date(now.getTime() + ONE_HOUR_MS);
 
-        const scheduleChecks = [
-          [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
-          [dto.enroll_end_at, schedule.enroll_end_at, '참가 종료'],
-          [dto.review_start_at, schedule.review_start_at, '검수 시작'],
-          [dto.review_end_at, schedule.review_end_at, '검수 종료'],
-          [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
-          [dto.vote_end_at, schedule.vote_end_at, '투표 종료'],
-        ];
+      //   const scheduleChecks = [
+      //     [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
+      //     [dto.enroll_end_at, schedule.enroll_end_at, '참가 종료'],
+      //     [dto.review_start_at, schedule.review_start_at, '검수 시작'],
+      //     [dto.review_end_at, schedule.review_end_at, '검수 종료'],
+      //     [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
+      //     [dto.vote_end_at, schedule.vote_end_at, '투표 종료'],
+      //   ];
 
-        for (const [newDate, oldDate, label] of scheduleChecks) {
-          const isChanged =
-            new Date(newDate).getTime() !== new Date(oldDate).getTime();
-          const isImminent = new Date(oldDate) < limitTime;
+      //   for (const [newDate, oldDate, label] of scheduleChecks) {
+      //     const isChanged =
+      //       new Date(newDate).getTime() !== new Date(oldDate).getTime();
+      //     const isImminent = new Date(oldDate) < limitTime;
 
-          if (isChanged && isImminent)
-            throw new BadRequestException(
-              `이미 시작되었거나 시작이 1시간 미만으로 남은 '${label}' 일정은 수정할 수 없어요!`,
-            );
-        }
-      }
+      //     if (isChanged && isImminent)
+      //       throw new BadRequestException(
+      //         `이미 시작되었거나 시작이 1시간 미만으로 남은 '${label}' 일정은 수정할 수 없어요!`,
+      //       );
+      //   }
+      // }
 
       await queryRunner.manager.update(
         Schedule,
