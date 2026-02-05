@@ -34,14 +34,17 @@ export function ThemeDisplay({ data, registered, point }: ThemeDisplayProps) {
             <p style={{ color: "var(--main)" }}>
               {formatDueIn(data.review_start_at)} 남음
             </p>
-            <UnstyledButton w={20} h={20}>
+            <Link
+              href={`/enroll?theme_id=${data.theme_id}&before-dress-up`}
+              style={{ height: "20px" }}
+            >
               <Image
                 src="/images/home/theme-display/register.svg"
                 alt=""
                 width={20}
                 height={20}
               />
-            </UnstyledButton>
+            </Link>
           </Stack>
         </Group>
       );
