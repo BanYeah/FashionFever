@@ -24,7 +24,7 @@ export class Schedule {
   @Column({
     type: 'varchar',
     length: 10,
-    comment: 'PREPARING, ENROLLING, REVIEWING, VOTING, COMPLETE',
+    comment: 'PREPARING, ENROLLING, REVIEWING, VOTING, RESULTING, COMPLETE',
   })
   status: string;
 

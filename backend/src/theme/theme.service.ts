@@ -28,8 +28,100 @@ export class ThemeService {
     private readonly r2Service: R2Service,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
+    @InjectRepository(GiftCollection)
+    private giftRepo: Repository<GiftCollection>,
   ) {}
 
+  async getThemes(page: number) {
+    const take = 5;
+    const skip = (page - 1) * take;
+
+    const [schedule, total] = await this.scheduleRepo.findAndCount({
+      where: { status: Not('PREPARING') },
+      order: { enroll_start_at: 'DESC' as const },
+      take: take,
+      skip: skip,
+      relations: ['banner'],
+    });
+
+    const data = schedule.map((item) => ({
+      theme_id: item.theme_id,
+      banner_url: item.banner.banner_url,
+
+      enroll_start_at: item.enroll_start_at,
+      review_start_at: item.review_start_at,
+      vote_start_at: item.vote_start_at,
+      result_start_at: item.result_start_at,
+      status: item.status,
+    }));
+
+    return {
+      data: data,
+      meta: {
+        total,
+        page,
+        last_page: Math.ceil(total / take),
+      },
+    };
+  }
+
+  async getThemeHeader(themeId: string) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId, status: Not('PREPARING') },
+      relations: ['header'],
+    });
+    if (!schedule || !schedule.header) throw new NotFoundException();
+
+    return {
+      data: {
+        theme_id: schedule.theme_id,
+        name: schedule.header.name,
+        desc: schedule.header.desc,
+        bg_limit: schedule.header.bg_limit,
+      },
+    };
+  }
+
+  async getThemeGifts(themeId: string) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId, status: Not('PREPARING') },
+    });
+    if (!schedule) throw new NotFoundException();
+
+    const collections = await this.giftRepo.find({
+      where: { theme_id: themeId },
+      relations: ['gifts'],
+      order: {
+        heart_rate: 'DESC',
+        gifts: {
+          collection_order: 'ASC',
+        },
+      },
+    });
+    if (!collections) throw new NotFoundException();
+
+    return {
+      data: {
+        theme_id: schedule.theme_id,
+        collections: collections.map((col) => ({
+          heart_rate: Number(col.heart_rate),
+          gift_total_num: col.gift_total_num,
+          is_random: col.is_random,
+          is_same_theme: col.is_same_theme,
+          theme_type: col.theme_type,
+          rarity: col.rarity,
+
+          gifts: col.gifts.map((gift) => ({
+            theme_name: gift.theme_name,
+            gift_name: gift.gift_name,
+            gift_url: gift.gift_url,
+          })),
+        })),
+      },
+    };
+  }
+
+  /* Theme Setting */
   private async validateSchedule(
     queryRunner: QueryRunner,
     enrollStartAt: Date,
@@ -230,41 +322,8 @@ export class ThemeService {
     }
   }
 
-  async getThemes(page: number) {
-    const take = 20;
-    const skip = (page - 1) * take;
-
-    const [schedule, total] = await this.scheduleRepo.findAndCount({
-      where: { status: Not('PREPARING') },
-      order: { enroll_start_at: 'DESC' as const },
-      take: take,
-      skip: skip,
-      relations: ['banner'],
-    });
-
-    const data = schedule.map((item) => ({
-      theme_id: item.theme_id,
-      banner_url: item.banner.banner_url,
-
-      enroll_start_at: item.enroll_start_at,
-      review_start_at: item.review_start_at,
-      vote_start_at: item.vote_start_at,
-      result_start_at: item.result_start_at,
-      status: item.status,
-    }));
-
-    return {
-      data: data,
-      meta: {
-        total,
-        page,
-        last_page: Math.ceil(total / take),
-      },
-    };
-  }
-
   async getThemeSettings(page: number) {
-    const take = 20;
+    const take = 5;
     const skip = (page - 1) * take;
 
     const [schedule, total] = await this.scheduleRepo.findAndCount({
