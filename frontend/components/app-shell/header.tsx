@@ -1,18 +1,20 @@
-"use client";
-
 import classes from "./header.module.css";
 import Image from "next/image";
 import Link from "next/link";
 
 interface AppShellHeaderProps {
+  title: string;
+  description: string;
   gift?: boolean;
   subheader?: boolean;
 }
 
-export function AppShellHeader({ gift, subheader }: AppShellHeaderProps) {
-  const title = "두근 두근 핑크빛 병원";
-  const description = "블링블링 러블리한 핑크빛 병원에 어울리는 미니는 누구?";
-
+export function AppShellHeader({
+  title,
+  description,
+  gift,
+  subheader,
+}: AppShellHeaderProps) {
   return (
     <div className={classes.Container}>
       <div className={classes.MainHeader}>
@@ -25,7 +27,7 @@ export function AppShellHeader({ gift, subheader }: AppShellHeaderProps) {
             priority
           />
         </Link>
-        <div className={classes.Title}>{title}</div>
+        <div className={classes.Title}>{title || ""}</div>
         <div className={classes.RightSection}>
           {gift && (
             <Link href="/">
@@ -42,7 +44,7 @@ export function AppShellHeader({ gift, subheader }: AppShellHeaderProps) {
 
       {subheader && (
         <div className={classes.Subheader}>
-          <p className={classes.Desc}>{description}</p>
+          <p className={classes.Desc}>{description || ""}</p>
         </div>
       )}
     </div>

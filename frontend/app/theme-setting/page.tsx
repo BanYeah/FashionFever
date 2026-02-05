@@ -559,6 +559,7 @@ export default function ThemeSettingPage() {
           <Divider size={1} color={"var(--gray-d9)"} />
         </Stack>
       </section>
+
       <EnrollFooter
         text="저 장 하 기"
         disabled={false}
