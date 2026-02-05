@@ -1,5 +1,54 @@
 import { ThemePayload } from "@/types/api/theme";
 
+export async function getThemes(page: number) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes?page=${page}`,
+    { cache: "no-store" },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
+export async function getThemeHeader(theme_id: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/${theme_id}/header`,
+    { cache: "no-store" },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
+export async function getThemeGifts(theme_id: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/${theme_id}/gift`,
+    { cache: "no-store" },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
+export async function getThemeStatus(theme_id: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes/${theme_id}/status`,
+    { cache: "no-store" },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
+
+  const data = await res.json();
+  return { success: true, ...data };
+}
+
+/* Theme Setting */
 function themeFormData(payload: ThemePayload): FormData {
   const formData = new FormData();
 
@@ -70,18 +119,6 @@ export async function createThemeSetting(payload: ThemePayload) {
       message: errorData.message || "테마를 저장하는데 실패했습니다.",
     };
   }
-
-  const data = await res.json();
-  return { success: true, ...data };
-}
-
-export async function getThemes(page: number) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/themes?page=${page}`,
-    { cache: "no-store", credentials: "include" },
-  );
-
-  if (!res.ok) return { success: false, status: res.status };
 
   const data = await res.json();
   return { success: true, ...data };
