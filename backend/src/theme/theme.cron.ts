@@ -37,6 +37,11 @@ export class ThemeCron {
       files.push(`${process.env.API_PREFIX}/themes/${themeId}/gift`);
     }
 
+    /* GET /themes/:theme_id/status */
+    const updatedThemeIds = updated.map((row: any) => row.theme_id);
+    for (const themeId of updatedThemeIds)
+      files.push(`${process.env.API_PREFIX}/themes/${themeId}/status`);
+
     const url = `https://api.cloudflare.com/client/v4/zones/${process.env.CACHE_ZONE_ID}/purge_cache`;
     const res = await fetch(url, {
       method: 'POST',

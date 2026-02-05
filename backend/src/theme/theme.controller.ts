@@ -93,6 +93,21 @@ export class ThemeController {
     return this.themeService.getThemeGifts(themeId);
   }
 
+  @Get(':theme_id/status')
+  @ApiTags('Theme')
+  @ApiOperation({ summary: '테마 상태 조회' })
+  @ApiParam({
+    name: 'theme_id',
+    description: '테마 번호',
+  })
+  @ApiResponse({ status: 200, description: '테마 상태 반환 성공' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
+  async getThemeStatus(
+    @Param('theme_id', new ParseUUIDPipe()) themeId: string,
+  ) {
+    return this.themeService.getThemeStatus(themeId);
+  }
+
   @Post('setting')
   @Roles('admin')
   @ApiTags('Theme Setting')

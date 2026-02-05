@@ -121,6 +121,20 @@ export class ThemeService {
     };
   }
 
+  async getThemeStatus(themeId: string) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId, status: Not('PREPARING') },
+    });
+    if (!schedule) throw new NotFoundException();
+
+    return {
+      data: {
+        theme_id: schedule.theme_id,
+        status: schedule.status,
+      },
+    };
+  }
+
   /* Theme Setting */
   private async validateSchedule(
     queryRunner: QueryRunner,
