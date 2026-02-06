@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduleModule as CronModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { AccountModule } from './account/account.module';
 import { R2Module } from './common/r2/r2.module';
+import { ScheduleModule } from './schedule/schedule.module';
 import { ThemeModule } from './theme/theme.module';
 
 @Module({
@@ -31,10 +32,11 @@ import { ThemeModule } from './theme/theme.module';
         synchronize: false,
       }),
     }),
-    ScheduleModule.forRoot(),
+    CronModule.forRoot(),
     AuthModule,
     AccountModule,
     R2Module,
+    ScheduleModule,
     ThemeModule,
   ],
   controllers: [AppController],
