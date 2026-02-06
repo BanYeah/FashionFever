@@ -196,6 +196,7 @@ export function ThemeDisplay({ data, registered, point }: ThemeDisplayProps) {
           width={390}
           height={156}
           style={{ width: "100%", height: "auto" }}
+          loading="eager"
         />
       </div>
 

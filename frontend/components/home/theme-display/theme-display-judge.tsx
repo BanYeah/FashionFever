@@ -120,6 +120,7 @@ export function ThemeDisplayJudge({
           width={390}
           height={156}
           style={{ width: "100%", height: "auto" }}
+          loading="eager"
         />
       </div>
 
