@@ -6,17 +6,17 @@ import { Dispatch, SetStateAction } from "react";
 import { UnstyledButton } from "@mantine/core";
 
 interface FileDisplayProps {
-  idx: number;
   index: number;
-  setIndex: Dispatch<SetStateAction<number>>;
+  selectedIndex: number;
+  setSelectedIndex: Dispatch<SetStateAction<number>>;
   preview: string;
   setFiles: Dispatch<SetStateAction<(File | string)[]>>;
 }
 
 export function FileDisplay({
-  idx, // 자기자신의 인덱스
-  index, // 현재 선택된 파일 인덱스
-  setIndex,
+  index, // 자기 자신의 인덱스
+  selectedIndex, // 현재 선택된 파일 인덱스
+  setSelectedIndex,
   preview,
   setFiles,
 }: FileDisplayProps) {
@@ -24,14 +24,14 @@ export function FileDisplay({
     e.stopPropagation();
 
     setFiles((prev) => {
-      const newFiles = prev.filter((_, i) => i !== idx);
+      const newFiles = prev.filter((_, i) => i !== index);
       return newFiles;
     });
 
     // 인덱스 보정
-    setIndex((prevIndex) => {
-      if (prevIndex === idx) return 0;
-      if (prevIndex > idx) return prevIndex - 1;
+    setSelectedIndex((prevIndex) => {
+      if (prevIndex === index) return 0;
+      if (prevIndex > index) return prevIndex - 1;
       return prevIndex;
     });
   };
@@ -46,9 +46,9 @@ export function FileDisplay({
           height={28}
         />
       </UnstyledButton>
-      {idx === index && <div className={classes.Highlight}></div>}
+      {index === selectedIndex && <div className={classes.Highlight}></div>}
 
-      <UnstyledButton onClick={() => setIndex(idx)}>
+      <UnstyledButton onClick={() => setSelectedIndex(index)}>
         <Image
           key={preview}
           src={preview}

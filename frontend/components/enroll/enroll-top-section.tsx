@@ -8,11 +8,16 @@ import { EnrollGuide } from "./enroll-guide";
 import { enrollBgColor } from "@/types/enroll-bg-color";
 
 interface EnrollTopSectionProps {
-  index: number;
+  bgLimit: number | null;
   previews: string[];
+  selectedIndex: number;
 }
 
-export function EnrollTopSection({ index, previews }: EnrollTopSectionProps) {
+export function EnrollTopSection({
+  bgLimit,
+  previews,
+  selectedIndex,
+}: EnrollTopSectionProps) {
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
@@ -20,7 +25,7 @@ export function EnrollTopSection({ index, previews }: EnrollTopSectionProps) {
       <EnrollGuide opened={opened} close={close} />
 
       <div className={classes.EnlargedPhotoWrapper}>
-        <AlertBgLimit color={2} />
+        <AlertBgLimit color={bgLimit} />
         <UnstyledButton className={classes.GuideButton} onClick={open}>
           <Image
             src="/images/enroll/guide-check.svg"
@@ -29,10 +34,10 @@ export function EnrollTopSection({ index, previews }: EnrollTopSectionProps) {
             height={36}
           />
         </UnstyledButton>
-        {previews.length > 0 && index < previews.length ? (
+        {previews.length > 0 && selectedIndex < previews.length ? (
           <Image
-            key={previews[index]}
-            src={previews[index]}
+            key={previews[selectedIndex]}
+            src={previews[selectedIndex]}
             alt=""
             width={390}
             height={312}
@@ -46,8 +51,8 @@ export function EnrollTopSection({ index, previews }: EnrollTopSectionProps) {
   );
 }
 
-function AlertBgLimit({ color }: { color: number }) {
-  if (0 <= color && color <= 10)
+function AlertBgLimit({ color }: { color: number | null }) {
+  if (color && 0 <= color && color <= 10)
     return (
       <div className={classes.AlertBgLimitWrapper}>
         <Group align="center" gap={8} pl={8} h={"100%"}>

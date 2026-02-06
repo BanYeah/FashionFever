@@ -11,13 +11,18 @@ import { EnrollNotiMessage } from "./enroll-noti-message";
 import { EnrollTopSection } from "./enroll-top-section";
 import { FileDisplay } from "./file-display";
 
-export function EnrollSection() {
+interface EnrollSectionProps {
+  themeId: string;
+  bgLimit: number | null;
+}
+
+export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
   const { notify } = useNotification();
   const [opened, { open, close }] = useDisclosure(false);
 
-  const [index, setIndex] = useState<number>(0); // File Index
   const [files, setFiles] = useState<(File | string)[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   useEffect(() => {
     const urls = files.map((file) => {
@@ -63,7 +68,11 @@ export function EnrollSection() {
 
       <section style={{ paddingBottom: "60px" }}>
         <Stack gap={0}>
-          <EnrollTopSection index={index} previews={previews} />
+          <EnrollTopSection
+            bgLimit={bgLimit}
+            previews={previews}
+            selectedIndex={selectedIndex}
+          />
           <SimpleGrid
             cols={2}
             spacing={20}
@@ -71,12 +80,12 @@ export function EnrollSection() {
             px={16}
             py={16}
           >
-            {previews.map((preview, idx) => (
+            {previews.map((preview, index) => (
               <FileDisplay
-                key={`${preview}_${idx}`}
-                idx={idx}
+                key={`${preview}`}
                 index={index}
-                setIndex={setIndex}
+                selectedIndex={selectedIndex}
+                setSelectedIndex={setSelectedIndex}
                 preview={preview}
                 setFiles={setFiles}
               />

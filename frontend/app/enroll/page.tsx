@@ -34,7 +34,7 @@ export default async function EnrollPage({
       header={<AppShellHeader title={data.name} description={data.desc} />}
       footer={null}
     >
-      <EnrollSection />
+      <EnrollSection themeId={themeId} bgLimit={data.bg_limit} />
     </AppShell>
   );
 }

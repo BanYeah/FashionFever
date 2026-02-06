@@ -3,6 +3,7 @@ import Link from "next/link";
 
 interface AppShellFooterProps {
   variant: "dressUp" | "tabs";
+  themeId?: string;
   activeTab?: number;
   tabs?: string[];
   tabLinks?: string[];
@@ -10,6 +11,7 @@ interface AppShellFooterProps {
 
 export function AppShellFooter({
   variant,
+  themeId,
   activeTab = 0,
   tabs,
   tabLinks,
@@ -18,7 +20,10 @@ export function AppShellFooter({
     return (
       <div className={classes.FooterContainer}>
         <div className={classes.DressUpContainer}>
-          <Link href="/mini-dressup" className={classes.DressUpLink}>
+          <Link
+            href={`/enroll?theme_id=${themeId}`}
+            className={classes.DressUpLink}
+          >
             미니 꾸미기
           </Link>
         </div>
