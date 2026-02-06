@@ -32,3 +32,16 @@
     white-space: nowrap;
   }
 }
+
+.Notice {
+  padding: 0px 6px;
+
+  color: var(--gray-8a);
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: keep-all;
+
+  span {
+    color: var(--main);
+  }
+}

@@ -39,7 +39,7 @@ export default async function GiftPage({
       header={<AppShellHeader title={data.name} description={data.desc} />}
       footer={isBeforeDressUp ? <AppShellFooter variant="dressUp" /> : null}
     >
-      <GiftList />
+      <GiftList themeId={themeId} />
     </AppShell>
   );
 }
