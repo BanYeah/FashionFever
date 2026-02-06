@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { AccountModule } from './account/account.module';
 import { R2Module } from './common/r2/r2.module';
 import { ThemeModule } from './theme/theme.module';
-import { GiftModule } from './gift/gift.module';
 
 @Module({
   imports: [
@@ -37,7 +36,6 @@ import { GiftModule } from './gift/gift.module';
     AccountModule,
     R2Module,
     ThemeModule,
-    GiftModule,
   ],
   controllers: [AppController],
   providers: [AppService],
