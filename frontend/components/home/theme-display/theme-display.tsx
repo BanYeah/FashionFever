@@ -35,7 +35,7 @@ export function ThemeDisplay({ data, registered, point }: ThemeDisplayProps) {
               {formatDueIn(data.review_start_at)} 남음
             </p>
             <Link
-              href={`/enroll?theme_id=${data.theme_id}&before-dress-up`}
+              href={`/gift-list?theme_id=${data.theme_id}&before-dress-up`}
               style={{ height: "20px" }}
             >
               <Image
