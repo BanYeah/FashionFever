@@ -9,6 +9,7 @@ import { AccountModule } from './account/account.module';
 import { R2Module } from './common/r2/r2.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { ThemeModule } from './theme/theme.module';
+import { SubmissionModule } from './submission/submission.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ThemeModule } from './theme/theme.module';
     R2Module,
     ScheduleModule,
     ThemeModule,
+    SubmissionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
