@@ -10,6 +10,9 @@ import { AddFileButton } from "../common/add-file-button/add-file-button";
 import { EnrollNotiMessage } from "./enroll-noti-message";
 import { EnrollTopSection } from "./enroll-top-section";
 import { FileDisplay } from "./file-display";
+import { SubmissionPayload } from "@/types/api/submission";
+import { createSubmission, getSubmission } from "@/utils/api/submission";
+import { convertToWebP } from "@/utils/convert-to-webp";
 
 interface EnrollSectionProps {
   themeId: string;
@@ -17,7 +20,7 @@ interface EnrollSectionProps {
 }
 
 export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
-  const { notify } = useNotification();
+  const { notify, notifyServerError } = useNotification();
   const [opened, { open, close }] = useDisclosure(false);
 
   const [files, setFiles] = useState<(File | string)[]>([]);
@@ -41,6 +44,39 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
     };
   }, [files]);
 
+  useEffect(() => {
+    (async () => {
+      const result = await getSubmission(themeId);
+      if (result.success) setFiles(result.data.content_urls);
+      else notifyServerError();
+    })();
+  }, [themeId]);
+
+  const handleEnroll = async () => {
+    const payload: SubmissionPayload = {
+      files: await Promise.all(
+        files.map((file) =>
+          file instanceof File ? convertToWebP(file) : file,
+        ),
+      ),
+    };
+    const result = await createSubmission(themeId, payload);
+    if (result.success) {
+      close();
+      notify(<EnrollNotiMessage variant="success" />);
+      return;
+    }
+
+    close();
+    switch (result.status) {
+      case 410:
+        notify(<EnrollNotiMessage variant="close" />);
+        break;
+      default:
+        notify(<EnrollNotiMessage variant="fail" />);
+    }
+  };
+
   return (
     <>
       <ModalGoBack
@@ -48,10 +84,7 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
         go="참가하기"
         back="돌아가기"
         opened={opened}
-        onGo={() => {
-          close();
-          notify(<EnrollNotiMessage variant="fail" />);
-        }}
+        onGo={handleEnroll}
         close={close}
       >
         <>

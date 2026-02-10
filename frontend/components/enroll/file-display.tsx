@@ -56,6 +56,7 @@ export function FileDisplay({
           width={200}
           height={160}
           style={{ width: "100%", height: "auto" }}
+          loading="eager"
         />
       </UnstyledButton>
     </div>
