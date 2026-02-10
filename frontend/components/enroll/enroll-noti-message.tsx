@@ -12,7 +12,7 @@ export function EnrollNotiMessage({ variant }: EnrollNotiMessageProps) {
         <p>
           참가 기간 종료 전까지
           <br />
-          자유롭게 패션 수정이 가능하니 참고해주세요.
+          자유롭게 스타일 수정이 가능하니 참고해주세요.
         </p>
       </Stack>
     );
@@ -34,7 +34,7 @@ export function EnrollNotiMessage({ variant }: EnrollNotiMessageProps) {
         <p>
           아쉽게도 이번 테마는 마감되었어요.
           <br />
-          다음 패션 피버를 기대해 주세요!
+          다음 테마를 기대해 주세요!
         </p>
       </Stack>
     );

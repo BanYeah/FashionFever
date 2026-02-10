@@ -19,7 +19,7 @@ export async function GiftList({ themeId }: { themeId: string }) {
       ))}
       <Stack gap={6}>
         <p className={classes.Notice}>
-          아이템은 달성하신 <span>최고 랭킹의 패션을 기준으로 1개만</span>{" "}
+          아이템은 달성하신 <span>최고 랭킹의 스타일을 기준으로 1개만</span>{" "}
           지급됩니다.
         </p>
         <p className={classes.Notice}>
