@@ -23,6 +23,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { ThemeService } from './theme.service';
+import { ThemeCron } from './theme.cron';
 
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { ThemeFormDto } from './dto/theme-form.dto';
@@ -30,7 +31,10 @@ import { ThemeFormDto } from './dto/theme-form.dto';
 @ApiTags('')
 @Controller('themes')
 export class ThemeController {
-  constructor(private themeService: ThemeService) {}
+  constructor(
+    private themeService: ThemeService,
+    private readonly themeCron: ThemeCron,
+  ) {}
 
   themeFormDto(body: any): ThemeFormDto {
     const dto: ThemeFormDto = {
@@ -235,5 +239,22 @@ export class ThemeController {
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
   ) {
     return this.themeService.deleteThemeSetting(themeId);
+  }
+
+  @Patch(':theme_id/setting/status')
+  @Roles('admin')
+  @ApiTags('Theme Setting')
+  @ApiOperation({
+    summary: '테마 설정 상태 업데이트 (관리자)',
+    description: '테마 일정 상태를 업데이트합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '테마 일정 상태가 성공적으로 업데이트됨',
+  })
+  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
+  async patchThemeStatus() {
+    await this.themeCron.handleScheduleStatusUpdate();
+    return;
   }
 }
