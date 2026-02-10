@@ -80,7 +80,7 @@ export class ThemeFormDto {
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
-  result_start_at: Date;
+  complete_start_at: Date;
 
   // Accounts
   @ApiProperty({

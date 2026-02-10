@@ -22,16 +22,16 @@ export class ScheduleService {
       .createQueryBuilder('schedule')
       .select([
         'MIN(schedule.enroll_start_at) AS "min_enroll_start_at"',
-        'MAX(schedule.result_start_at) AS "max_result_start_at"',
+        'MAX(schedule.complete_start_at) AS "max_complete_start_at"',
       ])
       .where('schedule.enroll_start_at <= :now', { now })
-      .andWhere('schedule.result_start_at > :now', { now })
+      .andWhere('schedule.complete_start_at > :now', { now })
       .getRawOne();
 
     return {
       data: {
         min_enroll_start_at: timeline ? timeline.min_enroll_start_at : null,
-        max_result_start_at: timeline ? timeline.max_result_start_at : null,
+        max_complete_start_at: timeline ? timeline.max_complete_start_at : null,
       },
     };
   }
@@ -41,7 +41,7 @@ export class ScheduleService {
     const schedule = await this.scheduleRepo
       .createQueryBuilder('schedule')
       .where('schedule.vote_start_at <= :now', { now })
-      .andWhere('schedule.result_start_at > :now', { now })
+      .andWhere('schedule.complete_start_at > :now', { now })
       .getOne();
 
     if (!schedule) throw new NotFoundException();
@@ -58,7 +58,7 @@ export class ScheduleService {
     const schedule = await this.scheduleRepo
       .createQueryBuilder('schedule')
       .where('schedule.vote_start_at <= :now', { now })
-      .andWhere('schedule.result_start_at > :now', { now })
+      .andWhere('schedule.complete_start_at > :now', { now })
       .getOne();
 
     if (!schedule) throw new NotFoundException();

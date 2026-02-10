@@ -54,7 +54,7 @@ export class ThemeCron {
       }),
     });
 
-    if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error('/purge_cache API 호출 오류');
   }
 
   // 매 10초마다 실행
@@ -65,35 +65,36 @@ export class ThemeCron {
     timeZone: 'Asia/Seoul',
   })
   async handleScheduleStatusUpdate() {
-    this.logger.log('테마 일정 상태 업데이트 배치 시작');
+    try {
+      this.logger.log('테마 일정 상태 업데이트 배치 시작');
 
-    const statusLogic = `
+      const statusLogic = `
       CASE 
         WHEN CURRENT_TIMESTAMP < "enroll_start_at" THEN 'PREPARING'
         WHEN CURRENT_TIMESTAMP >= "enroll_start_at" AND CURRENT_TIMESTAMP < "review_start_at" THEN 'ENROLLING'
-        WHEN CURRENT_TIMESTAMP >= "review_start_at" AND CURRENT_TIMESTAMP < "vote_start_at" THEN 'REVIEWING'
-        WHEN CURRENT_TIMESTAMP >= "vote_start_at" AND CURRENT_TIMESTAMP < "result_start_at" THEN 'VOTING'
-        WHEN CURRENT_TIMESTAMP >= "result_start_at" THEN 'RESULTING'
+        WHEN CURRENT_TIMESTAMP >= "review_start_at" AND CURRENT_TIMESTAMP < "vote_start_at" THEN 'REVIEW_READY'
+        WHEN CURRENT_TIMESTAMP >= "vote_start_at" AND CURRENT_TIMESTAMP < "complete_start_at" THEN 'VOTE_READY'
+        WHEN CURRENT_TIMESTAMP >= "complete_start_at" THEN 'COMPLETE_READY'
         ELSE "status"
       END
     `;
 
-    const [updated, count] = await this.scheduleRepo.query(`
+      const [updated, count] = await this.scheduleRepo.query(`
       UPDATE "Schedule"
       SET "status" = ${statusLogic}
-      WHERE "status" NOT IN ('RESULTING', 'COMPLETE')
+      WHERE "status" NOT IN ('COMPLETE_READY', 'COMPLETE')
         AND "status" IS DISTINCT FROM (${statusLogic})
       RETURNING "theme_id", "status";
     `);
 
-    this.logger.log('테마 일정 상태 업데이트 완료');
+      this.logger.log('테마 일정 상태 업데이트 완료');
+      // this.logger.log('CDN Purge 준비');
 
-    // this.logger.log('CDN Purge 준비');
-    // try {
-    //   await this.purgeCache(updated);
-    //   this.logger.log('CDN Purge 성공');
-    // } catch {
-    //   this.logger.log('CDN Purge 실패');
-    // }
+      // await this.purgeCache(updated);
+
+      // this.logger.log('CDN Purge 성공');
+    } catch (error) {
+      this.logger.error('오류 발생', error.stack);
+    }
   }
 }

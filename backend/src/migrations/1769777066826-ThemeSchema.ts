@@ -8,23 +8,23 @@ export class ThemeSchema1769777066826 implements MigrationInterface {
         "enroll_start_at"   TIMESTAMPTZ NOT NULL,
         "review_start_at"   TIMESTAMPTZ NOT NULL,
         "vote_start_at"     TIMESTAMPTZ NOT NULL,
-        "result_start_at"   TIMESTAMPTZ NOT NULL,
-        "status"            VARCHAR(10) NOT NULL,
+        "complete_start_at"   TIMESTAMPTZ NOT NULL,
+        "status"            VARCHAR(15) NOT NULL,
 
         CONSTRAINT "chk_timeline_order" CHECK (
           "enroll_start_at" < "review_start_at" AND 
           "review_start_at" < "vote_start_at" AND 
-          "vote_start_at" < "result_start_at"
+          "vote_start_at" < "complete_start_at"
         ),
         
         CONSTRAINT "chk_status_enum" CHECK (
-          "status" IN ('PREPARING', 'ENROLLING', 'REVIEWING', 'VOTING', 'RESULTING', 'COMPLETE')
+          "status" IN ('PREPARING', 'ENROLLING', 'REVIEW_READY', 'REVIEWING', 'VOTE_READY', 'VOTING', 'COMPLETE_READY', 'COMPLETE')
         )
       );
 
       CREATE INDEX idx_schedule_status ON "Schedule" ("status");
       CREATE INDEX idx_schedule_enroll_start ON "Schedule" ("enroll_start_at" DESC);
-      CREATE INDEX idx_schedule_period ON "Schedule" ("enroll_start_at", "result_start_at");
+      CREATE INDEX idx_schedule_period ON "Schedule" ("enroll_start_at", "complete_start_at");
 
       CREATE TABLE "Banner" (
         "theme_id"    UUID PRIMARY KEY REFERENCES "Schedule"("theme_id") ON DELETE CASCADE,

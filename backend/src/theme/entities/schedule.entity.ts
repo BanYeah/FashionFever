@@ -19,7 +19,7 @@ export class Schedule {
   vote_start_at: Date;
 
   @Column({ type: 'timestamptz' })
-  result_start_at: Date;
+  complete_start_at: Date;
 
   @Column({
     type: 'varchar',

@@ -51,7 +51,7 @@ export class ThemeService {
       enroll_start_at: item.enroll_start_at,
       review_start_at: item.review_start_at,
       vote_start_at: item.vote_start_at,
-      result_start_at: item.result_start_at,
+      complete_start_at: item.complete_start_at,
       status: item.status,
     }));
 
@@ -141,7 +141,7 @@ export class ThemeService {
     enrollStartAt: Date,
     reviewStartAt: Date,
     voteStartAt: Date,
-    resultStartAt: Date,
+    completeStartAt: Date,
     themeId?: string,
   ) {
     const now = new Date();
@@ -149,7 +149,7 @@ export class ThemeService {
       enrollStartAt,
       reviewStartAt,
       voteStartAt,
-      resultStartAt,
+      completeStartAt,
     ];
 
     if (!schedules.every((date) => date > now))
@@ -158,7 +158,7 @@ export class ThemeService {
     if (
       enrollStartAt >= reviewStartAt ||
       reviewStartAt >= voteStartAt ||
-      voteStartAt >= resultStartAt
+      voteStartAt >= completeStartAt
     )
       throw new BadRequestException(
         '각 기간은 이전 기간이 끝난 후 시작되어야 하며, 시작 시간은 종료 시간보다 빨라야 해요!',
@@ -175,8 +175,8 @@ export class ThemeService {
     const query = queryRunner.manager
       .createQueryBuilder(Schedule, 'schedule')
       .where(
-        `(:start_at < schedule.result_start_at AND schedule.enroll_start_at < :end_at)`,
-        { start_at: enrollStartAt, end_at: resultStartAt },
+        `(:start_at < schedule.complete_start_at AND schedule.enroll_start_at < :end_at)`,
+        { start_at: enrollStartAt, end_at: completeStartAt },
       );
     if (themeId) query.andWhere('schedule.theme_id != :themeId', { themeId });
     const overlap = await query.getOne();
@@ -186,7 +186,7 @@ export class ThemeService {
         formatter.format(overlap.enroll_start_at) + ' (00:00:00)';
 
       const otherEndAt =
-        formatter.format(overlap.result_start_at) + ' (00:00:00)';
+        formatter.format(overlap.complete_start_at) + ' (00:00:00)';
 
       throw new BadRequestException(
         `일정이 ${otherStartAt} ~ ${otherEndAt}인 테마가 이미 존재해요.`,
@@ -212,7 +212,7 @@ export class ThemeService {
       //   dto.enroll_start_at,
       //   dto.review_start_at,
       //   dto.vote_start_at,
-      //   dto.result_start_at,
+      //   dto.complete_start_at,
       // );
 
       const schedule = queryRunner.manager.create(Schedule, {
@@ -319,7 +319,7 @@ export class ThemeService {
       }
 
       await queryRunner.commitTransaction();
-      return { success: true, data: { theme_id: themeId } };
+      return { data: { theme_id: themeId } };
     } catch (err) {
       await queryRunner.rollbackTransaction();
 
@@ -354,7 +354,7 @@ export class ThemeService {
       enroll_start_at: item.enroll_start_at,
       review_start_at: item.review_start_at,
       vote_start_at: item.vote_start_at,
-      result_start_at: item.result_start_at,
+      complete_start_at: item.complete_start_at,
       status: item.status,
     }));
 
@@ -410,7 +410,7 @@ export class ThemeService {
           enroll_start_at: theme.enroll_start_at,
           review_start_at: theme.review_start_at,
           vote_start_at: theme.vote_start_at,
-          result_start_at: theme.result_start_at,
+          complete_start_at: theme.complete_start_at,
           status: theme.status,
 
           reviewer_minicode: theme.reviewer.user?.minicode || null,
@@ -459,7 +459,7 @@ export class ThemeService {
       //   dto.enroll_start_at,
       //   dto.review_start_at,
       //   dto.vote_start_at,
-      //   dto.result_start_at,
+      //   dto.complete_start_at,
       // );
 
       const schedule = await queryRunner.manager.findOne(Schedule, {
@@ -477,7 +477,7 @@ export class ThemeService {
       //     [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
       //     [dto.review_start_at, schedule.review_start_at, '검수 시작'],
       //     [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
-      //     [dto.result_start_at, schedule.result_start_at, '결과 집계 시작'],
+      //     [dto.complete_start_at, schedule.complete_start_at, '결과 집계 시작'],
       //   ];
 
       //   for (const [newDate, oldDate, label] of scheduleChecks) {
@@ -499,7 +499,7 @@ export class ThemeService {
           enroll_start_at: dto.enroll_start_at,
           review_start_at: dto.review_start_at,
           vote_start_at: dto.vote_start_at,
-          result_start_at: dto.result_start_at,
+          complete_start_at: dto.complete_start_at,
         },
       );
 
@@ -641,7 +641,7 @@ export class ThemeService {
         );
       });
 
-      return { success: true, data: { theme_id: themeId } };
+      return { data: { theme_id: themeId } };
     } catch (err) {
       await queryRunner.rollbackTransaction();
 
@@ -693,8 +693,6 @@ export class ThemeService {
           `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(deletedFiles)}`,
         );
       });
-
-      return { success: true };
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
