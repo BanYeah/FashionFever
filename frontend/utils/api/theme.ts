@@ -63,7 +63,7 @@ function themeFormData(payload: ThemePayload): FormData {
   formData.append("enroll_start_at", payload.enroll_start_at);
   formData.append("review_start_at", payload.review_start_at);
   formData.append("vote_start_at", payload.vote_start_at);
-  formData.append("result_start_at", payload.result_start_at);
+  formData.append("complete_start_at", payload.complete_start_at);
 
   if (payload.reviewer_minicode !== null)
     formData.append("reviewer_minicode", payload.reviewer_minicode);

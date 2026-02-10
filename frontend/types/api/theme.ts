@@ -8,7 +8,7 @@ export interface ThemeScheduleData {
   enroll_start_at: string; // ISO 문자열
   review_start_at: string;
   vote_start_at: string;
-  result_start_at: string;
+  complete_start_at: string;
   status: string;
 }
 
@@ -48,7 +48,7 @@ export interface ThemeData {
   enroll_start_at: string; // ISO 문자열
   review_start_at: string;
   vote_start_at: string;
-  result_start_at: string;
+  complete_start_at: string;
   status: ThemeStatusType;
 
   reviewer_minicode: string | null;
@@ -85,7 +85,7 @@ export interface ThemePayload {
   enroll_start_at: string; // ISO 문자열
   review_start_at: string;
   vote_start_at: string;
-  result_start_at: string;
+  complete_start_at: string;
 
   reviewer_minicode: string | null;
   judge_minicodes: string[];

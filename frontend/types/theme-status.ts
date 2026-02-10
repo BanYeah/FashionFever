@@ -1,18 +1,22 @@
 const STATUS_ORDER: Record<ThemeStatusType, number> = {
   PREPARING: 0,
   ENROLLING: 1,
-  REVIEWING: 2,
-  VOTING: 3,
-  RESULTING: 4,
-  COMPLETE: 5,
+  REVIEW_READY: 2,
+  REVIEWING: 3,
+  VOTE_READY: 4,
+  VOTING: 5,
+  COMPLETE_READY: 6,
+  COMPLETE: 7,
 };
 
 export type ThemeStatusType =
   | "PREPARING"
   | "ENROLLING"
+  | "REVIEW_READY"
   | "REVIEWING"
+  | "VOTE_READY"
   | "VOTING"
-  | "RESULTING"
+  | "COMPLETE_READY"
   | "COMPLETE";
 
 export class ThemeStatus {
@@ -20,7 +24,7 @@ export class ThemeStatus {
   enrollStartAt: Date | null;
   reviewStartAt: Date | null;
   voteStartAt: Date | null;
-  resultStartAt: Date | null;
+  completeStartAt: Date | null;
 
   constructor();
   constructor(
@@ -28,7 +32,7 @@ export class ThemeStatus {
     enrollStartAt: Date,
     reviewStartAt: Date,
     voteStartAt: Date,
-    resultStartAt: Date,
+    completeStartAt: Date,
   );
 
   constructor(
@@ -36,13 +40,13 @@ export class ThemeStatus {
     enrollStartAt?: Date,
     reviewStartAt?: Date,
     voteStartAt?: Date,
-    resultStartAt?: Date,
+    completeStartAt?: Date,
   ) {
     this.status = status ?? "PREPARING";
     this.enrollStartAt = enrollStartAt ?? null;
     this.reviewStartAt = reviewStartAt ?? null;
     this.voteStartAt = voteStartAt ?? null;
-    this.resultStartAt = resultStartAt ?? null;
+    this.completeStartAt = completeStartAt ?? null;
   }
 
   isAfterStart(other: ThemeStatusType): boolean {
@@ -64,9 +68,13 @@ export class ThemeStatus {
       return new Date(this.reviewStartAt) < limitTime;
     if (status === "VOTING" && this.voteStartAt)
       return new Date(this.voteStartAt) < limitTime;
-    if (status === "RESULTING" && this.resultStartAt)
-      return new Date(this.resultStartAt) < limitTime;
+    if (status === "COMPLETE" && this.completeStartAt)
+      return new Date(this.completeStartAt) < limitTime;
 
     return false;
+  }
+
+  isReady(status: ThemeStatusType): boolean {
+    return status.endsWith("_READY");
   }
 }

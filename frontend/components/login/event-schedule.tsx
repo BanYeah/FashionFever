@@ -33,9 +33,9 @@ export function EventSchedule() {
     if (!result.success) return "이벤트 기간 조회 실패";
 
     const startAt = result.data.min_enroll_start_at;
-    const endAt = result.data.max_result_start_at;
+    const endAt = result.data.max_complete_start_at;
 
-    if (startAt === null && endAt === null) return "이벤트 기간 아님";
+    if (startAt === null && endAt === null) return "종료";
     return `${formatDate(startAt)} ~ ${formatDate(endAt)}`;
   };
 

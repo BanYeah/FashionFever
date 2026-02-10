@@ -148,7 +148,7 @@ export default function ThemeSettingPage() {
           setEnrollStart(formatDate(data.enroll_start_at));
           setReviewStart(formatDate(data.review_start_at));
           setVoteStart(formatDate(data.vote_start_at));
-          setVoteEnd(formatDate(data.result_start_at, -1));
+          setVoteEnd(formatDate(data.complete_start_at, -1));
 
           if (data.reviewer_minicode)
             setReviewer("judge_" + data.reviewer_minicode);
@@ -161,7 +161,7 @@ export default function ThemeSettingPage() {
                 new Date(data.enroll_start_at),
                 new Date(data.review_start_at),
                 new Date(data.vote_start_at),
-                new Date(data.result_start_at),
+                new Date(data.complete_start_at),
               ),
           );
           setInitialCollections(data.collections);
@@ -347,15 +347,15 @@ export default function ThemeSettingPage() {
     const enrollStartDate = new Date(enrollStart + "T00:00:00+09:00");
     const reviewStartDate = new Date(reviewStart + "T00:00:00+09:00");
     const voteStartDate = new Date(voteStart + "T00:00:00+09:00");
-    const resultStartDate = new Date(voteEnd + "T00:00:00+09:00");
-    resultStartDate.setDate(resultStartDate.getDate() + 1);
+    const completeStartDate = new Date(voteEnd + "T00:00:00+09:00");
+    completeStartDate.setDate(completeStartDate.getDate() + 1);
 
     /* 일정 유효성 검사 */
     // const isValidSchedule = validateSchedule(
     //   enrollStartDate,
     //   reviewStartDate,
     //   voteStartDate,
-    //   resultStartDate,
+    //   completeStartDate,
     //   notify,
     // );
     // if (!isValidSchedule) return;
@@ -392,7 +392,7 @@ export default function ThemeSettingPage() {
         enroll_start_at: enrollStartDate.toISOString(),
         review_start_at: reviewStartDate.toISOString(),
         vote_start_at: voteStartDate.toISOString(),
-        result_start_at: resultStartDate.toISOString(),
+        complete_start_at: completeStartDate.toISOString(),
         reviewer_minicode:
           reviewer === null ? null : reviewer.replace(/^judge_/, ""),
         judge_minicodes: judge.map((code) => code.replace(/^judge_/, "")),
