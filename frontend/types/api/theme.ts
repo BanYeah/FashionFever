@@ -9,7 +9,7 @@ export interface ThemeScheduleData {
   review_start_at: string;
   vote_start_at: string;
   complete_start_at: string;
-  status: string;
+  status: ThemeStatusType;
 }
 
 export interface ThemeHeaderData {

@@ -27,6 +27,7 @@ export class ThemeStatus {
   completeStartAt: Date | null;
 
   constructor();
+  constructor(status: ThemeStatusType);
   constructor(
     status: ThemeStatusType,
     enrollStartAt: Date,
@@ -72,9 +73,5 @@ export class ThemeStatus {
       return new Date(this.completeStartAt) < limitTime;
 
     return false;
-  }
-
-  isReady(status: ThemeStatusType): boolean {
-    return status.endsWith("_READY");
   }
 }

@@ -116,7 +116,7 @@ export function ThemeCollection() {
             );
           } else if (pageItems) {
             return pageItems.map((item) => (
-              <ThemeDisplay key={item.theme_id} data={item} registered={true} />
+              <ThemeDisplay key={item.theme_id} data={item} />
             ));
           }
         })}
@@ -137,11 +137,7 @@ export function ThemeCollection() {
             );
           } else if (pageItems) {
             return pageItems.map((item) => (
-              <ThemeDisplayJudge
-                key={item.theme_id}
-                data={item}
-                registered={true}
-              />
+              <ThemeDisplayJudge key={item.theme_id} data={item} />
             ));
           }
         })}

@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDisclosure } from "@mantine/hooks";
 import { useNotification } from "@/components/notification/notification";
-import { Flex, Group, Stack, UnstyledButton, Divider } from "@mantine/core";
+import { Group, Stack, UnstyledButton, Divider } from "@mantine/core";
 import { ModalGoBack } from "../../common/modal/modal-go-back";
+import { ThemeReviewLink } from "./theme-review-link";
 import { ThemeScheduleData } from "@/types/api/theme";
 import { formatDueIn } from "@/utils/format-due-in";
 import { deleteThemeSetting } from "@/utils/api/theme";
@@ -17,125 +18,6 @@ interface ThemeDisplayAdminProps {
 }
 
 export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
-  const render = () => {
-    if (data.status === "PREPARING")
-      return (
-        <Group align="center" justify="space-between" p={6} gap={0}>
-          <p>아직 공개가 되지 않은 테마예요!</p>
-          <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>{formatDueIn(data.enroll_start_at)} 남음</p>
-            <Group gap={4}>
-              <ThemeDeleteButton themeId={data.theme_id} reload={reload} />
-              <ThemeSettingLink
-                href={`/theme-setting?theme_id=${data.theme_id}`}
-              />
-            </Group>
-          </Stack>
-        </Group>
-      );
-    else if (data.status === "ENROLLING")
-      return (
-        <Group align="center" justify="space-between" p={6} gap={0}>
-          <p style={{ color: "var(--black)" }}>
-            아직 미니 꾸미기가 진행 중인 테마예요!
-          </p>
-          <Stack align="flex-end" justify="space-between" gap={12}>
-            <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.review_start_at)} 남음
-            </p>
-            <ThemeSettingLink
-              href={`/theme-setting?theme_id=${data.theme_id}`}
-            />
-          </Stack>
-        </Group>
-      );
-    else if (data.status === "REVIEWING")
-      return (
-        <Group align="center" justify="space-between" p={6} gap={0}>
-          <Stack pt={7} pb={7} gap={5}>
-            <Group pl={3} pr={3} gap={35}>
-              <p>제외된 사진</p>
-              <p>23</p>
-            </Group>
-            <Divider size={1.5} color="var(--gray-8a)" />
-            <Group pt={3} pl={3} pr={3} gap={48}>
-              <p>검수 완료</p>
-              <p>100/150</p>
-            </Group>
-          </Stack>
-          <Stack align="flex-end" justify="space-between" gap={12}>
-            <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.vote_start_at)} 후 투표 시작
-            </p>
-            <Group gap={4}>
-              <ThemeReviewLink href="/" />
-              <ThemeSettingLink
-                href={`/theme-setting?theme_id=${data.theme_id}`}
-              />
-            </Group>
-          </Stack>
-        </Group>
-      );
-    else if (data.status === "VOTING")
-      return (
-        <Group align="center" justify="space-between" p={6} gap={0}>
-          <p>현재 투표가 진행 중인 테마예요!</p>
-          <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>결과 발표까지 {formatDueIn(data.result_start_at)}</p>
-            <ThemeSettingLink
-              href={`/theme-setting?theme_id=${data.theme_id}`}
-            />
-          </Stack>
-        </Group>
-      );
-    else if (data.status === "RESULTING")
-      return (
-        <Group align="center" justify="space-between" p={6} gap={0}>
-          <p>현재 결과 집계가 진행 중인 테마예요!</p>
-          <Stack justify="flex-end" h={56.5}>
-            <ThemeSettingLink
-              href={`/theme-setting?theme_id=${data.theme_id}`}
-            />
-          </Stack>
-        </Group>
-      );
-    else
-      return (
-        <Group align="center" justify="space-between" p={6} gap={0}>
-          <Stack pt={7} pb={7} gap={5}>
-            <Group pl={3} pr={3} gap={36}>
-              <p>전달된 선물</p>
-              <p>23</p>
-            </Group>
-            <Divider size={1.5} color="var(--gray-8a)" />
-            <Group pt={3} pl={3} pr={3} gap={48}>
-              <p>선물 완료</p>
-              <p>100/150</p>
-            </Group>
-          </Stack>
-          <Flex style={{ position: "relative" }} align="flex-end" h={56.5}>
-            <UnstyledButton
-              style={{ position: "absolute", top: "-28px", right: "-6px" }}
-              w={61}
-              h={61}
-            >
-              <Image
-                src="/images/home/theme-display/gift-delivery.svg"
-                alt="선물 전달"
-                width={61}
-                height={61}
-              />
-            </UnstyledButton>
-
-            <ThemeSettingLink
-              href={`/theme-setting?theme_id=${data.theme_id}`}
-              blur
-            />
-          </Flex>
-        </Group>
-      );
-  };
-
   return (
     <Stack className={classes.Container} gap={0}>
       {/* classes.Container에서 <p> 태그의 color: var(--gray-8a); font-size: 14px로 설정 */}
@@ -168,8 +50,140 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
         />
       </div>
 
-      {render()}
+      {/* 테마 정보 */}
+      <ThemeInfo data={data} reload={reload} />
     </Stack>
+  );
+}
+
+function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
+  const renderLeft = () => {
+    switch (data.status) {
+      case "REVIEW_READY":
+        return <p>현재 검수 준비가 진행 중인 테마예요!</p>;
+      case "VOTE_READY":
+        return <p>현재 투표 준비가 진행 중인 테마예요!</p>;
+      case "COMPLETE_READY":
+        return <p>현재 결과 집계가 진행 중인 테마예요!</p>;
+
+      case "PREPARING":
+        return <p>아직 공개가 되지 않은 테마예요!</p>;
+      case "ENROLLING":
+        return <p>아직 미니 꾸미기가 진행 중인 테마예요!</p>;
+      case "VOTING":
+        return <p>현재 투표가 진행 중인 테마예요!</p>;
+
+      case "REVIEWING":
+        return (
+          <Stack pt={7} pb={7} gap={5}>
+            <Group pl={3} pr={3} gap={35}>
+              <p>제외된 사진</p>
+              <p>23</p>
+            </Group>
+            <Divider size={1.5} color="var(--gray-8a)" />
+            <Group pt={3} pl={3} pr={3} gap={48}>
+              <p>검수 완료</p>
+              <p>100/150</p>
+            </Group>
+          </Stack>
+        );
+      case "COMPLETE":
+        return (
+          <Stack pt={7} pb={7} gap={5}>
+            <Group pl={3} pr={3} gap={36}>
+              <p>전달된 선물</p>
+              <p>23</p>
+            </Group>
+            <Divider size={1.5} color="var(--gray-8a)" />
+            <Group pt={3} pl={3} pr={3} gap={48}>
+              <p>선물 완료</p>
+              <p>100/150</p>
+            </Group>
+          </Stack>
+        );
+    }
+  };
+  const renderRight = () => {
+    switch (data.status) {
+      case "REVIEW_READY":
+      case "VOTE_READY":
+      case "COMPLETE_READY":
+        return (
+          <Stack justify="flex-end" h={"100%"}>
+            <ThemeSettingLink themeId={data.theme_id} />
+          </Stack>
+        );
+
+      case "PREPARING":
+        return (
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p>{formatDueIn(data.enroll_start_at)} 남음</p>
+            <Group gap={4}>
+              <ThemeDeleteButton themeId={data.theme_id} reload={reload} />
+              <ThemeSettingLink themeId={data.theme_id} />
+            </Group>
+          </Stack>
+        );
+      case "ENROLLING":
+        return (
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p style={{ color: "var(--main)" }}>
+              {formatDueIn(data.review_start_at)} 남음
+            </p>
+            <ThemeSettingLink themeId={data.theme_id} />
+          </Stack>
+        );
+      case "REVIEWING":
+        return (
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p style={{ color: "var(--main)" }}>
+              {formatDueIn(data.vote_start_at)} 후 투표 시작
+            </p>
+            <Group gap={4}>
+              <ThemeReviewLink themeId={data.theme_id} />
+              <ThemeSettingLink themeId={data.theme_id} />
+            </Group>
+          </Stack>
+        );
+      case "VOTING":
+        return (
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p>결과 발표까지 {formatDueIn(data.complete_start_at)}</p>
+            <ThemeSettingLink themeId={data.theme_id} />
+          </Stack>
+        );
+      case "COMPLETE":
+        return (
+          <Stack style={{ position: "relative" }} justify="flex-end" h={"100%"}>
+            <Link
+              style={{
+                position: "absolute",
+                top: "-28px",
+                right: "-6px",
+                width: "61px",
+                height: "61px",
+              }}
+              href={`/gift-delivery?theme_id=${data.theme_id}`}
+            >
+              <Image
+                src="/images/home/theme-display/gift-delivery.svg"
+                alt="선물 전달"
+                width={61}
+                height={61}
+              />
+            </Link>
+
+            <ThemeSettingLink themeId={data.theme_id} blur />
+          </Stack>
+        );
+    }
+  };
+
+  return (
+    <Group align="center" justify="space-between" p={6} h={68} gap={0}>
+      {renderLeft()}
+      {renderRight()}
+    </Group>
   );
 }
 
@@ -226,17 +240,18 @@ function ThemeDeleteButton({ themeId, reload }: ThemeDeleteButtonProps) {
   );
 }
 
-export function ThemeReviewLink({ href }: { href: string }) {
+function ThemeSettingLink({
+  themeId,
+  blur,
+}: {
+  themeId: string;
+  blur?: boolean;
+}) {
   return (
-    <Link className={classes.ThemeReview} href={href}>
-      <p>검수하기</p>
-    </Link>
-  );
-}
-
-function ThemeSettingLink({ href, blur }: { href: string; blur?: boolean }) {
-  return (
-    <Link style={{ height: "30px" }} href={href}>
+    <Link
+      style={{ height: "30px" }}
+      href={`/theme-setting?theme_id=${themeId}`}
+    >
       <Image
         src={
           blur
