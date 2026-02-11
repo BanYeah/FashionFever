@@ -10,6 +10,7 @@ import { R2Module } from './common/r2/r2.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { ThemeModule } from './theme/theme.module';
 import { SubmissionModule } from './submission/submission.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SubmissionModule } from './submission/submission.module';
     ScheduleModule,
     ThemeModule,
     SubmissionModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -89,7 +89,7 @@ export class Submission {
 
   @ManyToOne(() => Schedule, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'theme_id' })
-  theme: Schedule;
+  schedule: Schedule;
 
   @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'user_id' })
