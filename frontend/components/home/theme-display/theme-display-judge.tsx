@@ -84,7 +84,7 @@ function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
 
       case "REVIEWING":
         if (reviewData === null)
-          return <Loader color="var(--gray-8a)" type="dots" />;
+          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
         return (
           <>
             {reviewData ? (
@@ -106,7 +106,7 @@ function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
         );
       case "VOTING":
         if (voteData === null)
-          return <Loader color="var(--gray-8a)" type="dots" />;
+          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
         return (
           <>
             {voteData ? (

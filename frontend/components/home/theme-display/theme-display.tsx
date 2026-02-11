@@ -60,7 +60,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
         return <></>;
       case "ENROLLING":
         if (enrolled === null)
-          return <Loader color="var(--black)" size="sm" type="dots" />;
+          return <Loader color="var(--black)" size="sm" type="dots" mx={3} />;
         return (
           <p style={{ color: "var(--black)" }}>
             {enrolled
@@ -72,7 +72,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
       case "REVIEWING":
       case "VOTE_READY":
         if (enrolled === null)
-          return <Loader color="var(--gray-8a)" size="sm" type="dots" />;
+          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
         return (
           <p>{enrolled ? "참가한 테마예요!" : "참가하지 않은 테마예요!"}</p>
         );
@@ -80,7 +80,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
       case "COMPLETE_READY":
       case "COMPLETE":
         if (enrolled === null)
-          return <Loader color="var(--gray-8a)" type="dots" />;
+          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
 
         const prefix =
           data.status === "VOTING"
