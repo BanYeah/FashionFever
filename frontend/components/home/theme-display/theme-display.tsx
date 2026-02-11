@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Group, Stack, Box, Divider, Loader } from "@mantine/core";
 import { ThemeScheduleData } from "@/types/api/theme";
 import { formatDueIn } from "@/utils/format-due-in";
+import { getSubmission } from "@/utils/api/submission";
 
 export function ThemeDisplay({ data }: { data: ThemeScheduleData }) {
   return (
@@ -52,7 +53,15 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
   const [ranking, setRanking] = useState<number | null>(null);
   const [point, setPoint] = useState<number>(0);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    (async () => {
+      const result = await getSubmission(data.theme_id);
+      if (result.success) {
+        if (result.data.content_urls.length === 0) setEnrolled(false);
+        else setEnrolled(true);
+      }
+    })();
+  }, []);
 
   const renderLeft = () => {
     switch (data.status) {
@@ -79,7 +88,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
       case "VOTING":
       case "COMPLETE_READY":
       case "COMPLETE":
-        if (enrolled === null)
+        if (enrolled === null || ranking === null)
           return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
 
         const prefix =
