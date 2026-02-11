@@ -18,7 +18,7 @@ export class ThemeSchema1769777066826 implements MigrationInterface {
         ),
         
         CONSTRAINT "chk_status_enum" CHECK (
-          "status" IN ('PREPARING', 'ENROLLING', 'REVIEW_READY', 'REVIEWING', 'VOTE_READY', 'VOTING', 'COMPLETE_READY', 'COMPLETE')
+          "status" IN ('PREPARING', 'ENROLLING', 'REVIEWING', 'VOTE_READY', 'VOTING', 'COMPLETE_READY', 'COMPLETE')
         )
       );
 

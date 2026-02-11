@@ -77,7 +77,6 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
               : "아직 참가하지 않은 테마예요!"}
           </p>
         );
-      case "REVIEW_READY":
       case "REVIEWING":
       case "VOTE_READY":
         if (enrolled === null)
@@ -146,7 +145,6 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
             </Link>
           </Stack>
         );
-      case "REVIEW_READY":
       case "REVIEWING":
         return (
           <Stack justify="flex-start" h={"100%"}>

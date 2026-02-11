@@ -1,18 +1,16 @@
 const STATUS_ORDER: Record<ThemeStatusType, number> = {
   PREPARING: 0,
   ENROLLING: 1,
-  REVIEW_READY: 2,
-  REVIEWING: 3,
-  VOTE_READY: 4,
-  VOTING: 5,
-  COMPLETE_READY: 6,
-  COMPLETE: 7,
+  REVIEWING: 2,
+  VOTE_READY: 3,
+  VOTING: 4,
+  COMPLETE_READY: 5,
+  COMPLETE: 6,
 };
 
 export type ThemeStatusType =
   | "PREPARING"
   | "ENROLLING"
-  | "REVIEW_READY"
   | "REVIEWING"
   | "VOTE_READY"
   | "VOTING"

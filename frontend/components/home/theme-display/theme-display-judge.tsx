@@ -74,8 +74,6 @@ function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
             아직 미니 꾸미기가 진행 중인 테마예요!
           </p>
         );
-      case "REVIEW_READY":
-        return <p>현재 검수 준비가 진행 중인 테마예요!</p>;
       case "VOTE_READY":
         return <p>현재 투표 준비가 진행 중인 테마예요!</p>;
       case "COMPLETE_READY":
@@ -131,7 +129,6 @@ function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
   const renderRight = () => {
     switch (data.status) {
       case "PREPARING":
-      case "REVIEW_READY":
       case "VOTE_READY":
       case "COMPLETE_READY":
       case "COMPLETE":

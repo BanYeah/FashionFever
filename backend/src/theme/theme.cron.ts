@@ -72,7 +72,7 @@ export class ThemeCron {
       CASE 
         WHEN CURRENT_TIMESTAMP < "enroll_start_at" THEN 'PREPARING'
         WHEN CURRENT_TIMESTAMP >= "enroll_start_at" AND CURRENT_TIMESTAMP < "review_start_at" THEN 'ENROLLING'
-        WHEN CURRENT_TIMESTAMP >= "review_start_at" AND CURRENT_TIMESTAMP < "vote_start_at" THEN 'REVIEW_READY'
+        WHEN CURRENT_TIMESTAMP >= "review_start_at" AND CURRENT_TIMESTAMP < "vote_start_at" THEN 'REVIEWING'
         WHEN CURRENT_TIMESTAMP >= "vote_start_at" AND CURRENT_TIMESTAMP < "complete_start_at" THEN 'VOTE_READY'
         WHEN CURRENT_TIMESTAMP >= "complete_start_at" THEN 'COMPLETE_READY'
         ELSE "status"
