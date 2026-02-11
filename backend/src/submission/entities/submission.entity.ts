@@ -28,7 +28,7 @@ export class Submission {
   created_at: Date;
 
   @Column({ type: 'boolean', default: null, nullable: true })
-  is_reviewed: boolean | null;
+  is_approved: boolean | null;
 
   @Column({ type: 'timestamptz', default: null, nullable: true })
   reviewed_at: Date | null;

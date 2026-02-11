@@ -10,7 +10,7 @@ export class SubmissionSchema1770394977198 implements MigrationInterface {
         "content_url"     TEXT,
         "created_at"      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         
-        "is_reviewed"     BOOLEAN DEFAULT NULL,
+        "is_approved"     BOOLEAN DEFAULT NULL,
         "reviewed_at"     TIMESTAMPTZ DEFAULT NULL,
         
         "vote_rank"       INTEGER DEFAULT NULL,
