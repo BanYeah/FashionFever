@@ -6,7 +6,6 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   SimpleGrid,
   Box,
-  Text,
   Group,
   Stack,
   Modal,
@@ -14,13 +13,27 @@ import {
 } from "@mantine/core";
 import { HeartRating } from "../common/heart-rating/heartrating";
 
+export function RankingGrid() {
+  const dummyData = Array(6).fill({
+    rank: 1,
+    score: 5.0,
+  });
+
+  return (
+    <SimpleGrid cols={2} spacing={10} verticalSpacing={30} p={10}>
+      {dummyData.map((data, index) => (
+        <RankingCard key={index} rank={data.rank} score={data.score} />
+      ))}
+    </SimpleGrid>
+  );
+}
+
 interface RankingCardProps {
   rank: number;
   score: number;
-  imageUrl?: string;
 }
 
-function RankingCard({ rank, score, imageUrl }: RankingCardProps) {
+function RankingCard({ rank, score }: RankingCardProps) {
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
@@ -29,31 +42,29 @@ function RankingCard({ rank, score, imageUrl }: RankingCardProps) {
       <Modal
         opened={opened}
         onClose={close}
-        centered
         size="auto"
-        withCloseButton={false}
+        centered
         padding={0}
+        withCloseButton={false}
       >
-        <Box className={classes.ModalImageWrapper}>
-          <Image
-            src="/images/model.png"
-            alt="Zoomed Rank Item"
-            width={390}
-            height={312}
-            style={{ width: "100%", height: "auto" }}
-          />
-        </Box>
+        <Image
+          src="/images/model.png"
+          alt=""
+          width={390}
+          height={312}
+          style={{ display: "block", width: "100%", height: "auto" }}
+        />
       </Modal>
 
-      <Stack gap={8} className={classes.CardWrapper}>
+      <Stack style={{ position: "relative" }} gap={8}>
         {/* 이미지 영역 */}
-        <Box className={classes.ImageArea}>
+        <Box style={{ position: "relative" }}>
           <Image
             src={"/images/model.png"}
-            alt="rank item"
+            alt=""
             width={180}
             height={144}
-            style={{ objectFit: "cover", width: "100%", height: "auto" }}
+            style={{ display: "block", width: "100%", height: "auto" }}
           />
           {/* 우측 하단 확대 버튼 */}
           <UnstyledButton className={classes.MagnifyButton} onClick={open}>
@@ -67,36 +78,16 @@ function RankingCard({ rank, score, imageUrl }: RankingCardProps) {
         </Box>
 
         {/* 이미지 밖으로 삐져나오는 랭킹 태그 */}
-        <Box className={classes.RankTag}>#{rank}</Box>
+        <Box className={classes.RankTag}>
+          <p>#{rank}</p>
+        </Box>
 
         {/* 하단 정보 영역 */}
-        <Group align="center" gap={8} pl={8} className={classes.CustomHeart}>
+        <Group className={classes.CustomHeart} align="center" gap={8} pl={8}>
           <HeartRating value={score} unitH={22} unitW={25} />
-
-          <Text className={classes.ScoreText}>{score.toFixed(2)}</Text>
+          <p>{score.toFixed(2)}</p>
         </Group>
       </Stack>
     </>
-  );
-}
-
-export function RankingGrid() {
-  const dummyData = Array(6).fill({
-    rank: 1,
-    score: 5.0,
-    imageUrl: "/images/model.png",
-  });
-
-  return (
-    <SimpleGrid cols={2} spacing={10} verticalSpacing={30} p={10}>
-      {dummyData.map((data, index) => (
-        <RankingCard
-          key={index}
-          rank={data.rank}
-          score={data.score}
-          imageUrl={data.imageUrl}
-        />
-      ))}
-    </SimpleGrid>
   );
 }

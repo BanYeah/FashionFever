@@ -1,21 +1,11 @@
-.CardWrapper {
-  position: relative;
+.MagnifyButton {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
 
-  width: 100%;
-  height: fit-content;
-}
-
-.ImageArea {
-  position: relative;
-
-  aspect-ratio: 5 / 4;
-
-  overflow: hidden;
-}
-
-.Placeholder {
-  width: 100%;
-  height: 100%;
+  img {
+    display: block;
+  }
 }
 
 .RankTag {
@@ -35,12 +25,10 @@
 
   color: var(--white);
   font-size: 14px;
-}
 
-.ScoreText {
-  font-size: 16px;
-
-  transform: translateY(1px);
+  p {
+    transform: translate(-1px, 1px);
+  }
 }
 
 @media (max-width: 375px) {
@@ -48,24 +36,5 @@
   .CustomHeart svg {
     width: 18px;
     height: 18px;
-  }
-}
-
-.MagnifyButton {
-  position: absolute;
-  right: 2px;
-  bottom: 2px;
-
-  z-index: 5;
-
-  img {
-    display: block;
-  }
-}
-
-.ModalImageWrapper {
-  max-width: 90vw;
-  img {
-    display: block;
   }
 }
