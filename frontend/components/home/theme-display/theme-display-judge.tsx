@@ -3,16 +3,27 @@
 import classes from "./theme-display.module.css";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Group, Stack, Divider, Loader } from "@mantine/core";
+import { Group, Stack, Divider } from "@mantine/core";
 import { ThemeReviewLink } from "./theme-review-link";
 import { ThemeScheduleData } from "@/types/api/theme";
+import { getReviewStatus } from "@/utils/api/review";
 import { formatDueIn } from "@/utils/format-due-in";
 
 export function ThemeDisplayJudge({ data }: { data: ThemeScheduleData }) {
-  const [reviewData, setReviewData] = useState<boolean | null>(null);
-  const [voteData, setJudgeData] = useState<boolean | null>(null);
+  const [result, setResult] = useState<any>(undefined);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    (async () => {
+      switch (data.status) {
+        case "REVIEWING":
+          const res = await getReviewStatus(data.theme_id);
+          setResult(res);
+          break;
+        default:
+          setResult(undefined);
+      }
+    })();
+  }, []);
 
   return (
     <Stack className={classes.Container} gap={0}>
@@ -20,8 +31,10 @@ export function ThemeDisplayJudge({ data }: { data: ThemeScheduleData }) {
 
       {/* 테마 배너 이미지 */}
       <div className={classes.ImageWrapper}>
-        {(data.status === "REVIEWING" && reviewData) ||
-        (data.status === "VOTING" && voteData) ? (
+        {(data.status === "REVIEWING" &&
+          result?.success &&
+          result.data.can_review) ||
+        (data.status === "VOTING" && true) ? (
           <Stack
             className={classes.ImageDark}
             align="center"
@@ -52,18 +65,17 @@ export function ThemeDisplayJudge({ data }: { data: ThemeScheduleData }) {
       </div>
 
       {/* 테마 정보 */}
-      <ThemeInfo data={data} reviewData={reviewData} voteData={voteData} />
+      <ThemeInfo data={data} result={result} />
     </Stack>
   );
 }
 
 interface ThemeInfoProps {
   data: ThemeScheduleData;
-  reviewData: boolean | null;
-  voteData: boolean | null;
+  result: any;
 }
 
-function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
+function ThemeInfo({ data, result }: ThemeInfoProps) {
   const renderLeft = () => {
     switch (data.status) {
       case "PREPARING":
@@ -81,20 +93,18 @@ function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
         return <p>심사가 종료된 테마예요!</p>;
 
       case "REVIEWING":
-        if (reviewData === null)
-          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
         return (
           <>
-            {reviewData ? (
+            {result?.success && result.data.can_review ? (
               <Stack pt={7} pb={7} gap={5}>
                 <Group pl={3} pr={3} gap={35}>
                   <p>제외된 사진</p>
-                  <p>23</p>
+                  <p>{result.meta.rejected}</p>
                 </Group>
                 <Divider size={1.5} color="var(--gray-8a)" />
                 <Group pt={3} pl={3} pr={3} gap={48}>
                   <p>검수 완료</p>
-                  <p>100/150</p>
+                  <p>{`${result.meta.reviewed}/${result.meta.total}`}</p>
                 </Group>
               </Stack>
             ) : (
@@ -103,11 +113,9 @@ function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
           </>
         );
       case "VOTING":
-        if (voteData === null)
-          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
         return (
           <>
-            {voteData ? (
+            {true ? (
               <Stack pt={7} pb={7} gap={5}>
                 <Group pl={3} pr={3} gap={27}>
                   <p>1차 심사 완료</p>
@@ -148,7 +156,11 @@ function ThemeInfo({ data, reviewData, voteData }: ThemeInfoProps) {
             <p style={{ color: "var(--main)" }}>
               {formatDueIn(data.vote_start_at)} 후 투표 시작
             </p>
-            <ThemeReviewLink themeId={data.theme_id} />
+            {result?.success && result.data.can_review ? (
+              <ThemeReviewLink themeId={data.theme_id} />
+            ) : (
+              <></>
+            )}
           </Stack>
         );
       case "VOTING":

@@ -3,6 +3,7 @@
 import classes from "./theme-display.module.css";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useNotification } from "@/components/notification/notification";
 import { Group, Stack, UnstyledButton, Divider } from "@mantine/core";
@@ -11,6 +12,7 @@ import { ThemeReviewLink } from "./theme-review-link";
 import { ThemeScheduleData } from "@/types/api/theme";
 import { formatDueIn } from "@/utils/format-due-in";
 import { deleteThemeSetting } from "@/utils/api/theme";
+import { getReviewStatus } from "@/utils/api/review";
 
 interface ThemeDisplayAdminProps {
   data: ThemeScheduleData;
@@ -57,6 +59,21 @@ export function ThemeDisplayAdmin({ data, reload }: ThemeDisplayAdminProps) {
 }
 
 function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
+  const [result, setResult] = useState<any>(undefined);
+
+  useEffect(() => {
+    (async () => {
+      switch (data.status) {
+        case "REVIEWING":
+          const res = await getReviewStatus(data.theme_id);
+          setResult(res);
+          break;
+        default:
+          setResult(undefined);
+      }
+    })();
+  }, []);
+
   const renderLeft = () => {
     switch (data.status) {
       case "VOTE_READY":
@@ -76,12 +93,16 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
           <Stack pt={7} pb={7} gap={5}>
             <Group pl={3} pr={3} gap={35}>
               <p>제외된 사진</p>
-              <p>23</p>
+              <p>{result?.success ? result.meta.rejected : "-"}</p>
             </Group>
             <Divider size={1.5} color="var(--gray-8a)" />
             <Group pt={3} pl={3} pr={3} gap={48}>
               <p>검수 완료</p>
-              <p>100/150</p>
+              <p>
+                {result?.success
+                  ? `${result.meta.reviewed}/${result.meta.total}`
+                  : "-/-"}
+              </p>
             </Group>
           </Stack>
         );
