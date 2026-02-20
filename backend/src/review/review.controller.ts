@@ -111,7 +111,7 @@ export class ReviewController {
     status: 403,
     description: '권한 부족 (심사위원, 관리자 아님)',
   })
-  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마/제출임' })
   @ApiResponse({ status: 410, description: '테마 검수 기간이 종료됨' })
   async patchReviewStatus(
     @Session() session: any,
