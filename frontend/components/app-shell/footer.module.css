@@ -13,8 +13,6 @@
   max-width: 425px;
   height: 60px;
 
-  background-color: var(--main);
-
   z-index: 200;
 }
 
@@ -67,14 +65,4 @@
 
 .TabItem:last-child {
   border-right: none;
-}
-
-.ActiveTab {
-  background-color: var(--white);
-  color: var(--main);
-}
-
-.InactiveTab {
-  background-color: var(--main);
-  color: var(--white);
 }

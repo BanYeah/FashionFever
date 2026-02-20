@@ -7,6 +7,7 @@ interface AppShellFooterProps {
   activeTab?: number;
   tabs?: string[];
   tabLinks?: string[];
+  tabBg?: string;
 }
 
 export function AppShellFooter({
@@ -15,10 +16,14 @@ export function AppShellFooter({
   activeTab = 0,
   tabs,
   tabLinks,
+  tabBg = "var(--main)",
 }: AppShellFooterProps) {
   if (variant === "dressUp") {
     return (
-      <div className={classes.FooterContainer}>
+      <div
+        className={classes.FooterContainer}
+        style={{ backgroundColor: "var(--main)" }}
+      >
         <div className={classes.DressUpContainer}>
           <Link
             href={`/enroll?theme_id=${themeId}`}
@@ -33,23 +38,32 @@ export function AppShellFooter({
   // tabs
   else {
     return (
-      <div className={classes.FooterContainer}>
+      <div
+        className={classes.FooterContainer}
+        style={{ backgroundColor: tabBg }}
+      >
         <div className={classes.TabContainer}>
           {tabs?.map((text, index) => {
             const isActive = activeTab === index;
-            const tabClassName = `${classes.TabItem} ${
-              isActive ? classes.ActiveTab : classes.InactiveTab
-            }`;
+            const style = {
+              backgroundColor: isActive ? "var(--white)" : tabBg,
+              color: isActive ? tabBg : "var(--white)",
+            };
 
             return isActive ? (
-              <div key={`${index}_${text}`} className={tabClassName}>
+              <div
+                key={`${index}_${text}`}
+                className={classes.TabItem}
+                style={style}
+              >
                 {text}
               </div>
             ) : (
               <Link
                 key={`${index}_${text}`}
                 href={tabLinks?.[index] || "/home"}
-                className={tabClassName}
+                className={classes.TabItem}
+                style={style}
               >
                 {text}
               </Link>
