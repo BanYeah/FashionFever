@@ -30,7 +30,7 @@ export function AppShellHeader({
         <div className={classes.Title}>{title || ""}</div>
         <div className={classes.RightSection}>
           {gift && (
-            <Link href="/">
+            <Link href="/" style={{ width: "30px", height: "30px" }}>
               <Image
                 src="/images/app-shell/present.svg"
                 alt="선물목록"

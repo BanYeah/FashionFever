@@ -36,12 +36,14 @@
   align-items: center;
   justify-content: right;
 
-  width: 43px;
   padding-right: 8px;
+
+  width: 30px;
+  height: 30px;
 }
 
 .Title {
-  padding-top: 2px; /* 이게 있어야 위아래 간격 대칭이 맞아보임 */
+  padding-top: 4px; /* 이게 있어야 위아래 간격 대칭이 맞아보임 */
 
   font-size: 24px;
 }
