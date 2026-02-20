@@ -32,6 +32,8 @@ export function AccountLine({
   const [action, setAction] = useState<"reset" | "delete">("reset");
   const [copied, setCopied] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -64,6 +66,8 @@ export function AccountLine({
         opened={opened}
         onGo={async () => {
           if (value === account.minicode) {
+            setLoading(true);
+
             const doAction = () => {
               if (action === "reset") return resetCode(account.minicode);
               // action === "delete"
@@ -75,23 +79,25 @@ export function AccountLine({
             if (result.success) {
               if (option) toggle();
               reload(action === "delete");
-              close();
-              return;
             }
 
             close();
             setValue("");
-            switch (result.status) {
-              case 404:
-                handleError(
-                  <p>
-                    존재하지 않는{" "}
-                    {variant === "user" ? "유저예요!" : "심사위원이에요!"}
-                  </p>,
-                );
-                break;
-              default:
-                handleServerError();
+            setLoading(false);
+
+            if (!result.success) {
+              switch (result.status) {
+                case 404:
+                  handleError(
+                    <p>
+                      존재하지 않는{" "}
+                      {variant === "user" ? "유저예요!" : "심사위원이에요!"}
+                    </p>,
+                  );
+                  break;
+                default:
+                  handleServerError();
+              }
             }
           }
         }}
@@ -99,6 +105,7 @@ export function AccountLine({
           close();
           setValue("");
         }}
+        loading={loading}
       >
         <>
           <p>
