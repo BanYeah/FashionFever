@@ -27,6 +27,8 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const urls = files.map((file) => {
       if (file instanceof File) return URL.createObjectURL(file);
@@ -53,6 +55,8 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
   }, [themeId]);
 
   const handleEnroll = async () => {
+    setLoading(true);
+
     const payload: SubmissionPayload = {
       files: await Promise.all(
         files.map((file) =>
@@ -61,13 +65,15 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
       ),
     };
     const result = await createSubmission(themeId, payload);
+
+    setLoading(false);
+    close();
+
     if (result.success) {
-      close();
       notify(<EnrollNotiMessage variant="success" />);
       return;
     }
 
-    close();
     switch (result.status) {
       case 410:
         notify(<EnrollNotiMessage variant="close" />);
@@ -86,6 +92,7 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
         opened={opened}
         onGo={handleEnroll}
         close={close}
+        loading={loading}
       >
         <>
           <p>
