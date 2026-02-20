@@ -1,0 +1,50 @@
+.Caption {
+  padding-bottom: 10px;
+
+  color: var(--gray-b3);
+
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+
+  span {
+    color: var(--main);
+  }
+}
+
+.Center {
+  padding-top: 10px;
+
+  width: 100%;
+  aspect-ratio: 5.13 / 2;
+}
+
+.Button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 50px;
+
+  color: var(--white);
+  font-size: 18px;
+}
+
+.MagnifyButton {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+
+  z-index: 5;
+
+  img {
+    display: block;
+  }
+}
+
+.RetryCard {
+  width: 100%;
+  aspect-ratio: 5 / 4;
+
+  border: 1px solid var(--gray-f2);
+}
