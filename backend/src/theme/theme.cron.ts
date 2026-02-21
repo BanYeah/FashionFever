@@ -1,20 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
+
+import { R2Service } from 'src/common/r2/r2.service';
 
 import { Schedule } from './entities/schedule.entity';
+import { Submission } from 'src/submission/entities/submission.entity';
 
 @Injectable()
 export class ThemeCron {
   private readonly logger = new Logger(ThemeCron.name);
 
   constructor(
+    private readonly r2Service: R2Service,
     @InjectRepository(Schedule)
     private readonly scheduleRepo: Repository<Schedule>,
+    @InjectRepository(Submission)
+    private readonly submissionRepo: Repository<Submission>,
   ) {}
 
-  async purgeCache(updated: any[]) {
+  private async purgeCache(updated: any[]) {
     if (updated.length === 0) return;
 
     /* GET /schedules/timeline
@@ -57,6 +63,51 @@ export class ThemeCron {
     if (!res.ok) throw new Error('/purge_cache API 호출 오류');
   }
 
+  private async cleanupSubmissions(updated: any[]) {
+    const themeIds = updated
+      .filter((row: any) => row.status === 'VOTE_READY') // updated to 'VOTE_READY'
+      .map((row: any) => row.theme_id);
+
+    if (themeIds.length === 0) return;
+
+    const targets = await this.submissionRepo.find({
+      where: {
+        theme_id: In(themeIds),
+        is_approved: false,
+      },
+      select: ['submission_id', 'content_url'],
+    });
+
+    if (targets.length > 0) {
+      const deletedFiles = targets
+        .map((t) => t.content_url)
+        .filter((url): url is string => !!url);
+
+      await this.submissionRepo.delete(targets.map((t) => t.submission_id));
+
+      this.r2Service.deleteImages(deletedFiles).catch(() => {
+        console.log(
+          `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(deletedFiles)}`,
+        );
+      });
+    }
+
+    await this.scheduleRepo.update(
+      { theme_id: In(themeIds) },
+      { status: 'VOTING' },
+    );
+
+    updated.forEach((row) => {
+      if (row.status === 'VOTE_READY') row.status = 'VOTING';
+    });
+
+    const votingNow = updated.filter((row) => row.status === 'VOTING');
+
+    this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 준비');
+    await this.purgeCache(votingNow);
+    this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 성공');
+  }
+
   // 매 10초마다 실행
   // @Cron('0/10 * * * * *'
 
@@ -88,11 +139,14 @@ export class ThemeCron {
     `);
 
       this.logger.log('테마 일정 상태 업데이트 완료');
-      // this.logger.log('CDN Purge 준비');
 
-      // await this.purgeCache(updated);
+      this.logger.log('/purge_cache API 호출 준비');
+      await this.purgeCache(updated);
+      this.logger.log('/purge_cache API 호출 성공');
 
-      // this.logger.log('CDN Purge 성공');
+      this.logger.log('테마 투표 준비 시작');
+      await this.cleanupSubmissions(updated);
+      this.logger.log('테마 투표 준비 완료');
     } catch (error) {
       this.logger.error('오류 발생', error.stack);
     }
