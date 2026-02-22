@@ -74,7 +74,7 @@ export class SubmissionService {
         if (sub.content_file_order !== null) {
           const contentUrl = await this.r2Service.uploadImage(
             contentFiles[sub.content_file_order],
-            'submission',
+            `submission/${userId}`,
           );
           uploadedFiles.push(contentUrl);
 

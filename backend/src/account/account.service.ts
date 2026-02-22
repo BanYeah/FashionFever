@@ -1,22 +1,32 @@
 import {
   Injectable,
+  Inject,
   NotFoundException, // 404
   ConflictException, // 409
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { DataSource, Repository, Like } from 'typeorm';
 
+import Redis from 'ioredis';
 import { CryptoUtil } from 'src/common/utils/crypto.util';
-import { AuthService } from 'src/auth/auth.service';
+import { R2Service } from 'src/common/r2/r2.service';
 
 import { User } from '../auth/entities/user.entity';
 import { Judge } from '../auth/entities/judge.entity';
+import { Schedule } from 'src/theme/entities/schedule.entity';
+import { Submission } from 'src/submission/entities/submission.entity';
+
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class AccountService {
   constructor(
+    private dataSource: DataSource,
+    private readonly r2Service: R2Service,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Judge) private judgeRepo: Repository<Judge>,
+    @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
     private authService: AuthService,
   ) {}
 
@@ -127,14 +137,98 @@ export class AccountService {
     await this.judgeRepo.save(newJudge);
   }
 
-  async removeUser(minicode: string) {
-    const user = await this.userRepo.findOne({
-      where: { minicode },
+  private async purgeCache(userId: string) {
+    const prefixes = [
+      `${process.env.R2_PUBLIC_ENDPOINT}/submission/${userId}/`,
+    ];
+
+    const url = `https://api.cloudflare.com/client/v4/zones/${process.env.CACHE_ZONE_ID}/purge_cache`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.CACHE_SECRET_ACCESS_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prefixes: prefixes,
+      }),
     });
 
-    if (!user) throw new NotFoundException(); // 404
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('[CACHE_ERROR]', errorData);
+    }
+  }
 
-    await this.userRepo.remove(user);
+  async removeUser(minicode: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const user = await queryRunner.manager.findOne(User, {
+        where: { minicode },
+      });
+      if (!user) throw new NotFoundException(); // 404
+
+      const targets = await queryRunner.manager.find(Submission, {
+        where: { user_id: user.user_id },
+        select: ['submission_id', 'content_url'],
+      });
+
+      if (targets.length > 0) {
+        await queryRunner.manager.update(
+          Submission,
+          { user_id: user.user_id },
+          { content_url: null },
+        );
+      }
+
+      await queryRunner.manager.remove(user);
+      await queryRunner.commitTransaction();
+
+      if (targets.length > 0) {
+        const subIds = targets.map((t) => t.submission_id);
+
+        if (subIds && subIds.length > 0) {
+          const activeThemes = await this.scheduleRepo.find({
+            where: { status: 'VOTING' },
+            select: ['theme_id'],
+          });
+
+          for (const themeId of activeThemes.map((t) => t.theme_id)) {
+            await Promise.all([
+              this.redis.zrem(`voting:exposure:${themeId}`, ...subIds),
+              this.redis.zrem(`voting:ranking:${themeId}`, ...subIds),
+            ]).catch((err) => {
+              console.error(
+                `[REDIS_ZREM_FAIL] Failed to remove voting data for Theme: ${themeId}`,
+                err,
+              );
+            });
+          }
+        }
+
+        const deletedFiles = targets
+          .map((t) => t.content_url)
+          .filter((url): url is string => !!url);
+
+        await this.r2Service.deleteImages(deletedFiles).catch(() => {
+          console.log(
+            `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(deletedFiles)}`,
+          );
+        });
+
+        await this.purgeCache(user.user_id).catch((err) =>
+          console.error('[CACHE_ERROR]', err),
+        );
+      }
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async expelJudge(minicode: string) {

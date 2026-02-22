@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, IsNull } from 'typeorm';
 
+import Redis from 'ioredis';
 import { R2Service } from 'src/common/r2/r2.service';
 
 import { Schedule } from './entities/schedule.entity';
@@ -14,6 +15,7 @@ export class ThemeCron {
 
   constructor(
     private readonly r2Service: R2Service,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
     @InjectRepository(Schedule)
     private readonly scheduleRepo: Repository<Schedule>,
     @InjectRepository(Submission)
@@ -63,13 +65,20 @@ export class ThemeCron {
     if (!res.ok) throw new Error('/purge_cache API 호출 오류');
   }
 
-  private async cleanupSubmissions(updated: any[]) {
+  private async readyVote(updated: any[]) {
     const themeIds = updated
       .filter((row: any) => row.status === 'VOTE_READY') // updated to 'VOTE_READY'
       .map((row: any) => row.theme_id);
 
     if (themeIds.length === 0) return;
 
+    /* 유저 탈퇴로 인해 이미지 경로가 NULL인 제출 제거 */
+    await this.submissionRepo.delete({
+      theme_id: In(themeIds),
+      content_url: IsNull(),
+    });
+
+    /* 검수 과정에서 반려된 제출/사진 제거 */
     const targets = await this.submissionRepo.find({
       where: {
         theme_id: In(themeIds),
@@ -92,6 +101,39 @@ export class ThemeCron {
       });
     }
 
+    /* 테마 투표 준비 */
+    for (const themeId of themeIds) {
+      const exposureKey = `voting:exposure:${themeId}`;
+      const rankingKey = `voting:ranking:${themeId}`;
+
+      const TTL = 60 * 60 * 24 * 10; // 10일
+
+      const submissions = await this.submissionRepo.find({
+        where: { theme_id: themeId },
+        select: ['submission_id'],
+      });
+
+      if (submissions.length !== 0) {
+        const pipeline = this.redis.pipeline();
+
+        pipeline.del(exposureKey);
+        pipeline.del(rankingKey);
+
+        for (const sub of submissions) {
+          const subId = sub.submission_id;
+          // 노출 횟수(exposure)는 0, 초기 점수(ranking)는 1200으로 설정
+          pipeline.zadd(exposureKey, 0, subId);
+          pipeline.zadd(rankingKey, 1200, subId);
+        }
+
+        pipeline.expire(exposureKey, TTL);
+        pipeline.expire(rankingKey, TTL);
+
+        await pipeline.exec();
+      }
+    }
+
+    /* 테마 투표 준비 완료 */
     await this.scheduleRepo.update(
       { theme_id: In(themeIds) },
       { status: 'VOTING' },
@@ -145,7 +187,7 @@ export class ThemeCron {
       this.logger.log('/purge_cache API 호출 성공');
 
       this.logger.log('테마 투표 준비 시작');
-      await this.cleanupSubmissions(updated);
+      await this.readyVote(updated);
       this.logger.log('테마 투표 준비 완료');
     } catch (error) {
       this.logger.error('오류 발생', error.stack);
