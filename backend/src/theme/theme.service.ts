@@ -4,7 +4,7 @@ import {
   NotFoundException, // 404
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, QueryRunner, Not, In } from 'typeorm';
+import { DataSource, Repository, Not, In } from 'typeorm';
 
 import { R2Service } from 'src/common/r2/r2.service';
 
@@ -137,12 +137,10 @@ export class ThemeService {
 
   /* Theme Setting */
   private async validateSchedule(
-    queryRunner: QueryRunner,
     enrollStartAt: Date,
     reviewStartAt: Date,
     voteStartAt: Date,
     completeStartAt: Date,
-    themeId?: string,
   ) {
     const now = new Date();
     const schedules = [
@@ -164,34 +162,12 @@ export class ThemeService {
         '각 기간은 이전 기간이 끝난 후 시작되어야 하며, 시작 시간은 종료 시간보다 빨라야 해요!',
       );
 
-    // 기존 테마 일정과 겹치는지 확인
-    const formatter = new Intl.DateTimeFormat('ko-KR', {
-      year: '2-digit',
-      month: '2-digit',
-      day: '2-digit',
-      timeZone: 'Asia/Seoul',
-    });
+    const MAX_DAYS = 7;
+    const MAX_DIFF_MS = MAX_DAYS * 24 * 60 * 60 * 1000;
 
-    const query = queryRunner.manager
-      .createQueryBuilder(Schedule, 'schedule')
-      .where(
-        `(:start_at < schedule.complete_start_at AND schedule.enroll_start_at < :end_at)`,
-        { start_at: enrollStartAt, end_at: completeStartAt },
-      );
-    if (themeId) query.andWhere('schedule.theme_id != :themeId', { themeId });
-    const overlap = await query.getOne();
-
-    if (overlap) {
-      const otherStartAt =
-        formatter.format(overlap.enroll_start_at) + ' (00:00:00)';
-
-      const otherEndAt =
-        formatter.format(overlap.complete_start_at) + ' (00:00:00)';
-
-      throw new BadRequestException(
-        `일정이 ${otherStartAt} ~ ${otherEndAt}인 테마가 이미 존재해요.`,
-      );
-    }
+    const diffMs = completeStartAt.getTime() - voteStartAt.getTime();
+    if (diffMs > MAX_DIFF_MS)
+      throw new BadRequestException('투표 기간은 최대 7일을 넘길 수 없어요!');
   }
 
   async createThemeSetting(
@@ -208,7 +184,6 @@ export class ThemeService {
     try {
       // Schedule
       // this.validateSchedule(
-      //   queryRunner,
       //   dto.enroll_start_at,
       //   dto.review_start_at,
       //   dto.vote_start_at,
@@ -455,7 +430,6 @@ export class ThemeService {
     try {
       // Schedule
       // this.validateSchedule(
-      //   queryRunner,
       //   dto.enroll_start_at,
       //   dto.review_start_at,
       //   dto.vote_start_at,

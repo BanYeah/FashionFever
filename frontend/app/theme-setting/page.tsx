@@ -360,6 +360,18 @@ export default function ThemeSettingPage() {
     // );
     // if (!isValidSchedule) return;
 
+    /* 하트레이트 중복 검사 */
+    const heartRates = giftsData.map((data) => data.heart_rate);
+    if (new Set(heartRates).size !== heartRates.length) {
+      notify(
+        <p>
+          <span style={{ color: "var(--main)" }}>하트레이트</span> 값이 중복되어
+          <br /> 저장할 수 없어요!
+        </p>,
+      );
+      return;
+    }
+
     const bgIndex = enrollBgLimit.findIndex((item) => item.name === bgLimit);
     const convertToWebP_GC = async (
       collections: GiftCollection_t[],
@@ -574,14 +586,14 @@ function validateSchedule(
   enrollStartDate: Date,
   reviewStartDate: Date,
   voteStartDate: Date,
-  resultStartDate: Date,
+  completeStartDate: Date,
   notify: (message: React.ReactNode) => void,
 ): boolean {
   const schedules = [
     enrollStartDate,
     reviewStartDate,
     voteStartDate,
-    resultStartDate,
+    completeStartDate,
   ];
 
   const now = new Date();
@@ -593,7 +605,7 @@ function validateSchedule(
   if (
     enrollStartDate >= reviewStartDate ||
     reviewStartDate >= voteStartDate ||
-    voteStartDate >= resultStartDate
+    voteStartDate >= completeStartDate
   ) {
     notify(
       <p>
@@ -601,6 +613,15 @@ function validateSchedule(
         <br /> 각 기간은 이전 기간이 끝난 후 시작되어야 해요!
       </p>,
     );
+    return false;
+  }
+
+  const MAX_DAYS = 7;
+  const MAX_DIFF_MS = MAX_DAYS * 24 * 60 * 60 * 1000;
+
+  const diffMs = completeStartDate.getTime() - voteStartDate.getTime();
+  if (diffMs > MAX_DIFF_MS) {
+    notify(<p>투표 기간은 최대 7일을 넘길 수 없어요!</p>);
     return false;
   }
 
