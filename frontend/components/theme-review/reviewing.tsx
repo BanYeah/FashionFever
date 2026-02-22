@@ -67,7 +67,7 @@ export function Reviewing({ themeId }: { themeId: string }) {
       <div className={classes.CenterWrapper}>
         {loading && <Loader type="dots" color="var(--main)" />}
         {!loading && data && (
-          <Stack gap={8}>
+          <Stack gap={8} w={"100%"}>
             <Image
               className={classes.Image}
               src={data.content_url}
