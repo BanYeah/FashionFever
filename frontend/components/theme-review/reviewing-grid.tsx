@@ -257,7 +257,7 @@ function ReviewingCard({
 
       <Box style={{ position: "relative" }}>
         <Image
-          src={data.content_url}
+          src={data.content_url || "/images/content_alt.svg"}
           alt=""
           width={180}
           height={144}
