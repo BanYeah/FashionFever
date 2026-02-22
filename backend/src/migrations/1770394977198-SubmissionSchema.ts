@@ -40,8 +40,8 @@ export class SubmissionSchema1770394977198 implements MigrationInterface {
       CREATE INDEX idx_submission_theme_user_final_rank ON "Submission" ("theme_id", "user_id", "final_rank" ASC);
       CREATE INDEX idx_submission_theme_final_rank ON "Submission" ("theme_id", "final_rank" ASC);
 
-      CREATE INDEX idx_submission_review ON "Submission" ("theme_id", "is_reviewed", "reviewed_at" DESC);
-      CREATE INDEX idx_submission_review_status ON "Submission" ("theme_id", "is_reviewed") WHERE "is_reviewed" = FALSE;
+      CREATE INDEX idx_submission_review ON "Submission" ("theme_id", "is_approved", "reviewed_at" DESC);
+      CREATE INDEX idx_submission_review_status ON "Submission" ("theme_id", "is_approved") WHERE "is_approved" = FALSE;
 
       CREATE INDEX idx_submission_final_ranking ON "Submission" (
           "theme_id", 
