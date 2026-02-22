@@ -60,21 +60,32 @@ export class R2Service {
     if (fileUrls.length === 0) return;
 
     const objectsToDelete = fileUrls.map((url) => ({
-      Key: url.replace(`${this.publicEndpoint}/`, ''),
+      Key: decodeURIComponent(url.replace(`${this.publicEndpoint}/`, '')),
     }));
+    const errors: any[] = [];
 
-    try {
-      const command = new DeleteObjectsCommand({
-        Bucket: this.bucketName,
-        Delete: {
-          Objects: objectsToDelete,
-          Quiet: true, // 성공한 항목은 응답에 포함하지 않음
-        },
-      });
-      await this.s3Client.send(command);
-    } catch (error) {
+    const chunkSize = 1000;
+    for (let i = 0; i < objectsToDelete.length; i += chunkSize) {
+      const chunk = objectsToDelete.slice(i, i + chunkSize);
+
+      try {
+        const command = new DeleteObjectsCommand({
+          Bucket: this.bucketName,
+          Delete: {
+            Objects: chunk,
+            Quiet: true, // 성공한 항목은 응답에 포함하지 않음
+          },
+        });
+        await this.s3Client.send(command);
+      } catch (error) {
+        console.error(`[S3_DELETE_ERROR] Chunk starting at ${i} failed`, error);
+        errors.push({ index: i, error });
+      }
+    }
+
+    if (errors.length > 0) {
       throw new InternalServerErrorException(
-        '이미지 일괄 삭제 중 오류가 발생했어요!',
+        `이미지 일괄 삭제 중 일부(${errors.length}개 청크) 오류가 발생했어요!`,
       );
     }
   }
