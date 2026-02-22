@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule as CronModule } from '@nestjs/schedule';
+import { RedisModule } from './common/redis/redis.module';
+import { R2Module } from './common/r2/r2.module';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { AccountModule } from './account/account.module';
-import { R2Module } from './common/r2/r2.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { ThemeModule } from './theme/theme.module';
 import { SubmissionModule } from './submission/submission.module';
@@ -35,9 +37,10 @@ import { ReviewModule } from './review/review.module';
       }),
     }),
     CronModule.forRoot(),
+    RedisModule,
+    R2Module,
     AuthModule,
     AccountModule,
-    R2Module,
     ScheduleModule,
     ThemeModule,
     SubmissionModule,

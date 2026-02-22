@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Inject,
   HttpException,
   HttpStatus,
   UnauthorizedException, // 401
@@ -24,13 +25,10 @@ import { LoginAdminDto } from './dto/login-admin.dto';
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Judge) private judgeRepo: Repository<Judge>,
   ) {}
-
-  // 로컬 개발 및 단일 서버 배포 환경에서는 localhost:6379가 기본값.
-  // 추후 Redis 전용 서버 분리 시 ConfigService를 통한 설정 주입이 필요.
-  private readonly redis = new Redis();
 
   // 12자리 랜덤 입장 코드 생성기
   public generateRandomEnterCode(): string {
