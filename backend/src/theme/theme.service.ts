@@ -141,6 +141,7 @@ export class ThemeService {
     reviewStartAt: Date,
     voteStartAt: Date,
     completeStartAt: Date,
+    themeId?: string,
   ) {
     const now = new Date();
     const schedules = [
@@ -168,6 +169,38 @@ export class ThemeService {
     const diffMs = completeStartAt.getTime() - voteStartAt.getTime();
     if (diffMs > MAX_DIFF_MS)
       throw new BadRequestException('투표 기간은 최대 7일을 넘길 수 없어요!');
+
+    // 기존 테마와 투표 기간이 겹치는지 확인
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'Asia/Seoul',
+    });
+
+    const query = this.scheduleRepo
+      .createQueryBuilder('schedule')
+      .where(
+        '(:start_at < schedule.complete_start_at AND schedule.vote_start_at < :end_at)',
+        { start_at: voteStartAt, end_at: completeStartAt },
+      );
+    if (themeId) query.andWhere('schedule.theme_id != :themeId', { themeId });
+    const overlap = await query.getOne();
+
+    if (overlap) {
+      const otherStartAt =
+        formatter.format(overlap.vote_start_at) + ' (00:00:00)';
+      const otherEndAt =
+        formatter.format(
+          overlap.complete_start_at.setDate(
+            overlap.complete_start_at.getDate() - 1,
+          ),
+        ) + ' (23:59:59)';
+
+      throw new BadRequestException(
+        `투표 기간이 ${otherStartAt} ~ ${otherEndAt}인 테마가 이미 존재해요.`,
+      );
+    }
   }
 
   async createThemeSetting(
@@ -183,7 +216,7 @@ export class ThemeService {
 
     try {
       // Schedule
-      // this.validateSchedule(
+      // await this.validateSchedule(
       //   dto.enroll_start_at,
       //   dto.review_start_at,
       //   dto.vote_start_at,
@@ -429,11 +462,12 @@ export class ThemeService {
 
     try {
       // Schedule
-      // this.validateSchedule(
+      // await this.validateSchedule(
       //   dto.enroll_start_at,
       //   dto.review_start_at,
       //   dto.vote_start_at,
       //   dto.complete_start_at,
+      //   themeId,
       // );
 
       const schedule = await queryRunner.manager.findOne(Schedule, {
@@ -441,12 +475,9 @@ export class ThemeService {
       });
       if (!schedule) throw new NotFoundException('존재하지 않는 테마예요!');
 
-      // 이미 시작된 일정이거나 시작하기 1시간 전인 일정을 수정하지는 않는지 확인
+      // 이미 시작된 일정을 수정하지는 않는지 확인
       // {
       //   const now = new Date();
-      //   const ONE_HOUR_MS = 60 * 60 * 1000;
-      //   const limitTime = new Date(now.getTime() + ONE_HOUR_MS);
-
       //   const scheduleChecks = [
       //     [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
       //     [dto.review_start_at, schedule.review_start_at, '검수 시작'],
@@ -457,11 +488,11 @@ export class ThemeService {
       //   for (const [newDate, oldDate, label] of scheduleChecks) {
       //     const isChanged =
       //       new Date(newDate).getTime() !== new Date(oldDate).getTime();
-      //     const isImminent = new Date(oldDate) < limitTime;
+      //     const isStarted = new Date(oldDate) < now;
 
-      //     if (isChanged && isImminent)
+      //     if (isChanged && isStarted)
       //       throw new BadRequestException(
-      //         `이미 시작되었거나 시작이 1시간 미만으로 남은 '${label}' 일정은 수정할 수 없어요!`,
+      //         `이미 시작된 '${label}' 일정은 수정할 수 없어요!`,
       //       );
       //   }
       // }

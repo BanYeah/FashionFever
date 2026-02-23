@@ -75,7 +75,7 @@ export function ThemeSchedule({
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                // disabled={status.isImminent("ENROLLING")}
+                // disabled={status.isAfterStart("ENROLLING")}
                 time="00:00:00"
                 value={enrollStart}
                 setValue={setEnrollStart}
@@ -94,7 +94,7 @@ export function ThemeSchedule({
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                // disabled={status.isImminent("REVIEWING")}
+                // disabled={status.isAfterStart("REVIEWING")}
                 time="00:00:00"
                 value={reviewStart}
                 setValue={setReviewStart}
@@ -113,14 +113,14 @@ export function ThemeSchedule({
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                // disabled={status.isImminent("VOTING")}
+                // disabled={status.isAfterStart("VOTE_READY")}
                 time="00:00:00"
                 value={voteStart}
                 setValue={setVoteStart}
               />
               <p>~</p>
               <ThemeDateInput
-                // disabled={status.isImminent("RESULTING")}
+                // disabled={status.isAfterStart("COMPLETE_READY")}
                 time="23:59:59"
                 value={voteEnd}
                 setValue={setVoteEnd}

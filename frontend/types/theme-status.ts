@@ -55,21 +55,4 @@ export class ThemeStatus {
   isBeforeStart(other: ThemeStatusType): boolean {
     return STATUS_ORDER[this.status] < STATUS_ORDER[other];
   }
-
-  isImminent(status: ThemeStatusType): boolean {
-    const now = new Date();
-    const ONE_HOUR_MS = 60 * 60 * 1000;
-    const limitTime = new Date(now.getTime() + ONE_HOUR_MS);
-
-    if (status === "ENROLLING" && this.enrollStartAt)
-      return new Date(this.enrollStartAt) < limitTime;
-    if (status === "REVIEWING" && this.reviewStartAt)
-      return new Date(this.reviewStartAt) < limitTime;
-    if (status === "VOTING" && this.voteStartAt)
-      return new Date(this.voteStartAt) < limitTime;
-    if (status === "COMPLETE" && this.completeStartAt)
-      return new Date(this.completeStartAt) < limitTime;
-
-    return false;
-  }
 }
