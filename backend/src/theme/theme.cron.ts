@@ -103,6 +103,50 @@ export class ThemeCron {
 
     /* 테마 투표 준비 */
     for (const themeId of themeIds) {
+      {
+        const result = await this.submissionRepo
+          .createQueryBuilder('submission')
+          .where('submission.theme_id = :themeId', { themeId })
+          .select('COUNT(DISTINCT(submission.user_id))', 'count')
+          .getRawOne();
+
+        const userCount = parseInt(result.count);
+
+        // 테마에 참가한 유저 수가 10명 미만이면, 투표 진행 불가
+        if (userCount < 10) {
+          await this.scheduleRepo.update(
+            { theme_id: themeId },
+            { status: 'INCOMPLETE' },
+          );
+
+          const row = updated.find((r) => r.theme_id === themeId);
+          if (row) row.status = 'INCOMPLETE';
+
+          /* 제출/사진 제거 */
+          const targets = await this.submissionRepo.find({
+            where: { theme_id: themeId },
+            select: ['content_url'],
+          });
+
+          if (targets.length > 0) {
+            const deletedFiles = targets
+              .map((t) => t.content_url)
+              .filter((url): url is string => !!url);
+
+            await this.submissionRepo.delete({ theme_id: themeId });
+
+            this.r2Service.deleteImages(deletedFiles).catch(() => {
+              console.log(
+                `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(deletedFiles)}`,
+              );
+            });
+          }
+
+          continue;
+        }
+      }
+
+      // Redis 설정
       const exposureKey = `voting:exposure:${themeId}`;
       const rankingKey = `voting:ranking:${themeId}`;
 
@@ -113,40 +157,37 @@ export class ThemeCron {
         select: ['submission_id'],
       });
 
-      if (submissions.length !== 0) {
-        const pipeline = this.redis.pipeline();
+      const pipeline = this.redis.pipeline();
 
-        pipeline.del(exposureKey);
-        pipeline.del(rankingKey);
+      pipeline.del(exposureKey, rankingKey);
 
-        for (const sub of submissions) {
-          const subId = sub.submission_id;
-          // 노출 횟수(exposure)는 0, 초기 점수(ranking)는 1200으로 설정
-          pipeline.zadd(exposureKey, 0, subId);
-          pipeline.zadd(rankingKey, 1200, subId);
-        }
-
-        pipeline.expire(exposureKey, TTL);
-        pipeline.expire(rankingKey, TTL);
-
-        await pipeline.exec();
+      for (const sub of submissions) {
+        const subId = sub.submission_id;
+        // 노출 횟수(exposure)는 0, 초기 점수(ranking)는 1200으로 설정
+        pipeline.zadd(exposureKey, 0, subId);
+        pipeline.zadd(rankingKey, 1200, subId);
       }
+
+      pipeline.expire(exposureKey, TTL);
+      pipeline.expire(rankingKey, TTL);
+
+      await pipeline.exec();
+
+      await this.scheduleRepo.update(
+        { theme_id: themeId },
+        { status: 'VOTING' },
+      );
+
+      const row = updated.find((r) => r.theme_id === themeId);
+      if (row) row.status = 'VOTING';
     }
 
-    /* 테마 투표 준비 완료 */
-    await this.scheduleRepo.update(
-      { theme_id: In(themeIds) },
-      { status: 'VOTING' },
+    const finalized = updated.filter(
+      (row) => row.status === 'VOTING' || row.status === 'INCOMPLETE',
     );
 
-    updated.forEach((row) => {
-      if (row.status === 'VOTE_READY') row.status = 'VOTING';
-    });
-
-    const votingNow = updated.filter((row) => row.status === 'VOTING');
-
     this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 준비');
-    await this.purgeCache(votingNow);
+    await this.purgeCache(finalized);
     this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 성공');
   }
 

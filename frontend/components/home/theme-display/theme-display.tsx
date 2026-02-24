@@ -67,6 +67,9 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
     switch (data.status) {
       case "PREPARING":
         return <></>;
+      case "INCOMPLETE":
+        return <p>참가 인원 부족으로 투표가 무산된 테마예요.</p>;
+
       case "ENROLLING":
         if (enrolled === null)
           return <Loader color="var(--black)" size="sm" type="dots" mx={3} />;
@@ -77,6 +80,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
               : "아직 참가하지 않은 테마예요!"}
           </p>
         );
+
       case "REVIEWING":
       case "VOTE_READY":
         if (enrolled === null)
@@ -84,6 +88,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
         return (
           <p>{enrolled ? "참가한 테마예요!" : "참가하지 않은 테마예요!"}</p>
         );
+
       case "VOTING":
       case "COMPLETE_READY":
       case "COMPLETE":
@@ -125,7 +130,9 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
   const renderRight = () => {
     switch (data.status) {
       case "PREPARING":
+      case "INCOMPLETE":
         return <></>;
+
       case "ENROLLING":
         return (
           <Stack align="flex-end" justify="space-between" gap={22}>

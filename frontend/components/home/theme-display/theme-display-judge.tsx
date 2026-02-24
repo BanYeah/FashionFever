@@ -80,14 +80,19 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
     switch (data.status) {
       case "PREPARING":
         return <></>;
+      case "INCOMPLETE":
+        return <p>참가 인원 부족으로 투표가 무산된 테마예요.</p>;
+
       case "ENROLLING":
         return (
           <p style={{ color: "var(--black)" }}>
             아직 미니 꾸미기가 진행 중인 테마예요!
           </p>
         );
+
       case "VOTE_READY":
         return <p>현재 투표 준비가 진행 중인 테마예요!</p>;
+
       case "COMPLETE_READY":
       case "COMPLETE":
         return <p>심사가 종료된 테마예요!</p>;
@@ -140,6 +145,7 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
       case "VOTE_READY":
       case "COMPLETE_READY":
       case "COMPLETE":
+      case "INCOMPLETE":
         return <></>;
 
       case "ENROLLING":

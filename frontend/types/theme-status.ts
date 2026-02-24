@@ -6,6 +6,7 @@ const STATUS_ORDER: Record<ThemeStatusType, number> = {
   VOTING: 4,
   COMPLETE_READY: 5,
   COMPLETE: 6,
+  INCOMPLETE: 7,
 };
 
 export type ThemeStatusType =
@@ -15,7 +16,8 @@ export type ThemeStatusType =
   | "VOTE_READY"
   | "VOTING"
   | "COMPLETE_READY"
-  | "COMPLETE";
+  | "COMPLETE"
+  | "INCOMPLETE";
 
 export class ThemeStatus {
   status: ThemeStatusType;
