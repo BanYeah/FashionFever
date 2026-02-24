@@ -218,6 +218,8 @@ function ThemeDeleteButton({ themeId, reload }: ThemeDeleteButtonProps) {
   const { notify, notifyServerError } = useNotification();
   const [opened, { open, close }] = useDisclosure(false);
 
+  const [loading, setLoading] = useState(false);
+
   return (
     <>
       <ModalGoBack
@@ -226,23 +228,25 @@ function ThemeDeleteButton({ themeId, reload }: ThemeDeleteButtonProps) {
         back="그만두기"
         opened={opened}
         onGo={async () => {
-          const result = await deleteThemeSetting(themeId);
-          if (result.success) {
-            reload();
-            close();
-            return;
-          }
+          setLoading(true);
 
+          const result = await deleteThemeSetting(themeId);
+          if (result.success) reload();
           close();
-          switch (result.status) {
-            case 404:
-              notify(<p>존재하지 않는 테마예요!</p>);
-              return;
-            default:
-              notifyServerError();
+          setLoading(false);
+
+          if (!result.success) {
+            switch (result.status) {
+              case 404:
+                notify(<p>존재하지 않는 테마예요!</p>);
+                return;
+              default:
+                notifyServerError();
+            }
           }
         }}
         close={close}
+        loading={loading}
       >
         <p>
           테마 삭제는 <span>되돌릴 수 없습니다.</span> <br />
