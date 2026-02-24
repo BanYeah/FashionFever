@@ -133,6 +133,15 @@ interface GiftCollectionProps {
   onDelete: () => void;
 }
 
+type TempGiftData = Omit<GiftData, "gift_url"> & {
+  gift_url: File | string;
+};
+
+interface GiftState {
+  id: string;
+  data?: TempGiftData;
+}
+
 export const GiftCollection = forwardRef(
   ({ disabled, initialData, onDelete }: GiftCollectionProps, ref) => {
     const [heartRate, setHeartRate] = useState<string | number>(0);
@@ -144,7 +153,7 @@ export const GiftCollection = forwardRef(
     const [themeType, setThemeType] = useState<string | null>("NORMAL");
     const [rarity, setRarity] = useState<string | null>("SR");
 
-    const [gifts, setGifts] = useState<{ id: string; data?: GiftData }[]>([]);
+    const [gifts, setGifts] = useState<GiftState[]>([]);
     const giftRefs = useRef<{ [key: string]: GiftHandle | null }>({});
 
     useEffect(() => {
@@ -187,21 +196,34 @@ export const GiftCollection = forwardRef(
 
     const moveGift = (id: string, direction: "up" | "down") => {
       setGifts((prev) => {
-        const currentIndex = prev.findIndex((item) => item.id === id);
-        const targetIndex =
-          direction === "up" ? currentIndex - 1 : currentIndex + 1;
+        const curIdx = prev.findIndex((item) => item.id === id);
+        const targetIdx = direction === "up" ? curIdx - 1 : curIdx + 1;
 
         // Out-of-range
-        if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+        if (curIdx === -1) return prev;
+        if (targetIdx < 0 || targetIdx >= prev.length) return prev;
 
-        const newIds = [...prev];
+        const newState = prev.map((v) => {
+          const data = giftRefs.current[v.id]?.getData();
+          return {
+            id: v.id,
+            data: data
+              ? {
+                  theme_name: data.theme_name,
+                  gift_name: data.gift_name,
+                  gift_url: data.gift_file,
+                }
+              : undefined,
+          };
+        });
+
         // Swap (using Array Destructuring)
-        [newIds[currentIndex], newIds[targetIndex]] = [
-          newIds[targetIndex],
-          newIds[currentIndex],
+        [newState[curIdx], newState[targetIdx]] = [
+          newState[targetIdx],
+          newState[curIdx],
         ];
 
-        return newIds;
+        return newState;
       });
     };
 
@@ -398,7 +420,7 @@ export const GiftCollection = forwardRef(
 
 interface GiftProps {
   disabled?: boolean;
-  initialData?: GiftData;
+  initialData?: TempGiftData;
   isTop: boolean;
   isBottom: boolean;
   moveUp: () => void;
