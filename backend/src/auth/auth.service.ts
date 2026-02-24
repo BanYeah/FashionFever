@@ -168,7 +168,7 @@ export class AuthService {
     if (!adminHash)
       throw new InternalServerErrorException('Admin configuration missing'); // 500
 
-    const isMatch = bcrypt.compareSync(enter_code, adminHash);
+    const isMatch = await bcrypt.compare(enter_code, adminHash);
     if (!isMatch) {
       const current = await this.redis.incr(ipKey); // 1 증가
       if (current === 1) await this.redis.expire(ipKey, 3600); // 첫 실패 시 1시간 유효기간 설정

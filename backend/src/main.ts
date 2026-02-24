@@ -4,9 +4,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
+import session from 'express-session';
 import { createClient } from 'redis';
 import { RedisStore } from 'connect-redis';
-import session from 'express-session';
 
 import morgan from 'morgan';
 
@@ -33,10 +33,17 @@ async function bootstrap() {
     }),
   );
 
-  const redisClient = createClient({ url: 'redis://localhost:6379' });
-  if (!redisClient.isOpen) await redisClient.connect().catch(console.error);
+  const redisClient = createClient({
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  });
+  redisClient.on('error', (err) => console.log('[REDIS_ERROR] ', err));
+  await redisClient.connect();
 
   const redisStore = new RedisStore({ client: redisClient });
+
+  if (process.env.NODE_ENV === 'production')
+    app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.use(
     session({
       name: 'ff_session_id',
@@ -48,6 +55,7 @@ async function bootstrap() {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // 배포 환경(HTTPS)에서는 true로
         maxAge: 1000 * 60 * 60 * 6, // 6시간
+        sameSite: 'lax',
       },
     }),
   );
