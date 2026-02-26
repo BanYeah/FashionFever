@@ -6,8 +6,10 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Group, Stack, Box, Divider, Loader } from "@mantine/core";
 import { ThemeScheduleData } from "@/types/api/theme";
+import { VoteStatusData } from "@/types/api/vote";
 import { formatDueIn } from "@/utils/format-due-in";
 import { getSubmission } from "@/utils/api/submission";
+import { getVoteStatus } from "@/utils/api/vote";
 
 export function ThemeDisplay({ data }: { data: ThemeScheduleData }) {
   return (
@@ -55,10 +57,40 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
 
   useEffect(() => {
     (async () => {
-      const result = await getSubmission(data.theme_id);
-      if (result.success) {
-        if (result.data.content_urls.length === 0) setEnrolled(false);
-        else setEnrolled(true);
+      switch (data.status) {
+        case "PREPARING":
+        case "INCOMPLETE":
+          break;
+
+        case "ENROLLING":
+        case "REVIEWING":
+        case "VOTE_READY":
+          {
+            const result = await getSubmission(data.theme_id);
+            if (result.success) {
+              if (result.data.content_urls.length === 0) setEnrolled(false);
+              else setEnrolled(true);
+            }
+          }
+          break;
+
+        case "VOTING":
+        case "COMPLETE_READY":
+          {
+            const result = await getVoteStatus(data.theme_id);
+            if (result.success) {
+              const data: VoteStatusData = result.data;
+              if (data.best_rank === null) setEnrolled(false);
+              else setEnrolled(true);
+
+              setRanking(data.best_rank);
+              setPoint(data.vote_point);
+            }
+          }
+          break;
+
+        case "COMPLETE":
+          break;
       }
     })();
   }, []);
@@ -91,39 +123,57 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
 
       case "VOTING":
       case "COMPLETE_READY":
-      case "COMPLETE":
-        if (enrolled === null || ranking === null)
+        if (enrolled === null)
           return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
 
-        const prefix =
-          data.status === "VOTING"
-            ? "현재"
-            : data.status === "COMPLETE_READY"
-              ? "투표"
-              : "최종"; // "COMPLETE"
+        return (
+          <Box pt={7} pb={7} w={"50%"}>
+            <Stack w={"fit-content"} gap={5}>
+              <Group pl={3} pr={3} gap={22}>
+                {enrolled ? (
+                  <>
+                    <p>
+                      {data.status === "VOTING" ? "현재" : "투표"} 최고 랭킹
+                    </p>
+                    <p>{ranking ?? "-"}</p>
+                  </>
+                ) : (
+                  <p>참가하지 않은 테마예요!</p>
+                )}
+              </Group>
+              <Divider size={1.5} color="var(--gray-8a)" />
+              <Group pt={3} pl={3} pr={3} gap={36}>
+                <p>공감 포인트</p>
+                <p>{point}</p>
+              </Group>
+            </Stack>
+          </Box>
+        );
+
+      case "COMPLETE":
+        if (enrolled === null)
+          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
 
         return (
-          <Group align="center" justify="space-between" p={6} gap={0}>
-            <Box pt={7} pb={7} w={"50%"}>
-              <Stack w={"fit-content"} gap={5}>
-                <Group pl={3} pr={3} gap={22}>
-                  {enrolled ? (
-                    <>
-                      <p>{prefix} 최고 랭킹</p>
-                      <p>{ranking}</p>
-                    </>
-                  ) : (
-                    <p>참가하지 않은 테마예요!</p>
-                  )}
-                </Group>
-                <Divider size={1.5} color="var(--gray-8a)" />
-                <Group pt={3} pl={3} pr={3} gap={36}>
-                  <p>공감 포인트</p>
-                  <p>{point}</p>
-                </Group>
-              </Stack>
-            </Box>
-          </Group>
+          <Box pt={7} pb={7} w={"50%"}>
+            <Stack w={"fit-content"} gap={5}>
+              <Group pl={3} pr={3} gap={22}>
+                {enrolled ? (
+                  <>
+                    <p>최종 최고 랭킹</p>
+                    <p>{ranking ?? "-"}</p>
+                  </>
+                ) : (
+                  <p>참가하지 않은 테마예요!</p>
+                )}
+              </Group>
+              <Divider size={1.5} color="var(--gray-8a)" />
+              <Group pt={3} pl={3} pr={3} gap={36}>
+                <p>공감 포인트</p>
+                <p>{point}</p>
+              </Group>
+            </Stack>
+          </Box>
         );
     }
   };
