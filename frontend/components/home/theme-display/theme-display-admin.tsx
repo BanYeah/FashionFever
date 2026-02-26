@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useNotification } from "@/components/notification/notification";
-import { Group, Stack, UnstyledButton, Divider } from "@mantine/core";
+import { Group, Stack, UnstyledButton, Divider, Loader } from "@mantine/core";
 import { ModalGoBack } from "../../common/modal/modal-go-back";
 import { ThemeReviewLink } from "./theme-review-link";
 import { ThemeScheduleData } from "@/types/api/theme";
@@ -68,8 +68,6 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
           const res = await getReviewStatus(data.theme_id);
           setResult(res);
           break;
-        default:
-          setResult(undefined);
       }
     })();
   }, []);
@@ -92,20 +90,19 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
         return <p>현재 투표가 진행 중인 테마예요!</p>;
 
       case "REVIEWING":
+        if (!result?.success)
+          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
+
         return (
           <Stack pt={7} pb={7} gap={5}>
             <Group pl={3} pr={3} gap={35}>
               <p>제외된 사진</p>
-              <p>{result?.success ? result.meta.rejected : "-"}</p>
+              <p>{result.meta.rejected}</p>
             </Group>
             <Divider size={1.5} color="var(--gray-8a)" />
             <Group pt={3} pl={3} pr={3} gap={48}>
               <p>검수 완료</p>
-              <p>
-                {result?.success
-                  ? `${result.meta.reviewed}/${result.meta.total}`
-                  : "-/-"}
-              </p>
+              <p>{`${result.meta.reviewed}/${result.meta.total}`}</p>
             </Group>
           </Stack>
         );

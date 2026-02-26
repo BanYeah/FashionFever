@@ -3,7 +3,7 @@
 import classes from "./theme-display.module.css";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Group, Stack, Divider } from "@mantine/core";
+import { Group, Stack, Divider, Loader } from "@mantine/core";
 import { ThemeReviewLink } from "./theme-review-link";
 import { ThemeScheduleData } from "@/types/api/theme";
 import { getReviewStatus } from "@/utils/api/review";
@@ -19,8 +19,6 @@ export function ThemeDisplayJudge({ data }: { data: ThemeScheduleData }) {
           const res = await getReviewStatus(data.theme_id);
           setResult(res);
           break;
-        default:
-          setResult(undefined);
       }
     })();
   }, []);
@@ -98,24 +96,24 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
         return <p>심사가 종료된 테마예요!</p>;
 
       case "REVIEWING":
+        if (!result?.success)
+          return <Loader color="var(--gray-8a)" size="sm" type="dots" mx={3} />;
+
+        if (!result.data.can_review)
+          return <p>현재 검수가 진행 중인 테마예요!</p>;
+
         return (
-          <>
-            {result?.success && result.data.can_review ? (
-              <Stack pt={7} pb={7} gap={5}>
-                <Group pl={3} pr={3} gap={35}>
-                  <p>제외된 사진</p>
-                  <p>{result.meta.rejected}</p>
-                </Group>
-                <Divider size={1.5} color="var(--gray-8a)" />
-                <Group pt={3} pl={3} pr={3} gap={48}>
-                  <p>검수 완료</p>
-                  <p>{`${result.meta.reviewed}/${result.meta.total}`}</p>
-                </Group>
-              </Stack>
-            ) : (
-              <p>현재 검수가 진행 중인 테마예요!</p>
-            )}
-          </>
+          <Stack pt={7} pb={7} gap={5}>
+            <Group pl={3} pr={3} gap={35}>
+              <p>제외된 사진</p>
+              <p>{result.meta.rejected}</p>
+            </Group>
+            <Divider size={1.5} color="var(--gray-8a)" />
+            <Group pt={3} pl={3} pr={3} gap={48}>
+              <p>검수 완료</p>
+              <p>{`${result.meta.reviewed}/${result.meta.total}`}</p>
+            </Group>
+          </Stack>
         );
       case "VOTING":
         return (
