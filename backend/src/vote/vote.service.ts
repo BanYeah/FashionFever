@@ -74,7 +74,7 @@ export class VoteService {
 
     // 점수 변화량(Delta) 계산
     const actual1 = winnerSide === 1 ? 1 : winnerSide === 2 ? 0 : 0.5;
-    const delta1 = Math.round(k * (actual1 - expected1));
+    const delta1 = parseFloat((k * (actual1 - expected1)).toFixed(2));
     const delta2 = -delta1; // 제로섬 게임
 
     // Redis 업데이트 (점수 변경)
