@@ -1,6 +1,6 @@
 export interface ReviewData {
   submission_id: string;
-  content_url: string;
+  content_url: string | null;
 }
 
 export interface ReviewMeta {

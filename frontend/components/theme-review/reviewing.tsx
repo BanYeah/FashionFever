@@ -70,7 +70,7 @@ export function Reviewing({ themeId }: { themeId: string }) {
           <Stack gap={8} w={"100%"}>
             <Image
               className={classes.Image}
-              src={data.content_url || "/images/content_alt.svg"}
+              src={data.content_url ?? "/images/content_alt.svg"}
               alt=""
               width={390}
               height={312}

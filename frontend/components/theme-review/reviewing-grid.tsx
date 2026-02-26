@@ -230,7 +230,7 @@ function ReviewingCard({
       >
         <Stack gap={0}>
           <Image
-            src={data.content_url}
+            src={data.content_url ?? "/images/content_alt.svg"}
             alt=""
             width={390}
             height={312}
@@ -257,7 +257,7 @@ function ReviewingCard({
 
       <Box style={{ position: "relative" }}>
         <Image
-          src={data.content_url || "/images/content_alt.svg"}
+          src={data.content_url ?? "/images/content_alt.svg"}
           alt=""
           width={180}
           height={144}
