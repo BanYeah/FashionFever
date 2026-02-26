@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateVoteDto {
   @ApiProperty({
@@ -26,7 +26,7 @@ export class CreateVoteDto {
   @ApiProperty({
     description: '승리한 후보 번호',
   })
-  @IsString()
+  @IsNumber()
   @IsOptional()
   winner_side: number | null;
 }
