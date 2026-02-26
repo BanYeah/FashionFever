@@ -155,10 +155,27 @@ export class VoteService {
     });
 
     if (vote) {
+      const sub1 = await this.submissionRepo.findOne({
+        where: { submission_id: vote.sub_id1 },
+        select: ['content_url'],
+      });
+
+      const sub2 = await this.submissionRepo.findOne({
+        where: { submission_id: vote.sub_id1 },
+        select: ['content_url'],
+      });
+
+      if (!sub1 || !sub2) {
+        await this.voteRepo.remove(vote);
+        throw new InternalServerErrorException();
+      }
+
       return {
         vote_id: vote.vote_id,
         sub_id1: vote.sub_id1,
         sub_id2: vote.sub_id2,
+        sub_content_url1: sub1.content_url,
+        sub_content_url2: sub2.content_url,
       };
     }
 
@@ -183,10 +200,27 @@ export class VoteService {
     pipeline.zincrby(exposureKey, 1, subId2);
     await pipeline.exec();
 
+    const sub1 = await this.submissionRepo.findOne({
+      where: { submission_id: subId1 },
+      select: ['content_url'],
+    });
+
+    const sub2 = await this.submissionRepo.findOne({
+      where: { submission_id: subId1 },
+      select: ['content_url'],
+    });
+
+    if (!sub1 || !sub2) {
+      await this.voteRepo.remove(newVote);
+      throw new InternalServerErrorException();
+    }
+
     return {
       vote_id: newVote.vote_id,
       sub_id1: subId1,
       sub_id2: subId2,
+      sub_content_url1: sub1.content_url,
+      sub_content_url2: sub2.content_url,
     };
   }
 
