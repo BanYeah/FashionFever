@@ -28,5 +28,5 @@ export class CreateVoteDto {
   })
   @IsString()
   @IsOptional()
-  winnerSide: number | null;
+  winner_side: number | null;
 }

@@ -237,7 +237,7 @@ export class VoteService {
       themeId,
       dto.sub_id1,
       dto.sub_id2,
-      dto.winnerSide,
+      dto.winner_side,
       this.getDynamicK(voteCount),
     );
 
@@ -248,15 +248,15 @@ export class VoteService {
         sub_id2_score: result.sub2.prevScore,
         delta: result.delta,
         win_sub_id:
-          dto.winnerSide === 1
+          dto.winner_side === 1
             ? dto.sub_id1
-            : dto.winnerSide === 2
+            : dto.winner_side === 2
               ? dto.sub_id2
               : null,
         lose_sub_id:
-          dto.winnerSide === 1
+          dto.winner_side === 1
             ? dto.sub_id2
-            : dto.winnerSide === 2
+            : dto.winner_side === 2
               ? dto.sub_id1
               : null,
       },
