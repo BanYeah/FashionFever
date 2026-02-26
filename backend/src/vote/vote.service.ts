@@ -320,7 +320,7 @@ export class VoteService {
     if (!results) {
       return {
         data: {
-          best_rank: '-', // 조회 실패
+          best_rank: null, // 조회 실패
           vote_point: voteCount,
         },
       };
