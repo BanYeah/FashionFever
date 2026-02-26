@@ -251,8 +251,6 @@ export function AccountSetting({ variant }: AccountSettingProps) {
 
                   loadPage(pageIdx + 1);
                 }}
-                handleError={(message: React.ReactNode) => notify(message)}
-                handleServerError={notifyServerError}
               />
             ));
           }

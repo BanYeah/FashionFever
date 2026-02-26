@@ -4,6 +4,7 @@ import classes from "./account-setting.module.css";
 import Image from "next/image";
 import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
+import { useNotification } from "../notification/notification";
 import { Group, Input, UnstyledButton, Divider } from "@mantine/core";
 import { ModalGoBack } from "@/components/common/modal/modal-go-back";
 import { User } from "@/types/api/user";
@@ -14,17 +15,11 @@ interface AccountLineProps {
   variant: "user" | "judge";
   account: User | Judge;
   reload: (clear: boolean) => void;
-  handleError: (message: React.ReactNode) => void;
-  handleServerError: () => void;
 }
 
-export function AccountLine({
-  variant,
-  account,
-  reload,
-  handleError,
-  handleServerError,
-}: AccountLineProps) {
+export function AccountLine({ variant, account, reload }: AccountLineProps) {
+  const { notify, notifyServerError } = useNotification();
+
   const [opened, { open, close }] = useDisclosure(false);
   const [option, { toggle }] = useDisclosure(false);
 
@@ -88,15 +83,23 @@ export function AccountLine({
             if (!result.success) {
               switch (result.status) {
                 case 404:
-                  handleError(
+                  notify(
                     <p>
                       존재하지 않는{" "}
                       {variant === "user" ? "유저예요!" : "심사위원이에요!"}
                     </p>,
                   );
                   break;
+                case 422:
+                  notify(
+                    <p>
+                      투표가 진행 중인 테마가 있을 때는
+                      <br /> 계정을 삭제할 수 없어요!
+                    </p>,
+                  );
+                  break;
                 default:
-                  handleServerError();
+                  notifyServerError();
               }
             }
           }

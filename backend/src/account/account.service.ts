@@ -3,9 +3,10 @@ import {
   Inject,
   NotFoundException, // 404
   ConflictException, // 409
+  UnprocessableEntityException, // 422
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, Like } from 'typeorm';
+import { DataSource, Repository, Like, In } from 'typeorm';
 
 import Redis from 'ioredis';
 import { CryptoUtil } from 'src/common/utils/crypto.util';
@@ -166,6 +167,12 @@ export class AccountService {
     await queryRunner.startTransaction();
 
     try {
+      // 투표가 진행 중인 테마가 있을 때는 유저 삭제 불가
+      const schedules = await queryRunner.manager.count(Schedule, {
+        where: { status: In(['VOTE_READY', 'VOTING', 'COMPLETE_READY']) },
+      });
+      if (schedules > 0) throw new UnprocessableEntityException();
+
       const user = await queryRunner.manager.findOne(User, {
         where: { minicode },
       });
@@ -173,7 +180,7 @@ export class AccountService {
 
       const targets = await queryRunner.manager.find(Submission, {
         where: { user_id: user.user_id },
-        select: ['submission_id', 'content_url'],
+        select: ['content_url'],
       });
 
       if (targets.length > 0) {
@@ -188,27 +195,6 @@ export class AccountService {
       await queryRunner.commitTransaction();
 
       if (targets.length > 0) {
-        const subIds = targets.map((t) => t.submission_id);
-
-        if (subIds && subIds.length > 0) {
-          const activeThemes = await this.scheduleRepo.find({
-            where: { status: 'VOTING' },
-            select: ['theme_id'],
-          });
-
-          for (const themeId of activeThemes.map((t) => t.theme_id)) {
-            await Promise.all([
-              this.redis.zrem(`voting:exposure:${themeId}`, ...subIds),
-              this.redis.zrem(`voting:ranking:${themeId}`, ...subIds),
-            ]).catch((err) => {
-              console.error(
-                `[REDIS_ZREM_FAIL] Failed to remove voting data for Theme: ${themeId}`,
-                err,
-              );
-            });
-          }
-        }
-
         const deletedFiles = targets
           .map((t) => t.content_url)
           .filter((url): url is string => !!url);
