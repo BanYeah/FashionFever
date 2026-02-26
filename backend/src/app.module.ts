@@ -13,6 +13,7 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { ThemeModule } from './theme/theme.module';
 import { SubmissionModule } from './submission/submission.module';
 import { ReviewModule } from './review/review.module';
+import { VoteModule } from './vote/vote.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { ReviewModule } from './review/review.module';
     ThemeModule,
     SubmissionModule,
     ReviewModule,
+    VoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],
