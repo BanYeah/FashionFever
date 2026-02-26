@@ -21,10 +21,10 @@ import { getReviews, patchReviewStatus } from "@/utils/api/review";
 
 interface RankingGridProps {
   themeId: string;
-  status: "approved" | "rejected";
+  view: "approved" | "rejected";
 }
 
-export function ReviewingGrid({ themeId, status }: RankingGridProps) {
+export function ReviewingGrid({ themeId, view }: RankingGridProps) {
   const { notify, notifyServerError } = useNotification();
 
   const [loading, setLoading] = useState(false);
@@ -49,13 +49,13 @@ export function ReviewingGrid({ themeId, status }: RankingGridProps) {
   };
   useEffect(() => {
     reset();
-  }, [themeId, status]);
+  }, [themeId, view]);
 
   // 페이지 데이터 로드
   const loadPage = async (page: number) => {
     setLoading(true);
 
-    const result = await getReviews(themeId, page, status);
+    const result = await getReviews(themeId, page, view);
     if (result.success) {
       setData((prev) => {
         const newData = [...prev];
@@ -108,7 +108,7 @@ export function ReviewingGrid({ themeId, status }: RankingGridProps) {
 
   return (
     <Stack gap={0} p={10}>
-      {status === "rejected" && (
+      {view === "rejected" && (
         <p className={classes.Caption}>
           반려된 사진은 검수 기간이 종료 후, <span>영구적으로 삭제</span>되어
           복구가 불가능해요. <br />
@@ -130,7 +130,7 @@ export function ReviewingGrid({ themeId, status }: RankingGridProps) {
               <ReviewingCard
                 key={`${item.submission_id}`}
                 data={item}
-                tab={status}
+                view={view}
                 reload={(clear: boolean = false) => {
                   if (clear) {
                     setMeta((prev) => ({
@@ -161,7 +161,7 @@ export function ReviewingGrid({ themeId, status }: RankingGridProps) {
         {loading && <Loader type="dots" color="var(--main)" />}
         {!loading && meta.total === 0 && (
           <p style={{ color: "var(--gray-b3)" }}>
-            {status === "approved" ? "승인된" : "반려된"} 사진이 없어요.
+            {view === "approved" ? "승인된" : "반려된"} 사진이 없어요.
           </p>
         )}
       </Center>
@@ -171,7 +171,7 @@ export function ReviewingGrid({ themeId, status }: RankingGridProps) {
 
 interface ReviewingCardProps {
   data: ReviewData;
-  tab: "approved" | "rejected";
+  view: "approved" | "rejected";
   reload: (clear: boolean) => void;
   notify: (msg: React.ReactNode) => void;
   notifyServerError: () => void;
@@ -179,15 +179,15 @@ interface ReviewingCardProps {
 
 function ReviewingCard({
   data,
-  tab,
+  view,
   reload,
   notify,
   notifyServerError,
 }: ReviewingCardProps) {
   const [opened, { open, close }] = useDisclosure(false);
 
-  const status = tab === "approved" ? "rejected" : "approved";
-  const statusName = tab === "approved" ? "반려" : "승인";
+  const status = view === "approved" ? "rejected" : "approved";
+  const statusName = view === "approved" ? "반려" : "승인";
 
   const [loading, setLoading] = useState(false);
 

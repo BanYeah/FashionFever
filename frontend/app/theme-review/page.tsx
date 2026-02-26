@@ -21,7 +21,7 @@ export default async function ThemeReviewPage({
   if (!themeId) notFound();
 
   // 검수 권한이 없으면 '/home'으로 리다이렉트
-  const statusResult = await (async () => {
+  const reviewResult = await (async () => {
     const cookieStore = await cookies();
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_ENDPOINT}/reviews/${themeId}/status`,
@@ -39,9 +39,8 @@ export default async function ThemeReviewPage({
     const data = await res.json();
     return { success: true, ...data };
   })();
-  if (!statusResult.success) notFound();
-
-  if (!statusResult.data.can_review) redirect(`/home`);
+  if (!reviewResult.success) notFound();
+  if (!reviewResult.data.can_review) redirect(`/home`);
 
   // Header 정보 조회
   const headerResult = await getThemeHeader(themeId);
@@ -50,9 +49,9 @@ export default async function ThemeReviewPage({
   const data: ThemeHeaderData = headerResult.data;
 
   // Active-tab 확인
-  const status = Array.isArray(params["status"])
-    ? params["status"][0]
-    : params["status"];
+  const view = Array.isArray(params["view"])
+    ? params["view"][0]
+    : params["view"];
 
   return (
     <AppShell
@@ -69,7 +68,7 @@ export default async function ThemeReviewPage({
           variant="tabs"
           tabs={["검수 중", "승인된 사진", "반려된 사진"]}
           activeTab={(() => {
-            switch (status) {
+            switch (view) {
               case "approved":
                 return 1;
               case "rejected":
@@ -79,19 +78,19 @@ export default async function ThemeReviewPage({
             }
           })()}
           tabLinks={[
-            `/theme-review?theme_id=${themeId}&status=reviewing`,
-            `/theme-review?theme_id=${themeId}&status=approved`,
-            `/theme-review?theme_id=${themeId}&status=rejected`,
+            `/theme-review?theme_id=${themeId}&view=reviewing`,
+            `/theme-review?theme_id=${themeId}&view=approved`,
+            `/theme-review?theme_id=${themeId}&view=rejected`,
           ]}
           tabBg="var(--gray-d9)"
         />
       }
     >
       {(() => {
-        switch (status) {
+        switch (view) {
           case "approved":
           case "rejected":
-            return <ReviewingGrid themeId={themeId} status={status} />;
+            return <ReviewingGrid themeId={themeId} view={view} />;
           default:
             return <Reviewing themeId={themeId} />;
         }
