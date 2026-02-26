@@ -161,7 +161,7 @@ export class VoteService {
       });
 
       const sub2 = await this.submissionRepo.findOne({
-        where: { submission_id: vote.sub_id1 },
+        where: { submission_id: vote.sub_id2 },
         select: ['content_url'],
       });
 
@@ -206,7 +206,7 @@ export class VoteService {
     });
 
     const sub2 = await this.submissionRepo.findOne({
-      where: { submission_id: subId1 },
+      where: { submission_id: subId2 },
       select: ['content_url'],
     });
 
