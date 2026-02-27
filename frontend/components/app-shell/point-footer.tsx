@@ -1,14 +1,12 @@
 "use client";
 
-import classes from "./default-footer.module.css";
+import classes from "./point-footer.module.css";
 
-export function DefaultFooter() {
-  const point: number = 39;
-
+export function PointFooter({ point = 0 }: { point?: number }) {
   return (
     <div className={classes.FooterContainer}>
       <p style={{ color: "var(--white)", fontSize: "20px" }}>
-        공감 포인트 {point}
+        공감 포인트 {point ?? 0}
       </p>
     </div>
   );

@@ -1,10 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
-import { DefaultFooter } from "@/components/app-shell/default-footer";
 import { AppShellHeader } from "@/components/app-shell/header";
-import { VotingDisplay } from "@/components/voting/voting";
+import { VoteSection } from "@/components/voting/vote-section";
 import { ThemeHeaderData } from "@/types/api/theme";
-import { getThemeHeader } from "@/utils/api/theme";
+import { getThemeHeader, getThemeStatus } from "@/utils/api/theme";
 
 export default async function RankingPage({
   searchParams,
@@ -18,11 +17,17 @@ export default async function RankingPage({
 
   if (!themeId) notFound();
 
-  // Header 정보 조회
-  const result = await getThemeHeader(themeId);
-  if (!result.success) notFound();
+  // VOTING(투표 중)이 아니면 '/home'으로 리다이렉트
+  const statusResult = await getThemeStatus(themeId);
+  if (!statusResult.success) notFound();
 
-  const data: ThemeHeaderData = result.data;
+  if (statusResult.data.status !== "VOTING") redirect(`/home`);
+
+  // Header 정보 조회
+  const headterResult = await getThemeHeader(themeId);
+  if (!headterResult.success) notFound();
+
+  const data: ThemeHeaderData = headterResult.data;
 
   return (
     <AppShell
@@ -34,9 +39,9 @@ export default async function RankingPage({
           subheader
         />
       }
-      footer={<DefaultFooter />}
+      footer={null}
     >
-      <VotingDisplay />
+      <VoteSection themeId={themeId} />
     </AppShell>
   );
 }
