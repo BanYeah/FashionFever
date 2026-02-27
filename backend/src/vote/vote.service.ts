@@ -70,7 +70,6 @@ export class VoteService {
 
     // 승률 기대값 계산 (Expected Score)
     const expected1 = 1 / (1 + Math.pow(10, (score2 - score1) / 400));
-    const expected2 = 1 - expected1;
 
     // 점수 변화량(Delta) 계산
     const actual1 = winnerSide === 1 ? 1 : winnerSide === 2 ? 0 : 0.5;
@@ -99,12 +98,10 @@ export class VoteService {
     return {
       sub1: {
         prevScore: score1,
-        winP: expected1,
         topP: getPercentile(rank1),
       },
       sub2: {
         prevScore: score2,
-        winP: expected2,
         topP: getPercentile(rank2),
       },
       delta: Math.abs(delta1),
@@ -307,8 +304,6 @@ export class VoteService {
     return {
       data: {
         ...newVote,
-        winP1: result.sub1.winP,
-        winP2: result.sub2.winP,
         topP1: getTopStat(result.sub1.topP),
         topP2: getTopStat(result.sub2.topP),
         vote_point: voteCount + 1,
