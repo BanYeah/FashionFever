@@ -27,11 +27,11 @@ export class SubmissionSchema1770394977198 implements MigrationInterface {
         CONSTRAINT "fk_submission_user" FOREIGN KEY ("user_id") REFERENCES "User" ("user_id") ON DELETE SET NULL,
         
         CONSTRAINT "chk_scores" CHECK (
-            "vote_score" BETWEEN 0 AND 4.00 AND
-            "judge_score" BETWEEN 0 AND 0.50 AND
-            "like_score" BETWEEN 0 AND 0.50 AND
-            "total_score" BETWEEN 0 AND 5.00 AND
-            "final_score" BETWEEN 0 AND 5.00
+          "vote_score" BETWEEN 0 AND 4.00 AND
+          "judge_score" BETWEEN 0 AND 0.50 AND
+          "like_score" BETWEEN 0 AND 0.50 AND
+          "total_score" BETWEEN 0 AND 5.00 AND
+          "final_score" BETWEEN 0 AND 5.00
         )
       );
 
@@ -42,18 +42,10 @@ export class SubmissionSchema1770394977198 implements MigrationInterface {
 
       CREATE INDEX idx_submission_review ON "Submission" ("theme_id", "is_approved", "reviewed_at" DESC);
       CREATE INDEX idx_submission_review_status ON "Submission" ("theme_id", "is_approved") WHERE "is_approved" = FALSE;
-
-      CREATE INDEX idx_submission_final_ranking ON "Submission" (
-          "theme_id", 
-          "total_score" DESC, 
-          "vote_rank" ASC, 
-          "created_at" ASC
-      );
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX idx_submission_final_ranking`);
     await queryRunner.query(`DROP INDEX idx_submission_review_status`);
     await queryRunner.query(`DROP INDEX idx_submission_review`);
     await queryRunner.query(`DROP INDEX idx_submission_theme_final_rank`);
