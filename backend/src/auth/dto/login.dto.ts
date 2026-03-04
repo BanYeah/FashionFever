@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty({ description: '미니코드', example: 'ic57m' })
+  @ApiProperty({ description: '미니코드' })
   @IsString()
   @IsNotEmpty()
   minicode: string;
 
-  @ApiProperty({ description: '입장코드', example: 'ic57mic57m' })
+  @ApiProperty({ description: '입장코드' })
   @IsString()
   @IsNotEmpty()
   enter_code: string;
