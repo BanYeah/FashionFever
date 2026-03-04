@@ -18,7 +18,7 @@ export async function createVote(theme_id: string, payload: VotePayload) {
   return { success: true, ...data };
 }
 
-export async function getVoteStatus(theme_id: string) {
+export async function getVoteStat(theme_id: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/votes/${theme_id}`,
     { cache: "no-store", credentials: "include" },

@@ -4,12 +4,14 @@ import classes from "./theme-display.module.css";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useAuthStore } from "@/utils/store/authStore";
 import { Group, Stack, Box, Divider, Loader } from "@mantine/core";
 import { ThemeScheduleData } from "@/types/api/theme";
-import { VoteStatusData } from "@/types/api/vote";
+import { VoteStatData } from "@/types/api/vote";
 import { formatDueIn } from "@/utils/format-due-in";
 import { getSubmission } from "@/utils/api/submission";
-import { getVoteStatus } from "@/utils/api/vote";
+import { getVoteStat } from "@/utils/api/vote";
+import { getRecordStat } from "@/utils/api/record";
 
 export function ThemeDisplay({ data }: { data: ThemeScheduleData }) {
   return (
@@ -51,6 +53,8 @@ export function ThemeDisplay({ data }: { data: ThemeScheduleData }) {
 }
 
 function ThemeInfo({ data }: { data: ThemeScheduleData }) {
+  const { user } = useAuthStore();
+
   const [enrolled, setEnrolled] = useState<boolean | null>(null);
   const [ranking, setRanking] = useState<number | null>(null);
   const [point, setPoint] = useState<number>(0);
@@ -77,9 +81,9 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
         case "VOTING":
         case "COMPLETE_READY":
           {
-            const result = await getVoteStatus(data.theme_id);
+            const result = await getVoteStat(data.theme_id);
             if (result.success) {
-              const data: VoteStatusData = result.data;
+              const data: VoteStatData = result.data;
               if (data.best_rank === null) setEnrolled(false);
               else setEnrolled(true);
 
@@ -90,6 +94,17 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
           break;
 
         case "COMPLETE":
+          {
+            const result = await getRecordStat(data.theme_id);
+            if (result.success) {
+              const data: VoteStatData = result.data;
+              if (data.best_rank === null) setEnrolled(false);
+              else setEnrolled(true);
+
+              setRanking(data.best_rank);
+              setPoint(data.vote_point);
+            }
+          }
           break;
       }
     })();
@@ -247,7 +262,11 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
                 width: "61px",
                 height: "61px",
               }}
-              href="/"
+              href={
+                user
+                  ? `/ranking/${user.user_id}/top1?theme_id=${data.theme_id}`
+                  : `/ranking?theme_id=${data.theme_id}`
+              }
             >
               <Image
                 src="/images/home/theme-display/result.svg"

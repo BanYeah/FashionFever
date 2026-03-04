@@ -10,7 +10,7 @@ export interface VoteData {
   vote_point: number;
 }
 
-export interface VoteStatusData {
+export interface VoteStatData {
   best_rank: number | null;
   vote_point: number;
 }
