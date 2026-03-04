@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
 import { EnrollSection } from "@/components/enroll/enroll-section";
@@ -20,8 +20,7 @@ export default async function EnrollPage({
   // ENROLLING(참가 중)이 아니면 '/home'으로 리다이렉트
   const statusResult = await getThemeStatus(themeId);
   if (!statusResult.success) notFound();
-
-  if (statusResult.data.status !== "ENROLLING") redirect(`/home`);
+  if (statusResult.data.status !== "ENROLLING") notFound();
 
   // Header 정보 조회
   const headerResult = await getThemeHeader(themeId);

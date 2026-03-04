@@ -1,24 +1,13 @@
-export default function NotFound() {
+import { LoginFooter } from "@/components/login/login-shell/login-footer";
+import { LoginHeader } from "@/components/login/login-shell/login-header";
+import { NotFoundSection } from "@/components/common/not-found-section/not-found-section";
+
+export default function NotFoundPage() {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100dvh",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          columnGap: "16px",
-          fontSize: "16px",
-        }}
-      >
-        <p>404</p>
-        <p>|</p>
-        <p>페이지를 찾을 수 없습니다.</p>
-      </div>
-    </div>
+    <section style={{ minHeight: "100dvh", backgroundColor: "var(--main)" }}>
+      <LoginHeader />
+      <NotFoundSection />
+      <LoginFooter />
+    </section>
   );
 }

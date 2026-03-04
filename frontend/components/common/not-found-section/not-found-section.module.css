@@ -1,0 +1,61 @@
+.Container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: calc(100% - 30px);
+  max-width: 395px;
+  min-width: 290px;
+  height: 78px;
+
+  border: 3.5px solid var(--black);
+  background-color: var(--white);
+}
+
+.Image {
+  position: absolute;
+  right: 0px;
+  bottom: -40px;
+}
+
+.Text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-90%, -50%);
+
+  white-space: nowrap;
+}
+
+.Button {
+  position: absolute;
+  left: -3.5px;
+  bottom: -51.5px;
+
+  width: calc(100% - 140px);
+  height: 40px;
+}
+
+.ButtonFlex {
+  display: flex;
+
+  width: 100%;
+  height: inherit;
+}
+
+.ButtonBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding-left: 26px;
+
+  flex: 1;
+  height: inherit;
+
+  background-color: var(--black);
+
+  color: var(--main);
+  font-size: 20px;
+}

@@ -13,6 +13,8 @@ import {
   ADMIN_PATHS,
 } from "@/types/paths";
 
+import NotFoundPage from "@/app/not-found";
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -79,15 +81,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.replace("/login");
       return;
     }
-
-    // 로그인 상태인데 권한이 없는 페이지인 경우
-    if (user) {
-      const aPaths = getAllowedPath(user.account);
-      if (!aPaths.some((path) => matchPath(path, pathname, user.user_id))) {
-        router.replace("/home");
-        return;
-      }
-    }
   }, [router, pathname, user, isInitialized]);
 
   /* 공개된 페이지 (Public Path) */
@@ -109,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 권한 없음
   const allowedPaths = getAllowedPath(user.account);
   if (!allowedPaths.some((path) => matchPath(path, pathname, user.user_id)))
-    return null;
+    return <NotFoundPage />;
 
   return <>{children}</>;
 }

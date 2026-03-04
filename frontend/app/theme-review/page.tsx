@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
 import { AppShellFooter } from "@/components/app-shell/footer";
@@ -20,7 +20,7 @@ export default async function ThemeReviewPage({
 
   if (!themeId) notFound();
 
-  // 검수 권한이 없으면 '/home'으로 리다이렉트
+  // 검수 권한 조회
   const reviewResult = await (async () => {
     const cookieStore = await cookies();
     const res = await fetch(
@@ -40,7 +40,7 @@ export default async function ThemeReviewPage({
     return { success: true, ...data };
   })();
   if (!reviewResult.success) notFound();
-  if (!reviewResult.data.can_review) redirect(`/home`);
+  if (!reviewResult.data.can_review) notFound();
 
   // Header 정보 조회
   const headerResult = await getThemeHeader(themeId);
