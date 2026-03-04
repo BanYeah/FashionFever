@@ -176,6 +176,7 @@ export class AuthController {
     });
 
     req.session.account = 'admin';
+    req.session.user_id = null;
     req.session.minicode = null;
 
     await new Promise<void>((resolve, reject) => {
@@ -225,6 +226,7 @@ export class AuthController {
 
     return {
       account: session.account,
+      user_id: session.user_id,
       minicode: session.minicode,
     };
   }

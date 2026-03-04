@@ -90,15 +90,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user.account !== "admin" && ADMIN_PATHS.includes(pathname))
       router.replace("/home");
 
-    // 다른 유저의 /ranking/[minicode]/...에 접근하면 /home으로 리다이렉트
+    // 다른 유저의 /ranking/[user_id]/...에 접근하면 /home으로 리다이렉트
     if (pathname.startsWith("/ranking")) {
-      // /ranking/[minicode]/... 경로에서 minicode 추출
+      // /ranking/[user_id]/... 경로에서 user_id 추출
       const match = pathname.match(/^\/ranking\/([^/]+)/);
-      const minicode = match ? match[1] : null;
+      const user_id = match ? match[1] : null;
 
-      if (minicode) {
+      if (user_id) {
         if (
-          (user.account === "user" && user.minicode !== minicode) ||
+          (user.account === "user" && user.user_id !== user_id) ||
           user.account === "judge"
         )
           router.replace("/home");

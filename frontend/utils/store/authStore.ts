@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 interface User {
   account: "user" | "judge" | "admin";
+  user_id: string | null;
   minicode: string | null;
 }
 
