@@ -4,25 +4,25 @@ import { Input, PasswordInput, UnstyledButton, Loader } from "@mantine/core";
 
 interface LoginInputBaseProps {
   password?: boolean;
-  disabled?: boolean;
   placeholder: string;
+  disabled?: boolean;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  rightButton?: boolean;
-  onClick?: () => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onClick?: () => void;
+  rightButton?: boolean;
   loading?: boolean;
 }
 
 export function LoginInputBase({
   password,
-  disabled,
   placeholder,
+  disabled,
   value,
   onChange,
-  rightButton,
-  onClick,
   onKeyDown,
+  onClick,
+  rightButton,
   loading,
 }: LoginInputBaseProps) {
   const props = {

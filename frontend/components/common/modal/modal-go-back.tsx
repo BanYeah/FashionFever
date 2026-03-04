@@ -4,24 +4,24 @@ import classes from "./modal-go-back.module.css";
 import { Modal, Stack, UnstyledButton, Loader } from "@mantine/core";
 
 interface ModalGoBackProps {
-  title: string;
-  go: string;
-  back: string;
-  children: React.ReactNode;
   opened: boolean;
-  onGo: () => void;
   close: () => void;
+  title: string;
+  children: React.ReactNode;
+  back: string;
+  go: string;
+  onGo: () => void;
   loading?: boolean;
 }
 
 export function ModalGoBack({
-  title,
-  go,
-  back,
-  children,
   opened,
-  onGo,
   close,
+  title,
+  children,
+  back,
+  go,
+  onGo,
   loading,
 }: ModalGoBackProps) {
   return (

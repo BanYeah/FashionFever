@@ -11,6 +11,7 @@ export function LoginHeader() {
           alt="FASHION FEVER"
           width={187}
           height={59}
+          priority
         />
       </div>
       <div className={classes.SubHeader}>
