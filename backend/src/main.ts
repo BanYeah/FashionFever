@@ -13,25 +13,17 @@ import morgan from 'morgan';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Cloudflare 등을 통해 들어오는 실제 IP를 인식하기 위해
-  app.set('trust proxy', true);
+  if (process.env.NODE_ENV === 'production')
+    app.getHttpAdapter().getInstance().set('trust proxy', 2);
+
+  const apiPrefix = process.env.API_PREFIX!;
+  app.setGlobalPrefix(apiPrefix);
 
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:8080'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
-
-  const apiPrefix = process.env.API_PREFIX!;
-  app.setGlobalPrefix(apiPrefix);
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // DTO에 없는 속성 제거
-      forbidNonWhitelisted: true, // DTO에 없는 속성이 있으면 에러
-      transform: true, // 네트워크로 넘어온 데이터를 DTO 타입으로 자동 변환
-    }),
-  );
 
   const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
@@ -40,9 +32,6 @@ async function bootstrap() {
   await redisClient.connect();
 
   const redisStore = new RedisStore({ client: redisClient });
-
-  if (process.env.NODE_ENV === 'production')
-    app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   app.use(
     session({
@@ -57,6 +46,14 @@ async function bootstrap() {
         maxAge: 1000 * 60 * 60 * 6, // 6시간
         sameSite: 'lax',
       },
+    }),
+  );
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // DTO에 없는 속성 제거
+      forbidNonWhitelisted: true, // DTO에 없는 속성이 있으면 에러
+      transform: true, // 네트워크로 넘어온 데이터를 DTO 타입으로 자동 변환
     }),
   );
 
