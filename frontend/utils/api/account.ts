@@ -1,19 +1,3 @@
-export async function appointJudge(minicode: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/judges/appoint`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ minicode }),
-      cache: "no-store",
-      credentials: "include",
-    },
-  );
-
-  if (!res.ok) return { success: false, status: res.status };
-  else return { success: true };
-}
-
 export async function fetchUsers(page: number, minicode: string | null) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/users`,
@@ -52,11 +36,10 @@ export async function fetchJudges(page: number, minicode: string | null) {
 
 export async function resetCode(minicode: string) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/users/reset-code`,
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/users/reset-code?minicode=${minicode}`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ minicode }),
       cache: "no-store",
       credentials: "include",
     },
@@ -66,13 +49,27 @@ export async function resetCode(minicode: string) {
   return { success: true };
 }
 
+export async function appointJudge(minicode: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/judges/appoint?minicode=${minicode}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      credentials: "include",
+    },
+  );
+
+  if (!res.ok) return { success: false, status: res.status };
+  else return { success: true };
+}
+
 export async function deleteUser(minicode: string) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/users/delete`,
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/users/delete?minicode=${minicode}`,
     {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ minicode }),
       cache: "no-store",
       credentials: "include",
     },
@@ -84,11 +81,10 @@ export async function deleteUser(minicode: string) {
 
 export async function expelJudge(minicode: string) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/judges/expel`,
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/account/judges/expel?minicode=${minicode}`,
     {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ minicode }),
       cache: "no-store",
       credentials: "include",
     },

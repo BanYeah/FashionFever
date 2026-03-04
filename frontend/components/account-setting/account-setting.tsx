@@ -16,9 +16,8 @@ import {
   Divider,
 } from "@mantine/core";
 import { AccountLine } from "./account-line";
+import { User, Judge } from "@/types/api/account";
 import { PageMeta } from "@/types/page-meta";
-import { User } from "@/types/api/user";
-import { Judge } from "@/types/api/judge";
 import { registerUser } from "@/utils/api/auth";
 import { appointJudge, fetchUsers, fetchJudges } from "@/utils/api/account";
 
@@ -94,6 +93,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
       });
       notifyServerError();
     }
+
     setLoading(false);
   };
 
@@ -123,7 +123,7 @@ export function AccountSetting({ variant }: AccountSettingProps) {
 
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, [loading, meta.current, meta.last, data.length]);
+  }, [loading, data.length, meta.current, meta.last]);
 
   const handleSearchCode = () => {
     const params = new URLSearchParams(searchParams);
@@ -143,11 +143,11 @@ export function AccountSetting({ variant }: AccountSettingProps) {
     if (regex.test(addCode)) {
       if (variant === "user") {
         const result = await registerUser(addCode);
-
         if (result.success) {
           reset();
           return;
         }
+
         switch (result.status) {
           case 409:
             notify(<p>이미 존재하는 미니코드예요!</p>);
@@ -158,11 +158,11 @@ export function AccountSetting({ variant }: AccountSettingProps) {
       } else {
         // variant === "judge"
         const result = await appointJudge(addCode);
-
         if (result.success) {
           reset();
           return;
         }
+
         switch (result.status) {
           case 404:
             notify(<p>존재하지 않는 미니코드예요!</p>);

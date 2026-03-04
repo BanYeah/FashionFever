@@ -1,6 +1,5 @@
 import {
   Injectable,
-  Inject,
   NotFoundException, // 404
   ConflictException, // 409
   UnprocessableEntityException, // 422
@@ -8,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Like, In } from 'typeorm';
 
-import Redis from 'ioredis';
 import { CryptoUtil } from 'src/common/utils/crypto.util';
 import { R2Service } from 'src/common/r2/r2.service';
 
@@ -24,10 +22,8 @@ export class AccountService {
   constructor(
     private dataSource: DataSource,
     private readonly r2Service: R2Service,
-    @Inject('REDIS_CLIENT') private readonly redis: Redis,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Judge) private judgeRepo: Repository<Judge>,
-    @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
     private authService: AuthService,
   ) {}
 
@@ -109,7 +105,6 @@ export class AccountService {
     const user = await this.userRepo.findOne({
       where: { minicode },
     });
-
     if (!user) throw new NotFoundException(); // 404
 
     const newRawEnterCode = this.authService.generateRandomEnterCode();
@@ -122,7 +117,6 @@ export class AccountService {
     const user = await this.userRepo.findOne({
       where: { minicode },
     });
-
     if (!user) throw new NotFoundException(); // 404
 
     const isAlreadyJudge = await this.judgeRepo.exists({
@@ -157,7 +151,7 @@ export class AccountService {
 
     if (!res.ok) {
       const errorData = await res.json();
-      console.error('[CACHE_ERROR]', errorData);
+      throw new Error(errorData);
     }
   }
 
@@ -167,11 +161,11 @@ export class AccountService {
     await queryRunner.startTransaction();
 
     try {
-      // 투표가 진행 중인 테마가 있을 때는 유저 삭제 불가
+      // 투표가 진행 중인 테마가 있을 때는 사용자 삭제 불가
       const schedules = await queryRunner.manager.count(Schedule, {
         where: { status: In(['VOTE_READY', 'VOTING', 'COMPLETE_READY']) },
       });
-      if (schedules > 0) throw new UnprocessableEntityException();
+      if (schedules > 0) throw new UnprocessableEntityException(); // 422
 
       const user = await queryRunner.manager.findOne(User, {
         where: { minicode },
@@ -206,7 +200,7 @@ export class AccountService {
         });
 
         await this.purgeCache(user.user_id).catch((err) =>
-          console.error('[CACHE_ERROR]', err),
+          console.error('[CACHE_ERROR] Failed to purge cache: ', err),
         );
       }
     } catch (err) {
@@ -221,7 +215,6 @@ export class AccountService {
     const judge = await this.judgeRepo.findOne({
       where: { minicode },
     });
-
     if (!judge) throw new NotFoundException(); // 404
 
     await this.judgeRepo.remove(judge);
