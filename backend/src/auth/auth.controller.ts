@@ -24,48 +24,45 @@ export class AuthController {
 
   @Post('/register')
   @ApiOperation({
-    summary: '신규 유저 등록',
+    summary: '신규 사용자 등록',
     description:
-      '입력받은 minicode를 사용하여 시스템에 새로운 유저를 생성합니다.',
+      '입력받은 minicode를 사용하여 시스템에 새로운 사용자를 생성합니다.',
   })
-  @ApiResponse({ status: 201, description: '성공적으로 유저가 등록됨' })
+  @ApiResponse({ status: 201, description: '성공적으로 사용자가 등록됨' })
   @ApiResponse({ status: 409, description: '이미 존재하는 minicode' })
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    return await this.authService.createUser(createUserDto);
+  async createUser(@Body() dto: CreateUserDto) {
+    return await this.authService.createUser(dto.minicode);
   }
 
   @Get('/exist/:minicode')
   @ApiOperation({
-    summary: '유저 존재 여부 조회',
-    description:
-      '전달받은 minicode가 유저 테이블에 등록되어 있는지 확인합니다.',
+    summary: '사용자 존재 여부 조회',
+    description: '전달받은 minicode가 등록되어 있는지 확인합니다.',
   })
   @ApiParam({
     name: 'minicode',
     description: '미니코드 (5-7자리)',
-    example: 'ic57m',
   })
-  @ApiResponse({ status: 200, description: '등록된 유저임' })
-  @ApiResponse({ status: 404, description: '등록되지 않은 유저임' })
+  @ApiResponse({ status: 200, description: '등록된 사용자임' })
+  @ApiResponse({ status: 404, description: '등록되지 않은 사용자임' })
   async getUserExist(@Param('minicode') minicode: string) {
     return await this.authService.checkUserExist(minicode);
   }
 
-  @Get('/judges/exist/:minicode')
+  @Get('/judge/exist/:minicode')
   @ApiOperation({
     summary: '심사위원 임명 여부 조회',
     description:
-      '특정 minicode를 가진 유저가 심사위원 권한을 가지고 있는지 확인합니다.',
+      '특정 minicode의 사용자가 심사위원 권한을 가지고 있는지 확인합니다.',
   })
   @ApiParam({
     name: 'minicode',
     description: '미니코드 (5-7자리)',
-    example: 'ic57m',
   })
   @ApiResponse({ status: 200, description: '임명된 심사위원임' })
   @ApiResponse({
     status: 404,
-    description: '심사위원이 아니거나 존재하지 않는 유저임',
+    description: '심사위원이 아니거나 존재하지 않는 사용자임',
   })
   async getJudgeExist(@Param('minicode') minicode: string) {
     return await this.authService.checkJudgeExist(minicode);
@@ -74,21 +71,24 @@ export class AuthController {
   @Post('/login')
   @HttpCode(200)
   @ApiOperation({
-    summary: '일반 유저 로그인',
+    summary: '사용자 로그인',
     description:
       '입력받은 minicode와 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
   })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({
     status: 401,
-    description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)',
+    description: '인증 실패 (존재하지 않는 사용자 또는 잘못된 enter_code)',
   })
   @ApiResponse({
     status: 423,
     description: '계정 잠금 (로그인 시도 횟수 초과)',
   })
-  async loginUser(@Body() loginDto: LoginDto, @Request() req: any) {
-    const userInfo = await this.authService.validateUser(loginDto);
+  async loginUser(@Body() dto: LoginDto, @Request() req: any) {
+    const userInfo = await this.authService.validateUser(
+      dto.minicode,
+      dto.enter_code,
+    );
 
     await new Promise<void>((resolve, reject) => {
       req.session.regenerate((err: any) => {
@@ -108,10 +108,16 @@ export class AuthController {
       });
     });
 
-    return;
+    return {
+      data: {
+        account: 'user',
+        user_id: userInfo.user_id,
+        minicode: userInfo.minicode,
+      },
+    };
   }
 
-  @Post('/judges/login')
+  @Post('/judge/login')
   @HttpCode(200)
   @ApiOperation({
     summary: '심사위원 로그인',
@@ -121,14 +127,17 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({
     status: 401,
-    description: '인증 실패 (존재하지 않는 유저 또는 잘못된 enter_code)',
+    description: '인증 실패 (존재하지 않는 심사위원 또는 잘못된 enter_code)',
   })
   @ApiResponse({
     status: 423,
     description: '계정 잠금 (로그인 시도 횟수 초과)',
   })
-  async loginJudge(@Body() loginDto: LoginDto, @Request() req: any) {
-    const judgeInfo = await this.authService.validateJudge(loginDto);
+  async loginJudge(@Body() dto: LoginDto, @Request() req: any) {
+    const judgeInfo = await this.authService.validateJudge(
+      dto.minicode,
+      dto.enter_code,
+    );
 
     await new Promise<void>((resolve, reject) => {
       req.session.regenerate((err: any) => {
@@ -148,7 +157,13 @@ export class AuthController {
       });
     });
 
-    return;
+    return {
+      data: {
+        account: 'judge',
+        user_id: judgeInfo.user_id,
+        minicode: judgeInfo.minicode,
+      },
+    };
   }
 
   @Post('/admin/login')
@@ -162,11 +177,11 @@ export class AuthController {
   @ApiResponse({ status: 401, description: '인증 실패 (잘못된 enter_code)' })
   @ApiResponse({ status: 423, description: '계정 잠금 (IP 차단)' })
   async loginAdmin(
-    @Body() loginAdminDto: LoginAdminDto,
+    @Body() dto: LoginAdminDto,
     @Request() req: any,
     @Ip() ip: string,
   ) {
-    await this.authService.validateAdmin(loginAdminDto, ip);
+    await this.authService.validateAdmin(dto.enter_code, ip);
 
     await new Promise<void>((resolve, reject) => {
       req.session.regenerate((err: any) => {
@@ -186,7 +201,13 @@ export class AuthController {
       });
     });
 
-    return;
+    return {
+      data: {
+        account: 'admin',
+        user_id: null,
+        minicode: null,
+      },
+    };
   }
 
   @Post('/logout')
@@ -203,16 +224,16 @@ export class AuthController {
       });
     });
 
-    return { message: 'Logged out successfully' };
+    return;
   }
 
   @Get('/status')
   @ApiOperation({
     summary: '현재 로그인 상태 및 권한 확인',
-    description: '세션에서 현재 로그인된 유저의 정보를 직접 반환합니다.',
+    description: '현재 로그인된 계정 정보를 반환합니다.',
   })
-  @ApiResponse({ status: 200, description: '로그인 상태임' })
-  @ApiResponse({ status: 401, description: '로그인되지 않음' })
+  @ApiResponse({ status: 200, description: '로그인 정보 조회 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패' })
   async getStatus(
     @Request() req: any,
     @Response({ passthrough: true }) res: any,

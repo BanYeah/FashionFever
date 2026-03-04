@@ -7,8 +7,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useNotification } from "../notification/notification";
 import { Group, Input, UnstyledButton, Divider } from "@mantine/core";
 import { ModalGoBack } from "@/components/common/modal/modal-go-back";
-import { User } from "@/types/api/user";
-import { Judge } from "@/types/api/judge";
+import { User, Judge } from "@/types/api/account";
 import { resetCode, deleteUser, expelJudge } from "@/utils/api/account";
 
 interface AccountLineProps {
@@ -29,6 +28,52 @@ export function AccountLine({ variant, account, reload }: AccountLineProps) {
 
   const [loading, setLoading] = useState(false);
 
+  const handleAccount = async () => {
+    if (value !== account.minicode) return;
+    if (loading) return;
+    setLoading(true);
+
+    const doAction = () => {
+      if (action === "reset") return resetCode(account.minicode);
+      // action === "delete"
+      else if (variant === "user") return deleteUser(account.minicode);
+      else return expelJudge(account.minicode);
+    };
+
+    const result = await doAction();
+    if (result.success) {
+      if (option) toggle();
+      reload(action === "delete");
+    }
+
+    close();
+    setValue("");
+    setLoading(false);
+
+    if (!result.success) {
+      switch (result.status) {
+        case 404:
+          notify(
+            <p>
+              존재하지 않는{" "}
+              {variant === "user" ? "유저예요!" : "심사위원이에요!"}
+            </p>,
+          );
+          break;
+        case 422:
+          notify(
+            <p>
+              투표가 진행 중인 테마가 있을 때는
+              <br /> 계정을 삭제할 수 없어요!
+            </p>,
+          );
+          break;
+        default:
+          notifyServerError();
+      }
+    }
+  };
+
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -36,7 +81,7 @@ export function AccountLine({ variant, account, reload }: AccountLineProps) {
 
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch (e) {
       setCopied(false);
     }
   };
@@ -59,51 +104,7 @@ export function AccountLine({ variant, account, reload }: AccountLineProps) {
         go="계속하기"
         back="그만두기"
         opened={opened}
-        onGo={async () => {
-          if (value === account.minicode) {
-            setLoading(true);
-
-            const doAction = () => {
-              if (action === "reset") return resetCode(account.minicode);
-              // action === "delete"
-              else if (variant === "user") return deleteUser(account.minicode);
-              else return expelJudge(account.minicode);
-            };
-
-            const result = await doAction();
-            if (result.success) {
-              if (option) toggle();
-              reload(action === "delete");
-            }
-
-            close();
-            setValue("");
-            setLoading(false);
-
-            if (!result.success) {
-              switch (result.status) {
-                case 404:
-                  notify(
-                    <p>
-                      존재하지 않는{" "}
-                      {variant === "user" ? "유저예요!" : "심사위원이에요!"}
-                    </p>,
-                  );
-                  break;
-                case 422:
-                  notify(
-                    <p>
-                      투표가 진행 중인 테마가 있을 때는
-                      <br /> 계정을 삭제할 수 없어요!
-                    </p>,
-                  );
-                  break;
-                default:
-                  notifyServerError();
-              }
-            }
-          }
-        }}
+        onGo={handleAccount}
         close={() => {
           close();
           setValue("");
@@ -133,6 +134,9 @@ export function AccountLine({ variant, account, reload }: AccountLineProps) {
             maxLength={7}
             value={value}
             onChange={(event) => setValue(event.currentTarget.value)}
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === "Enter") handleAccount();
+            }}
           />
         </>
       </ModalGoBack>

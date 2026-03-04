@@ -5,7 +5,7 @@ import classes from "./account-select.module.css";
 import { Dispatch, SetStateAction } from "react";
 import { useState, useEffect } from "react";
 import { Stack, Box, MultiSelect, Select, CloseButton } from "@mantine/core";
-import { Judge } from "@/types/api/judge";
+import { Judge } from "@/types/api/account";
 import { fetchJudges } from "@/utils/api/account";
 
 // 검수 계정 관리

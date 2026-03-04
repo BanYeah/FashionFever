@@ -20,8 +20,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshAuth = useCallback(async () => {
     try {
-      setInitialized(false); // Loader 표시
-
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/status`,
         { withCredentials: true },

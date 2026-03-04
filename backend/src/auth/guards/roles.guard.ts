@@ -25,8 +25,8 @@ export class RolesGuard implements CanActivate {
 
     if (!session || !session.account) throw new UnauthorizedException(); // 401
 
-    const hasRole = requiredRoles.includes(session.account);
-    if (!hasRole) throw new ForbiddenException(); // 403
+    const isPermitted = requiredRoles.includes(session.account);
+    if (!isPermitted) throw new ForbiddenException(); // 403
 
     return true;
   }

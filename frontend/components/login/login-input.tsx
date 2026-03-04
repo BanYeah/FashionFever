@@ -5,8 +5,8 @@ import React, { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useNotification } from "../notification/notification";
 import { Stack } from "@mantine/core";
-import { LoginInputBase } from "./login-input-base";
 import { ModalGoBack } from "../common/modal/modal-go-back";
+import { LoginInputBase } from "./login-input-base";
 import {
   registerUser,
   checkUserExist,
@@ -29,6 +29,7 @@ export function LoginInput() {
   const { notify, notifyServerError } = useNotification();
 
   const handleMinicode = async () => {
+    if (loading) return;
     if (minicode === "admin_") {
       setIsEnter(true); // 입장코드 입력창 등장
       return;
@@ -42,27 +43,39 @@ export function LoginInput() {
       return;
     }
 
-    if (loading) return;
     setLoading(true);
 
-    try {
-      const result = isJudge
-        ? await checkJudgeExist(code)
-        : await checkUserExist(code);
+    const result = isJudge
+      ? await checkJudgeExist(code)
+      : await checkUserExist(code);
 
-      if (result.success)
-        setIsEnter(true); // 입장코드 입력창 등장
-      else if (result.status === 404) {
-        if (isJudge) notify(<p>심사위원으로 임명되지 않은 미니예요!</p>);
-        else open(); // 정보 제공 및 활용 동의 안내
-      } else notifyServerError();
-    } finally {
+    if (result.success) {
+      setIsEnter(true); // 입장코드 입력창 등장
       setLoading(false);
+      return;
     }
+
+    switch (result.status) {
+      case 404:
+        if (isJudge) notify(<p>심사위원으로 임명되지 않은 미니예요!</p>);
+        else open(); // 정보 제공 및 활용 동의 안내창
+        break;
+      default:
+        notifyServerError();
+    }
+
+    setLoading(false);
   };
 
   const handleEntercode = async () => {
-    const doLogin = () => {
+    if (loading) return;
+    setLoading(true);
+
+    const doLogin = (): Promise<{
+      success: boolean;
+      status?: number;
+      message?: any;
+    }> => {
       if (minicode === "admin_") return loginAdmin(entercode);
       if (minicode.startsWith("judge_"))
         return loginJudge(minicode.slice(6), entercode);
@@ -71,12 +84,17 @@ export function LoginInput() {
 
     const result = await doLogin();
 
-    if (result.success) return;
+    if (result.success) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
+
     switch (result.status) {
       case 401:
-        notify(<p>미니코드 또는 입장코드가 일치하지 않아요.</p>);
+        notify(<p>입장코드가 일치하지 않아요.</p>);
         break;
-
       case 423:
         if (minicode === "admin_")
           notify(
@@ -98,7 +116,6 @@ export function LoginInput() {
           );
         }
         break;
-
       default:
         notifyServerError();
     }
@@ -107,28 +124,28 @@ export function LoginInput() {
   return (
     <>
       <ModalGoBack
+        opened={opened}
+        close={close}
         title="정보 제공 및 활용 동의 안내"
         go="참여하기"
         back="그만두기"
-        opened={opened}
         onGo={async () => {
           if (loading) return;
           setLoading(true);
-          try {
-            const result = await registerUser(minicode);
 
-            if (result.success || result.status === 409) {
-              setIsEnter(true); // 입장코드 입력창 등장
-              close();
-            } else {
-              close();
-              notifyServerError();
-            }
-          } finally {
+          const result = await registerUser(minicode);
+
+          if (result.success || result.status === 409) {
+            setIsEnter(true); // 입장코드 입력창 등장
+            close();
             setLoading(false);
+            return;
           }
+
+          close();
+          setLoading(false);
+          notifyServerError();
         }}
-        close={close}
         loading={loading}
       >
         <>
@@ -165,15 +182,15 @@ export function LoginInput() {
       </Stack>
       <Stack align="stretch" mt={16} mb={16} gap={12}>
         <LoginInputBase
-          disabled={isEnter}
           placeholder="미니코드 입력"
+          disabled={isEnter}
           value={minicode}
           onChange={(e) => setMinicode(e.target.value)}
-          rightButton={!isEnter}
-          onClick={handleMinicode}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === "Enter") handleMinicode();
           }}
+          onClick={handleMinicode}
+          rightButton={!isEnter}
           loading={loading}
         />
         {isEnter && (
@@ -182,11 +199,11 @@ export function LoginInput() {
             placeholder="입장코드 입력"
             value={entercode}
             onChange={(e) => setEntercode(e.target.value)}
-            rightButton
-            onClick={handleEntercode}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter") handleEntercode();
             }}
+            onClick={handleEntercode}
+            rightButton
             loading={loading}
           />
         )}

@@ -13,12 +13,12 @@ import { Repository } from 'typeorm';
 
 import Redis from 'ioredis';
 import bcrypt from 'bcrypt';
+import { timingSafeEqual } from 'crypto';
 import { CryptoUtil } from 'src/common/utils/crypto.util';
 
 import { User } from './entities/user.entity';
 import { Judge } from './entities/judge.entity';
 
-import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginAdminDto } from './dto/login-admin.dto';
 
@@ -44,9 +44,7 @@ export class AuthService {
     return result;
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<void> {
-    const { minicode } = createUserDto;
-
+  async createUser(minicode: string): Promise<void> {
     const isExist = await this.userRepo.exists({ where: { minicode } });
     if (isExist) throw new ConflictException(); // 409
 
@@ -62,32 +60,34 @@ export class AuthService {
   }
 
   async checkUserExist(minicode: string): Promise<void> {
-    const isExist = await this.userRepo.exists({
-      where: { minicode },
-    });
-
+    const isExist = await this.userRepo.exists({ where: { minicode } });
     if (!isExist) throw new NotFoundException(); // 404
   }
 
   async checkJudgeExist(minicode: string): Promise<void> {
-    const isExist = await this.judgeRepo.exists({
-      where: { minicode },
-    });
-
+    const isExist = await this.judgeRepo.exists({ where: { minicode } });
     if (!isExist) throw new NotFoundException(); // 404
   }
 
   private verifyEnterCode(rawCode: string, encryptedCode: string): void {
     try {
       const decrypted = CryptoUtil.decrypt(encryptedCode);
-      if (decrypted !== rawCode) throw new UnauthorizedException(); // 401
+
+      const bufRaw = Buffer.from(rawCode);
+      const bufDecrypted = Buffer.from(decrypted);
+
+      if (bufDecrypted.length !== bufRaw.length)
+        throw new UnauthorizedException();
+
+      if (!timingSafeEqual(bufDecrypted, bufRaw))
+        throw new UnauthorizedException();
     } catch (e) {
-      throw new UnauthorizedException();
+      if (e instanceof UnauthorizedException) throw e;
+      throw new InternalServerErrorException(); // 500
     }
   }
 
-  async validateUser(loginDto: LoginDto): Promise<User> {
-    const { minicode, enter_code } = loginDto;
+  async validateUser(minicode: string, enterCode: string): Promise<User> {
     const lockKey = `lock:${minicode}`;
 
     const attempts = await this.redis.get(lockKey);
@@ -102,24 +102,24 @@ export class AuthService {
     }
 
     const user = await this.userRepo.findOne({ where: { minicode } });
+    if (!user) throw new UnauthorizedException(); // 401
 
     try {
-      if (!user) throw new UnauthorizedException(); // 401
-      this.verifyEnterCode(enter_code, user.enter_code);
-
+      this.verifyEnterCode(enterCode, user.enter_code);
       await this.redis.del(lockKey);
-      return user;
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
+    } catch (e) {
+      if (e instanceof UnauthorizedException) {
         const current = await this.redis.incr(lockKey); // 1 증가
         if (current === 1) await this.redis.expire(lockKey, 900); // 첫 실패 시 15분(900초) 유효기간 설정
+        throw e;
       }
-      throw error;
+      throw new InternalServerErrorException(); // 500
     }
+
+    return user;
   }
 
-  async validateJudge(loginDto: LoginDto): Promise<User> {
-    const { minicode, enter_code } = loginDto;
+  async validateJudge(minicode: string, enterCode: string): Promise<User> {
     const lockKey = `lock:${minicode}`;
 
     const attempts = await this.redis.get(lockKey);
@@ -137,24 +137,24 @@ export class AuthService {
       where: { minicode },
       relations: { judge: true }, // Left Join
     });
+    if (!user || !user.judge) throw new UnauthorizedException(); // 401
 
     try {
-      if (!user || !user.judge) throw new UnauthorizedException(); // 401
-      this.verifyEnterCode(enter_code, user.enter_code);
-
+      this.verifyEnterCode(enterCode, user.enter_code);
       await this.redis.del(lockKey);
-      return user;
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
+    } catch (e) {
+      if (e instanceof UnauthorizedException) {
         const current = await this.redis.incr(lockKey); // 1 증가
         if (current === 1) await this.redis.expire(lockKey, 900); // 첫 실패 시 15분(900초) 유효기간 설정
+        throw e;
       }
-      throw error;
+      throw new InternalServerErrorException(); // 500
     }
+
+    return user;
   }
 
-  async validateAdmin(loginAdminDto: LoginAdminDto, ip: string): Promise<void> {
-    const { enter_code } = loginAdminDto;
+  async validateAdmin(enterCode: string, ip: string): Promise<void> {
     const ipKey = `admin_lock:${ip}`;
 
     const attempts = await this.redis.get(ipKey);
@@ -164,15 +164,14 @@ export class AuthService {
         HttpStatus.LOCKED,
       ); // 423
 
-    const adminHash = process.env.ADMIN_KEY;
-    if (!adminHash)
-      throw new InternalServerErrorException('Admin configuration missing'); // 500
+    const isAuthorized = await bcrypt.compare(
+      enterCode,
+      process.env.ADMIN_KEY!,
+    );
 
-    const isMatch = await bcrypt.compare(enter_code, adminHash);
-    if (!isMatch) {
+    if (!isAuthorized) {
       const current = await this.redis.incr(ipKey); // 1 증가
       if (current === 1) await this.redis.expire(ipKey, 3600); // 첫 실패 시 1시간 유효기간 설정
-
       throw new UnauthorizedException(); // 401
     }
 

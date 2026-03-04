@@ -4,14 +4,15 @@ import {
   Post,
   Patch,
   Delete,
+  Query,
   HttpCode,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AccountService } from './account.service';
 
 import { Roles } from '../auth/decorators/roles.decorator';
+
 import { FindDto } from './dto/find.dto';
-import { MinicodeDto } from './dto/minicode.dto';
 
 @ApiTags('Account')
 @Controller('account')
@@ -22,16 +23,12 @@ export class AccountController {
   @HttpCode(200)
   @Roles('admin')
   @ApiOperation({
-    summary: '전체 유저 정보 조회 (관리자)',
-    description: '최신순으로 40개씩 유저 목록을 가져옵니다.',
+    summary: '전체 사용자 정보 조회 (관리자)',
+    description: '최신순으로 40개씩 사용자 목록을 가져옵니다.',
   })
-  @ApiResponse({ status: 200, description: '유저 목록 반환 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
-  async getUsers(@Body() findDto: FindDto) {
-    return await this.accountService.findAllUsers(
-      findDto.page,
-      findDto.minicode,
-    );
+  @ApiResponse({ status: 200, description: '사용자 목록 반환 성공' })
+  async getUsers(@Body() dto: FindDto) {
+    return await this.accountService.findAllUsers(dto.page, dto.minicode);
   }
 
   @Post('/judges')
@@ -42,58 +39,64 @@ export class AccountController {
     description: '최신순으로 40개씩 심사위원 목록을 가져옵니다.',
   })
   @ApiResponse({ status: 200, description: '심사위원 목록 반환 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
-  async getJudges(@Body() findDto: FindDto) {
-    return await this.accountService.findAllJudges(
-      findDto.page,
-      findDto.minicode,
-    );
+  async getJudges(@Body() dto: FindDto) {
+    return await this.accountService.findAllJudges(dto.page, dto.minicode);
   }
 
   @Patch('/users/reset-code')
   @Roles('admin')
-  @ApiOperation({ summary: '유저 입장 코드 재발급 (관리자)' })
+  @ApiOperation({ summary: '사용자 입장 코드 재발급 (관리자)' })
+  @ApiQuery({
+    name: 'minicode',
+    description: '미니코드',
+  })
   @ApiResponse({ status: 200, description: '재발급 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
-  @ApiResponse({ status: 404, description: '유저 없음' })
-  async resetCode(@Body() minicodeDto: MinicodeDto) {
-    return await this.accountService.resetUserEnterCode(minicodeDto.minicode);
+  @ApiResponse({ status: 404, description: '사용자 없음' })
+  async resetCode(@Query('minicode') minicode: string) {
+    return await this.accountService.resetUserEnterCode(minicode);
   }
 
   @Patch('/judges/appoint')
   @Roles('admin')
   @ApiOperation({
     summary: '심사위원 임명 (관리자)',
-    description: '특정 유저를 심사위원 목록에 추가합니다.',
+    description: '특정 사용자를 심사위원에 임명합니다.',
+  })
+  @ApiQuery({
+    name: 'minicode',
+    description: '미니코드',
   })
   @ApiResponse({ status: 200, description: '심사위원 임명 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
-  @ApiResponse({ status: 404, description: '유저 없음' })
+  @ApiResponse({ status: 404, description: '사용자 없음' })
   @ApiResponse({ status: 409, description: '이미 심사위원임' })
-  async appointJudge(@Body() minicodeDto: MinicodeDto) {
-    return await this.accountService.appointJudge(minicodeDto.minicode);
+  async appointJudge(@Query('minicode') minicode: string) {
+    return await this.accountService.appointJudge(minicode);
   }
 
   @Delete('/users/delete')
   @Roles('admin')
-  @ApiOperation({ summary: '유저 완전 삭제 (관리자)' })
-  @ApiResponse({ status: 200, description: '유저 삭제 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
-  @ApiResponse({ status: 404, description: '유저 없음' })
-  @ApiResponse({ status: 422, description: '유저 삭제 불가' })
-  async deleteUser(@Body() minicodeDto: MinicodeDto) {
-    await this.accountService.removeUser(minicodeDto.minicode);
-    return { message: 'User deleted successfully' };
+  @ApiOperation({ summary: '사용자 완전 삭제 (관리자)' })
+  @ApiQuery({
+    name: 'minicode',
+    description: '미니코드',
+  })
+  @ApiResponse({ status: 200, description: '사용자 삭제 성공' })
+  @ApiResponse({ status: 404, description: '사용자 없음' })
+  @ApiResponse({ status: 422, description: '사용자 삭제 불가' })
+  async deleteUser(@Query('minicode') minicode: string) {
+    return await this.accountService.removeUser(minicode);
   }
 
   @Delete('/judges/expel')
   @Roles('admin')
   @ApiOperation({ summary: '심사위원 해임 (관리자)' })
+  @ApiQuery({
+    name: 'minicode',
+    description: '미니코드',
+  })
   @ApiResponse({ status: 200, description: '심사위원 해임 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
   @ApiResponse({ status: 404, description: '심사위원 없음' })
-  async expelJudge(@Body() minicodeDto: MinicodeDto) {
-    await this.accountService.expelJudge(minicodeDto.minicode);
-    return { message: 'Judge authority removed successfully' };
+  async expelJudge(@Query('minicode') minicode: string) {
+    return await this.accountService.expelJudge(minicode);
   }
 }

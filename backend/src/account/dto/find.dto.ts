@@ -7,7 +7,7 @@ export class FindDto {
   @IsNotEmpty()
   page: number;
 
-  @ApiProperty({ description: '미니코드', example: 'ic57m' })
+  @ApiProperty({ description: '미니코드' })
   @IsString()
   @IsOptional()
   minicode: string | null;
