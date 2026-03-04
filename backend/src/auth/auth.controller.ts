@@ -49,7 +49,7 @@ export class AuthController {
     return await this.authService.checkUserExist(minicode);
   }
 
-  @Get('/judges/exist/:minicode')
+  @Get('/judge/exist/:minicode')
   @ApiOperation({
     summary: '심사위원 임명 여부 조회',
     description:
@@ -108,10 +108,16 @@ export class AuthController {
       });
     });
 
-    return;
+    return {
+      data: {
+        account: 'user',
+        user_id: userInfo.user_id,
+        minicode: userInfo.minicode,
+      },
+    };
   }
 
-  @Post('/judges/login')
+  @Post('/judge/login')
   @HttpCode(200)
   @ApiOperation({
     summary: '심사위원 로그인',
@@ -151,7 +157,13 @@ export class AuthController {
       });
     });
 
-    return;
+    return {
+      data: {
+        account: 'judge',
+        user_id: judgeInfo.user_id,
+        minicode: judgeInfo.minicode,
+      },
+    };
   }
 
   @Post('/admin/login')
@@ -189,7 +201,13 @@ export class AuthController {
       });
     });
 
-    return;
+    return {
+      data: {
+        account: 'admin',
+        user_id: null,
+        minicode: null,
+      },
+    };
   }
 
   @Post('/logout')

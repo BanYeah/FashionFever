@@ -27,7 +27,7 @@ export async function checkUserExist(minicode: string) {
 
 export async function checkJudgeExist(minicode: string) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/judges/exist/${minicode}`,
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/judge/exist/${minicode}`,
     { cache: "no-store" },
   );
 
@@ -36,6 +36,8 @@ export async function checkJudgeExist(minicode: string) {
 }
 
 export async function loginUser(minicode: string, enter_code: string) {
+  const { setUser, setInitialized } = useAuthStore.getState();
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/login`,
     {
@@ -56,16 +58,18 @@ export async function loginUser(minicode: string, enter_code: string) {
     };
   }
 
-  const { setUser, setInitialized } = useAuthStore.getState();
-  setUser({ account: "user", minicode: minicode });
+  const data = await res.json();
+  setUser(data.data);
   setInitialized(true);
 
   return { success: true };
 }
 
 export async function loginJudge(minicode: string, enter_code: string) {
+  const { setUser, setInitialized } = useAuthStore.getState();
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/judges/login`,
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/judge/login`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -84,14 +88,16 @@ export async function loginJudge(minicode: string, enter_code: string) {
     };
   }
 
-  const { setUser, setInitialized } = useAuthStore.getState();
-  setUser({ account: "judge", minicode: minicode });
+  const data = await res.json();
+  setUser(data.data);
   setInitialized(true);
 
   return { success: true };
 }
 
 export async function loginAdmin(enter_code: string) {
+  const { setUser, setInitialized } = useAuthStore.getState();
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/admin/login`,
     {
@@ -103,17 +109,10 @@ export async function loginAdmin(enter_code: string) {
     },
   );
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    return {
-      success: false,
-      status: res.status,
-      message: errorData.message,
-    };
-  }
+  if (!res.ok) return { success: false, status: res.status };
 
-  const { setUser, setInitialized } = useAuthStore.getState();
-  setUser({ account: "admin", minicode: null });
+  const data = await res.json();
+  setUser(data.data);
   setInitialized(true);
 
   return { success: true };
@@ -131,11 +130,7 @@ export async function logout() {
     },
   );
 
-  if (!res.ok)
-    return {
-      success: false,
-      status: res.status,
-    };
+  if (!res.ok) return { success: false, status: res.status };
 
   const { setUser, setInitialized } = useAuthStore.getState();
   setUser(null);
