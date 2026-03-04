@@ -7,7 +7,7 @@ import { UnstyledButton } from "@mantine/core";
 import { logout } from "@/utils/api/auth";
 
 export function LogoutButton() {
-  const { notify, notifyServerError } = useNotification();
+  const { notifyServerError } = useNotification();
 
   return (
     <UnstyledButton
@@ -22,6 +22,7 @@ export function LogoutButton() {
         alt=""
         width={20}
         height={20}
+        style={{ display: "block" }}
       />
     </UnstyledButton>
   );

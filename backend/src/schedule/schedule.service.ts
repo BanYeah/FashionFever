@@ -6,14 +6,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Schedule } from 'src/theme/entities/schedule.entity';
-import { ThemeJudge } from 'src/theme/entities/theme-judge.entity';
 
 @Injectable()
 export class ScheduleService {
   constructor(
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
-    @InjectRepository(ThemeJudge)
-    private themeJudgeRepo: Repository<ThemeJudge>,
   ) {}
 
   async getTimeline() {
@@ -37,13 +34,9 @@ export class ScheduleService {
   }
 
   async getVotingNow() {
-    const now = new Date();
-    const schedule = await this.scheduleRepo
-      .createQueryBuilder('schedule')
-      .where('schedule.vote_start_at <= :now', { now })
-      .andWhere('schedule.complete_start_at > :now', { now })
-      .getOne();
-
+    const schedule = await this.scheduleRepo.findOne({
+      where: { status: 'VOTING' },
+    });
     if (!schedule) throw new NotFoundException();
 
     return {
@@ -54,24 +47,16 @@ export class ScheduleService {
   }
 
   async getJudgingNow(minicode: string) {
-    const now = new Date();
-    const schedule = await this.scheduleRepo
-      .createQueryBuilder('schedule')
-      .where('schedule.vote_start_at <= :now', { now })
-      .andWhere('schedule.complete_start_at > :now', { now })
-      .getOne();
-
-    if (!schedule) throw new NotFoundException();
-
-    const canJudge = await this.themeJudgeRepo.exists({
+    const schedule = await this.scheduleRepo.findOne({
       where: {
-        theme_id: schedule.theme_id,
-        user: { minicode },
+        status: 'VOTING',
+        theme_judge: {
+          user: { minicode: minicode },
+        },
       },
-      relations: ['user'],
+      relations: ['theme_judge', 'theme_judge.user'],
     });
-
-    if (!canJudge) throw new NotFoundException();
+    if (!schedule) throw new NotFoundException();
 
     return {
       data: {

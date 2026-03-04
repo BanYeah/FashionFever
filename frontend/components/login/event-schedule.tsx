@@ -28,9 +28,9 @@ export function EventSchedule() {
     return `${month}월 ${day}일(${weekday})`;
   };
 
-  const eventTimeline = async () => {
+  const timeline = async () => {
     const result = await getTimeline();
-    if (!result.success) return "이벤트 기간 조회 실패";
+    if (!result.success) return "조회 실패";
 
     const startAt = result.data.min_enroll_start_at;
     const endAt = result.data.max_complete_start_at;
@@ -52,7 +52,7 @@ export function EventSchedule() {
       <div className={classes.ScheduleEmpty} />
       <Stack className={classes.Schedule} align="center" gap={6}>
         <p style={{ color: "var(--highlight)", fontSize: "16px" }}>
-          이벤트 기간 : {eventTimeline()}
+          이벤트 기간 : {timeline()}
         </p>
         <p style={{ color: "var(--main)", fontSize: "14px" }}>
           (자세한 일정은 공식 카페 내 게시글을 참고해 주세요!)

@@ -8,14 +8,12 @@ import { Flex, Stack, UnstyledButton, Divider } from "@mantine/core";
 import { ThemeDisplay } from "./theme-display/theme-display";
 import { ThemeDisplayJudge } from "./theme-display/theme-display-judge";
 import { ThemeDisplayAdmin } from "./theme-display/theme-display-admin";
-import { PageMeta } from "@/types/page-meta";
 import { ThemeScheduleData } from "@/types/api/theme";
+import { PageMeta } from "@/types/page-meta";
 import { getThemes, getThemeSettings } from "@/utils/api/theme";
 
 export function ThemeCollection() {
   const { notify, notifyServerError } = useNotification();
-
-  const { user } = useAuthStore.getState();
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<(ThemeScheduleData[] | "ERROR")[]>([]);
@@ -102,6 +100,7 @@ export function ThemeCollection() {
     return () => observer.disconnect();
   }, [loading, meta.current, meta.last, data.length]);
 
+  const { user } = useAuthStore.getState();
   if (user?.account === "user") {
     return (
       <Stack p={10} gap={10}>
@@ -182,21 +181,18 @@ export function ThemeCollection() {
   }
 }
 
-interface RetryLineProps {
-  loadPage: () => void;
-}
-
-function RetryLine({ loadPage }: RetryLineProps) {
+function RetryLine({ loadPage }: { loadPage: () => void }) {
   return (
     <>
-      <Flex align="center" justify="center" gap={10} h={200}>
+      <Flex align="center" justify="center" gap={10} h={220}>
         <p style={{ color: "var(--main)" }}>데이터 로딩 실패!</p>
-        <UnstyledButton h={17} onClick={loadPage}>
+        <UnstyledButton pb={1} onClick={loadPage}>
           <Image
             src="/images/account-setting/retry.svg"
             alt="다시 시도"
             width={55}
             height={16}
+            style={{ display: "block" }}
           />
         </UnstyledButton>
       </Flex>
