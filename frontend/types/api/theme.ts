@@ -1,5 +1,6 @@
 import { ThemeStatusType } from "../theme-status";
 
+/* Theme */
 /* GET */
 export interface ThemeScheduleData {
   theme_id: string;
