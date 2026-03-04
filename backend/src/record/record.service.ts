@@ -1,0 +1,143 @@
+import {
+  Injectable,
+  NotFoundException, // 404
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, LessThanOrEqual } from 'typeorm';
+
+import { Schedule } from 'src/theme/entities/schedule.entity';
+import { GiftCollection } from 'src/gift/entities/gift-collection.entity';
+
+import { Submission } from 'src/submission/entities/submission.entity';
+import { Record } from './entities/record.entity';
+
+@Injectable()
+export class RecordService {
+  constructor(
+    @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
+    @InjectRepository(GiftCollection)
+    private giftRepo: Repository<GiftCollection>,
+    @InjectRepository(Submission)
+    private submissionRepo: Repository<Submission>,
+    @InjectRepository(Record) private recordRepo: Repository<Record>,
+  ) {}
+
+  async getRecords(userId: string, themeId: string) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId },
+    });
+    if (!schedule) throw new NotFoundException();
+    if (schedule.status !== 'COMPLETE') throw new NotFoundException();
+
+    const submissions = await this.submissionRepo.find({
+      where: { theme_id: themeId, user_id: userId },
+      order: { final_rank: 'ASC' as const },
+    });
+
+    if (submissions.length === 0) throw new NotFoundException();
+
+    return {
+      data: submissions.map((sub) => {
+        return {
+          content_url: sub.content_url,
+          vote_score: sub.vote_score,
+          like_score: sub.like_score,
+          judge_score: sub.judge_score,
+          adj_score: sub.adj_score,
+          final_score: sub.final_score,
+          final_rank: sub.final_rank,
+        };
+      }),
+    };
+  }
+
+  async getTop1Record(userId: string, themeId: string) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId },
+    });
+    if (!schedule) throw new NotFoundException();
+    if (schedule.status !== 'COMPLETE') throw new NotFoundException();
+
+    const sub = await this.submissionRepo.findOne({
+      where: { theme_id: themeId, user_id: userId },
+      order: { final_rank: 'ASC' as const },
+    });
+
+    if (!sub) throw new NotFoundException();
+
+    const col = await this.giftRepo.findOne({
+      where: {
+        theme_id: themeId,
+        heart_rate: LessThanOrEqual(sub.final_score),
+      },
+      relations: ['gifts'],
+      order: {
+        heart_rate: 'DESC',
+        gifts: {
+          collection_order: 'ASC',
+        },
+      },
+    });
+
+    return {
+      data: {
+        content_url: sub.content_url,
+        vote_score: sub.vote_score,
+        like_score: sub.like_score,
+        judge_score: sub.judge_score,
+        adj_score: sub.adj_score,
+        final_score: sub.final_score,
+        final_rank: sub.final_rank,
+        collection: col
+          ? {
+              heart_rate: Number(col.heart_rate),
+              gift_total_num: col.gift_total_num,
+              is_random: col.is_random,
+              is_same_theme: col.is_same_theme,
+              theme_type: col.theme_type,
+              rarity: col.rarity,
+
+              gifts: col.gifts.map((gift) => ({
+                theme_name: gift.theme_name,
+                gift_name: gift.gift_name,
+                gift_url: gift.gift_url,
+              })),
+            }
+          : null,
+      },
+    };
+  }
+
+  async getRecordRankings(themeId: string, page: number) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId },
+    });
+    if (!schedule) throw new NotFoundException();
+    if (schedule.status !== 'COMPLETE') throw new NotFoundException();
+
+    const take = 30;
+    const skip = (page - 1) * take;
+
+    const [submissions, total] = await this.submissionRepo.findAndCount({
+      where: { theme_id: themeId },
+      order: { final_rank: 'ASC' as const },
+      take: take,
+      skip: skip,
+    });
+
+    const data = submissions.map((sub) => ({
+      content_url: sub.content_url,
+      final_score: sub.final_score,
+      final_rank: sub.final_rank,
+    }));
+
+    return {
+      data: data,
+      meta: {
+        total,
+        page,
+        last_page: Math.ceil(total / take),
+      },
+    };
+  }
+}

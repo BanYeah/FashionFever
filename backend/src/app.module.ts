@@ -14,6 +14,7 @@ import { ThemeModule } from './theme/theme.module';
 import { SubmissionModule } from './submission/submission.module';
 import { ReviewModule } from './review/review.module';
 import { VoteModule } from './vote/vote.module';
+import { RecordModule } from './record/record.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { VoteModule } from './vote/vote.module';
     SubmissionModule,
     ReviewModule,
     VoteModule,
+    RecordModule,
   ],
   controllers: [AppController],
   providers: [AppService],
