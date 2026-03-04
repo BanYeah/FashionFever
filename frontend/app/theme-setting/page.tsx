@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import {
+  useRouter,
+  usePathname,
+  useSearchParams,
+  notFound,
+} from "next/navigation";
 import { useNotification } from "@/components/notification/notification";
 import {
   Flex,
@@ -90,6 +95,7 @@ export default function ThemeSettingPage() {
 
   /* 테마 설정 상세 조회 */
   const [loading, setLoading] = useState<boolean>(false);
+  const [missing, setMissing] = useState<boolean>(false);
   const [initialStatus, setInitialStatus] = useState<ThemeStatus>(
     new ThemeStatus(),
   );
@@ -129,48 +135,52 @@ export default function ThemeSettingPage() {
 
       setInitialStatus(() => new ThemeStatus());
       setInitialCollections([]);
+
+      setMissing(false);
       return;
     }
 
     (async () => {
       setLoading(true);
-      try {
-        const result = await getThemeSetting(themeId);
-        if (result.success) {
-          const data: ThemeData = result.data;
+      setMissing(false);
 
-          setName(data.name);
-          setDescription(data.desc);
-          if (data.bg_limit) setBgLimit(enrollBgLimit[data.bg_limit].name);
-
-          setBanner(data.banner_url);
-
-          setEnrollStart(formatDate(data.enroll_start_at));
-          setReviewStart(formatDate(data.review_start_at));
-          setVoteStart(formatDate(data.vote_start_at));
-          setVoteEnd(formatDate(data.complete_start_at, -1));
-
-          if (data.reviewer_minicode)
-            setReviewer("judge_" + data.reviewer_minicode);
-          setJudge(data.judge_minicodes.map((code) => "judge_" + code));
-
-          setInitialStatus(
-            () =>
-              new ThemeStatus(
-                data.status,
-                new Date(data.enroll_start_at),
-                new Date(data.review_start_at),
-                new Date(data.vote_start_at),
-                new Date(data.complete_start_at),
-              ),
-          );
-          setInitialCollections(data.collections);
-        } else throw new Error();
-      } catch {
-        notifyServerError();
-      } finally {
+      const result = await getThemeSetting(themeId);
+      if (!result.success) {
+        setMissing(true);
         setLoading(false);
+        return;
       }
+
+      const data: ThemeData = result.data;
+
+      setName(data.name);
+      setDescription(data.desc);
+      if (data.bg_limit) setBgLimit(enrollBgLimit[data.bg_limit].name);
+
+      setBanner(data.banner_url);
+
+      setEnrollStart(formatDate(data.enroll_start_at));
+      setReviewStart(formatDate(data.review_start_at));
+      setVoteStart(formatDate(data.vote_start_at));
+      setVoteEnd(formatDate(data.complete_start_at, -1));
+
+      if (data.reviewer_minicode)
+        setReviewer("judge_" + data.reviewer_minicode);
+      setJudge(data.judge_minicodes.map((code) => "judge_" + code));
+
+      setInitialStatus(
+        () =>
+          new ThemeStatus(
+            data.status,
+            new Date(data.enroll_start_at),
+            new Date(data.review_start_at),
+            new Date(data.vote_start_at),
+            new Date(data.complete_start_at),
+          ),
+      );
+      setInitialCollections(data.collections);
+
+      setLoading(false);
     })();
   }, [themeId]);
 
@@ -420,7 +430,7 @@ export default function ThemeSettingPage() {
 
       const params = new URLSearchParams(searchParams);
       params.set("theme_id", result.data.theme_id);
-      router.push(`${pathname}?${params.toString()}`);
+      router.replace(`${pathname}?${params.toString()}`);
 
       notify(<p>성공적으로 테마가 저장되었습니다.</p>);
     } catch (e) {
@@ -453,6 +463,8 @@ export default function ThemeSettingPage() {
       />
     );
   }
+
+  if (missing) notFound();
 
   return (
     <>
