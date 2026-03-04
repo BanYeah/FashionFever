@@ -28,7 +28,6 @@ export class ScheduleController {
   @Roles('judge')
   @ApiOperation({ summary: '심사 가능한 테마 조회 (심사위원)' })
   @ApiResponse({ status: 200, description: '심사 가능한 테마 반환 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (심사위원 아님)' })
   @ApiResponse({ status: 404, description: '심사 가능한 테마 없음' })
   async getJudgingNow(@Session() session: any) {
     return this.scheuleService.getJudgingNow(session.minicode);

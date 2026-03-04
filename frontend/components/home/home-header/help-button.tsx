@@ -9,6 +9,7 @@ import { Stack, UnstyledButton } from "@mantine/core";
 
 export function HelpButton() {
   const { notify } = useNotification();
+
   const message = (
     <Stack gap={30}>
       <div>
@@ -49,6 +50,7 @@ export function HelpButton() {
           alt=""
           width={40}
           height={40}
+          style={{ display: "block" }}
         />
       </UnstyledButton>
     );
@@ -60,6 +62,7 @@ export function HelpButton() {
           alt=""
           width={40}
           height={40}
+          style={{ display: "block" }}
         />
       </Link>
     );

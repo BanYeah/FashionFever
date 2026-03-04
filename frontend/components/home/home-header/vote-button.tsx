@@ -13,8 +13,8 @@ export function VoteButton() {
   const router = useRouter();
 
   const { notify, notifyServerError } = useNotification();
-  const { user } = useAuthStore.getState();
 
+  const { user } = useAuthStore.getState();
   if (user?.account === "user") {
     const message = (
       <>
