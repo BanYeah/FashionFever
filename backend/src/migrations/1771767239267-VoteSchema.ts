@@ -26,10 +26,22 @@ export class VoteSchema1771767239267 implements MigrationInterface {
 
       CREATE INDEX idx_vote_user_theme_completed_asc ON "Vote" (user_id, theme_id, voted_at ASC) WHERE voted_at IS NOT NULL;
       CREATE INDEX idx_vote_pending ON "Vote" (user_id, theme_id) WHERE voted_at IS NULL;
+
+      CREATE TABLE "VoteStat" (
+        "user_id"     UUID NOT NULL,
+        "theme_id"    UUID NOT NULL,
+        "vote_count"  INTEGER NOT NULL DEFAULT 0,
+
+        PRIMARY KEY ("user_id", "theme_id"),
+        
+        CONSTRAINT "fk_votestat_user" FOREIGN KEY ("user_id") REFERENCES "User" ("user_id") ON DELETE CASCADE,
+        CONSTRAINT "fk_votestat_theme" FOREIGN KEY ("theme_id") REFERENCES "Schedule" ("theme_id") ON DELETE CASCADE
+      );
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP TABLE "VoteStat"`);
     await queryRunner.query(`DROP INDEX idx_vote_pending`);
     await queryRunner.query(`DROP INDEX idx_vote_user_theme_completed_asc`);
     await queryRunner.query(`DROP TABLE "Vote"`);

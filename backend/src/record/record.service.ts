@@ -9,6 +9,7 @@ import { Schedule } from 'src/theme/entities/schedule.entity';
 import { GiftCollection } from 'src/gift/entities/gift-collection.entity';
 
 import { Submission } from 'src/submission/entities/submission.entity';
+import { VoteStat } from 'src/vote/entities/vote-stat.entity';
 import { Record } from './entities/record.entity';
 
 @Injectable()
@@ -19,6 +20,7 @@ export class RecordService {
     private giftRepo: Repository<GiftCollection>,
     @InjectRepository(Submission)
     private submissionRepo: Repository<Submission>,
+    @InjectRepository(VoteStat) private vStatRepo: Repository<VoteStat>,
     @InjectRepository(Record) private recordRepo: Repository<Record>,
   ) {}
 
@@ -137,6 +139,29 @@ export class RecordService {
         total,
         page,
         last_page: Math.ceil(total / take),
+      },
+    };
+  }
+
+  async getRecordStat(userId: string, themeId: string) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId },
+    });
+    if (!schedule) throw new NotFoundException();
+    if (schedule.status !== 'COMPLETE') throw new NotFoundException();
+
+    const voteStat = await this.vStatRepo.findOne({
+      where: { user_id: userId, theme_id: themeId },
+    });
+
+    const record = await this.recordRepo.findOne({
+      where: { user_id: userId, theme_id: themeId },
+    });
+
+    return {
+      data: {
+        best_rank: record ? record.best_final_rank : null,
+        vote_point: voteStat ? voteStat.vote_count : 0,
       },
     };
   }

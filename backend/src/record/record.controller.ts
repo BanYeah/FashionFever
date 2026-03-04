@@ -77,4 +77,21 @@ export class RecordController {
   ) {
     return this.recordService.getRecordRankings(themeId, page);
   }
+
+  @Get(':theme_id/status')
+  @Roles('user')
+  @ApiOperation({ summary: '기록 상태 조회 (사용자)' })
+  @ApiParam({
+    name: 'theme_id',
+    description: '테마 번호',
+  })
+  @ApiResponse({ status: 200, description: '기록 상태 조회 성공' })
+  @ApiResponse({ status: 403, description: '권한 부족 (사용자 아님)' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
+  async getSubmissions(
+    @Session() session: any,
+    @Param('theme_id', new ParseUUIDPipe()) themeId: string,
+  ) {
+    return await this.recordService.getRecordStat(session.user_id, themeId);
+  }
 }

@@ -211,6 +211,27 @@ export class ThemeCron {
         counts.map((c: any) => [c.user_id, c.vote_count]),
       );
 
+      await queryRunner.query(`DELETE FROM "VoteStat" WHERE theme_id = $1`, [
+        themeId,
+      ]);
+
+      const voteStatData = Array.from(countMap.entries());
+      const chunkSize = 100;
+      for (let i = 0; i < voteStatData.length; i += chunkSize) {
+        const chunk = voteStatData.slice(i, i + chunkSize);
+        const values = chunk
+          .map(
+            ([userId, count]) =>
+              `('${userId}'::UUID, '${themeId}'::UUID, ${count}::INTEGER)`,
+          )
+          .join(',');
+
+        await queryRunner.query(`
+          INSERT INTO "VoteStat" (user_id, theme_id, vote_count)
+          VALUES ${values};
+        `);
+      }
+
       /* 투표/심사/공감/합계 점수 계산 */
       const scores = rankings.map((subId, index) => {
         const rank = index + 1;
@@ -259,7 +280,6 @@ export class ThemeCron {
       }));
 
       /* 투표/심사/공감/합계 점수, 투표/최종 랭킹 업데이트 */
-      const chunkSize = 100;
       for (let i = 0; i < updateData.length; i += chunkSize) {
         const chunk = updateData.slice(i, i + chunkSize);
         const values = chunk
