@@ -81,6 +81,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.replace("/login");
       return;
     }
+
+    // 로그인 상태인데 로그인 페이지인 경우
+    if (user && matchPath("/login", pathname)) {
+      router.replace("/home");
+      return;
+    }
   }, [router, pathname, user, isInitialized]);
 
   /* 공개된 페이지 (Public Path) */
