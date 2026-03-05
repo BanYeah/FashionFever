@@ -26,7 +26,14 @@ export default async function RankingPage({
 
   return (
     <AppShell
-      header={<AppShellHeader title={data.name} description={data.desc} gift />}
+      header={
+        <AppShellHeader
+          themeId={data.theme_id}
+          title={data.name}
+          description={data.desc}
+          gift
+        />
+      }
       footer={
         <AppShellFooter
           variant="tabs"

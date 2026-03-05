@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface AppShellHeaderProps {
+  themeId: string;
   title: string;
   description: string;
   gift?: boolean;
@@ -10,6 +11,7 @@ interface AppShellHeaderProps {
 }
 
 export function AppShellHeader({
+  themeId,
   title,
   description,
   gift,
@@ -30,7 +32,10 @@ export function AppShellHeader({
         <div className={classes.Title}>{title || ""}</div>
         <div className={classes.RightSection}>
           {gift && (
-            <Link href="/" style={{ width: "30px", height: "30px" }}>
+            <Link
+              href={`/gift-list?theme_id=${themeId}`}
+              style={{ width: "30px", height: "30px" }}
+            >
               <Image
                 src="/images/app-shell/present.svg"
                 alt="선물목록"

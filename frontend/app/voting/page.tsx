@@ -32,6 +32,7 @@ export default async function RankingPage({
     <AppShell
       header={
         <AppShellHeader
+          themeId={data.theme_id}
           title={data.name}
           description={data.desc}
           gift
