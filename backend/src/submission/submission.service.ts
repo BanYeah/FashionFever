@@ -22,8 +22,7 @@ export class SubmissionService {
     private readonly r2Service: R2Service,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
-    @InjectRepository(Submission)
-    private submissionRepo: Repository<Submission>,
+    @InjectRepository(Submission) private submRepo: Repository<Submission>,
   ) {}
 
   async createSubmission(
@@ -128,7 +127,7 @@ export class SubmissionService {
     });
     if (!schedule) throw new NotFoundException();
 
-    const submissions = await this.submissionRepo.find({
+    const submissions = await this.submRepo.find({
       where: { theme_id: themeId, user_id: userId },
       select: ['content_url'],
     });

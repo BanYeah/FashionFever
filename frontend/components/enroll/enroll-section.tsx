@@ -34,7 +34,6 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
       if (file instanceof File) return URL.createObjectURL(file);
       return file;
     });
-
     setPreviews(urls);
 
     // clean-up

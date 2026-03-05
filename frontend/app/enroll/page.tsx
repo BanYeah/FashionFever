@@ -17,7 +17,7 @@ export default async function EnrollPage({
 
   if (!themeId) notFound();
 
-  // ENROLLING(참가 중)이 아니면 '/home'으로 리다이렉트
+  // ENROLLING(참가 중)이 아니면 404로
   const statusResult = await getThemeStatus(themeId);
   if (!statusResult.success) notFound();
   if (statusResult.data.status !== "ENROLLING") notFound();
@@ -30,7 +30,13 @@ export default async function EnrollPage({
 
   return (
     <AppShell
-      header={<AppShellHeader title={data.name} description={data.desc} />}
+      header={
+        <AppShellHeader
+          themeId={data.theme_id}
+          title={data.name}
+          description={data.desc}
+        />
+      }
       footer={null}
     >
       <EnrollSection themeId={themeId} bgLimit={data.bg_limit} />

@@ -78,6 +78,6 @@ export class FormatDateUtil {
     const sign = reversed ? "-" : "";
     if (diffDays === 0 && diffHours === 0) return "0시간";
     if (diffDays === 0) return `${sign}${diffHours}시간`;
-    return `${diffDays}일 ${diffHours}시간`;
+    return `${sign}${diffDays}일 ${diffHours}시간`;
   }
 }

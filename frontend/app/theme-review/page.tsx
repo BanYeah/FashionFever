@@ -57,6 +57,7 @@ export default async function ThemeReviewPage({
     <AppShell
       header={
         <AppShellHeader
+          themeId={data.theme_id}
           title={data.name}
           description={data.desc}
           gift

@@ -38,6 +38,7 @@ export function Reviewing({ themeId }: { themeId: string }) {
   }, []);
 
   const patchStatus = async (subId: string, status: StatusType) => {
+    if (patching !== null) return;
     setPatching(status);
 
     const result = await patchReviewStatus(subId, status);

@@ -38,7 +38,7 @@ export function ThemeSchedule({
     offset: number = 0,
   ) => {
     const diff = FormatDateUtil.diff(start, end, offset);
-    if (!diff) return "";
+    if (diff === "") return "";
     return `(${diff})`;
   };
 
