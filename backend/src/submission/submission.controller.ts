@@ -7,13 +7,11 @@ import {
   Patch,
   Delete,
   Param,
-  Query,
   Request,
   Response,
   ParseUUIDPipe,
   UseInterceptors,
   UploadedFiles,
-  ForbiddenException, // 403
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
@@ -21,7 +19,6 @@ import {
   ApiOperation,
   ApiBody,
   ApiParam,
-  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { SubmissionService } from '../submission/submission.service';
@@ -46,7 +43,6 @@ export class SubmissionController {
     status: 400,
     description: '잘못된 요청 (필수 파일 누락 또는 데이터 검증 실패)',
   })
-  @ApiResponse({ status: 403, description: '권한 부족 (사용자 아님)' })
   @ApiResponse({ status: 410, description: '테마 참가 기간이 종료됨' })
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'content_files', maxCount: 4 }]),
@@ -80,7 +76,6 @@ export class SubmissionController {
     description: '테마 번호',
   })
   @ApiResponse({ status: 200, description: '스타일 조회 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (사용자 아님)' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async getSubmissions(
     @Session() session: any,
