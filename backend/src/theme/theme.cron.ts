@@ -66,11 +66,6 @@ export class ThemeCron {
       const userCount = parseInt(result.count);
 
       if (userCount < 10) {
-        await this.scheduleRepo.update(
-          { theme_id: themeId },
-          { status: 'INCOMPLETE' },
-        );
-
         /* 제출/사진 제거 */
         const targets = await this.submissionRepo.find({
           where: { theme_id: themeId },
@@ -91,6 +86,11 @@ export class ThemeCron {
           });
         }
 
+        await this.scheduleRepo.update(
+          { theme_id: themeId },
+          { status: 'INCOMPLETE' },
+        );
+
         await PurgeCacheUtil.apiTheme([
           { theme_id: themeId, status: 'INCOMPLETE' },
         ]).catch((err) =>
@@ -106,14 +106,13 @@ export class ThemeCron {
 
     const TTL = 60 * 60 * 24 * 10; // 10일
 
+    const pipeline = this.redis.pipeline();
+    pipeline.del(exposureKey, rankingKey);
+
     const submissions = await this.submissionRepo.find({
       where: { theme_id: themeId },
       select: ['submission_id'],
     });
-
-    const pipeline = this.redis.pipeline();
-
-    pipeline.del(exposureKey, rankingKey);
 
     for (const sub of submissions) {
       const subId = sub.submission_id;
@@ -177,6 +176,7 @@ export class ThemeCron {
         themeId,
       ]);
 
+      /* 사용자 별 투표 횟수 저장 */
       const voteStatData = Array.from(countMap.entries());
       const chunkSize = 100;
       for (let i = 0; i < voteStatData.length; i += chunkSize) {
@@ -309,6 +309,10 @@ export class ThemeCron {
     ]).catch((err) =>
       console.error('[CACHE_ERROR] Failed to purge cache: ', err),
     );
+
+    const rankingKey = `voting:ranking:${themeId}`;
+    const exposureKey = `voting:exposure:${themeId}`;
+    await this.redis.del(rankingKey, exposureKey);
   }
 
   private async adjustScore(themeId: string, queryRunner: QueryRunner) {
