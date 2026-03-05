@@ -1,4 +1,11 @@
-import { Entity, PrimaryColumn, Generated, Column, OneToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Generated,
+  Column,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
 import { Banner } from './banner.entity';
 import { Header } from './header.entity';
 import { Reviewer } from './reviewer.entity';
@@ -39,6 +46,6 @@ export class Schedule {
   @OneToOne(() => Reviewer, (reviewer) => reviewer.schedule)
   reviewer: Reviewer;
 
-  @OneToOne(() => ThemeJudge, (theme_judge) => theme_judge.schedule)
-  theme_judge: ThemeJudge;
+  @OneToMany(() => ThemeJudge, (theme_judge) => theme_judge.schedule)
+  theme_judges: ThemeJudge[];
 }

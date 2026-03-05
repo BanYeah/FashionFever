@@ -50,11 +50,11 @@ export class ScheduleService {
     const schedule = await this.scheduleRepo.findOne({
       where: {
         status: 'VOTING',
-        theme_judge: {
+        theme_judges: {
           user: { minicode: minicode },
         },
       },
-      relations: ['theme_judge', 'theme_judge.user'],
+      relations: ['theme_judges', 'theme_judges.user'],
     });
     if (!schedule) throw new NotFoundException();
 
