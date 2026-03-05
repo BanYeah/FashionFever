@@ -37,6 +37,10 @@ export class ThemeController {
   ) {}
 
   themeFormDto(body: any): ThemeFormDto {
+    // body를 ThemeFormDto으로 변환
+    // 1. null이 될 수 있는 요소
+    // 2. 배열일 수 있는 요소
+    // 3. JSON 객체를 문자열로 표현한 요소
     const dto: ThemeFormDto = {
       ...body,
       bg_limit: body.bg_limit ? Number(body.bg_limit) : null,
@@ -52,7 +56,6 @@ export class ThemeController {
           ? JSON.parse(body.collections)
           : body.collections,
     };
-
     return dto;
   }
 
@@ -126,7 +129,6 @@ export class ThemeController {
     status: 400,
     description: '잘못된 요청 (필수 파일 누락 또는 데이터 검증 실패)',
   })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'banner', maxCount: 1 },
@@ -159,7 +161,6 @@ export class ThemeController {
     example: 1,
   })
   @ApiResponse({ status: 200, description: '테마 설정 조회 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
   async getThemeSettings(@Query('page') page: number) {
     return this.themeService.getThemeSettings(page);
   }
@@ -173,7 +174,6 @@ export class ThemeController {
     description: '테마 번호',
   })
   @ApiResponse({ status: 200, description: '테마 설정 조회 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async getThemeSetting(
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
@@ -187,7 +187,7 @@ export class ThemeController {
   @ApiOperation({
     summary: '테마 설정 수정 (관리자)',
     description:
-      '테마 일정, 헤더, 배너 이미지, 리뷰어/심사위원, 선물 컬렉션을 한 번에 수정합니다.',
+      '테마 일정, 헤더, 배너 이미지, 검수자/심사위원, 선물 컬렉션을 한 번에 수정합니다.',
   })
   @ApiBody({ type: ThemeFormDto })
   @ApiResponse({ status: 200, description: '테마 설정이 성공적으로 수정됨' })
@@ -195,11 +195,7 @@ export class ThemeController {
     status: 400,
     description: '잘못된 요청 (필수 파일 누락 또는 데이터 검증 실패)',
   })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
-  @ApiResponse({
-    status: 404,
-    description: '존재하지 않는 테마임',
-  })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'banner', maxCount: 1 },
@@ -233,7 +229,7 @@ export class ThemeController {
     description: '테마 번호',
   })
   @ApiResponse({ status: 200, description: '테마 설정 삭제 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
+  @ApiResponse({ status: 400, description: '테마 설정 삭제 불가' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async deleteThemeSetting(
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
@@ -252,7 +248,6 @@ export class ThemeController {
     status: 200,
     description: '테마 일정 상태가 성공적으로 업데이트됨',
   })
-  @ApiResponse({ status: 403, description: '권한 부족 (관리자 아님)' })
   async patchThemeStatus() {
     await this.themeCron.handleScheduleStatusUpdate();
     return;

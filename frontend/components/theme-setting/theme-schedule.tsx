@@ -2,20 +2,21 @@ import "@mantine/dates/styles.css";
 import classes from "./theme-schedule.module.css";
 import { Dispatch, SetStateAction } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { Group, Stack, UnstyledButton, Collapse } from "@mantine/core";
+import { Group, Stack, Select, UnstyledButton, Collapse } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { ThemeStatus } from "@/types/theme-status";
+import { DateTimeInfo, FormatDateUtil } from "@/utils/fomat-date.util";
 
 interface ThemeScheduleProps {
   status: ThemeStatus;
-  enrollStart: string | null;
-  setEnrollStart: Dispatch<SetStateAction<string | null>>;
-  reviewStart: string | null;
-  setReviewStart: Dispatch<SetStateAction<string | null>>;
-  voteStart: string | null;
-  setVoteStart: Dispatch<SetStateAction<string | null>>;
-  voteEnd: string | null;
-  setVoteEnd: Dispatch<SetStateAction<string | null>>;
+  enrollStart: DateTimeInfo;
+  setEnrollStart: Dispatch<SetStateAction<DateTimeInfo>>;
+  reviewStart: DateTimeInfo;
+  setReviewStart: Dispatch<SetStateAction<DateTimeInfo>>;
+  voteStart: DateTimeInfo;
+  setVoteStart: Dispatch<SetStateAction<DateTimeInfo>>;
+  voteEnd: DateTimeInfo;
+  setVoteEnd: Dispatch<SetStateAction<DateTimeInfo>>;
 }
 
 export function ThemeSchedule({
@@ -31,33 +32,21 @@ export function ThemeSchedule({
 }: ThemeScheduleProps) {
   const [opened, { toggle }] = useDisclosure(false);
 
-  const formatDate = (dateStr: string, offset: number = 0) => {
-    const [yyyy, mm, dd] = dateStr.split("-").map(Number);
-    const date = new Date(yyyy, mm - 1, dd);
-
-    date.setDate(date.getDate() + offset);
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${year} ${month} ${day}`;
-  };
-
-  const getDurationString = (
-    startDateStr: string | null,
-    endDateStr: string | null,
+  const getDiff = (
+    start: DateTimeInfo,
+    end: DateTimeInfo,
     offset: number = 0,
   ) => {
-    if (startDateStr === null || endDateStr === null) return "";
+    const diff = FormatDateUtil.diff(start, end, offset);
+    if (!diff) return "";
+    return `(${diff})`;
+  };
 
-    const start = new Date(startDateStr + "T00:00:00+09:00");
-    const end = new Date(endDateStr + "T00:00:00+09:00");
+  const getEnd = (dateTime: DateTimeInfo, offset: number = 0): DateTimeInfo => {
+    if (dateTime.date === null) return { date: null, time: "23:59:59" };
 
-    const diffInMs = end.getTime() - start.getTime();
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-    return `(${diffInDays + offset}일)`;
+    const date = new Date(FormatDateUtil.timezone(dateTime)!);
+    return FormatDateUtil.dateTime(date.toISOString(), offset);
   };
 
   return (
@@ -70,58 +59,51 @@ export function ThemeSchedule({
         <Stack gap={16}>
           <Stack gap={9}>
             <p className={classes.Label}>
-              참가 기간{" "}
-              <span>{getDurationString(enrollStart, reviewStart)}</span>
+              참가 기간 <span>{getDiff(enrollStart, reviewStart)}</span>
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
                 // disabled={status.isAfterStart("ENROLLING")}
-                time="00:00:00"
                 value={enrollStart}
                 setValue={setEnrollStart}
               />
               <p>~</p>
               <ThemeDateInput
                 disabled={true}
-                time="23:59:59"
-                value={reviewStart ? formatDate(reviewStart, -1) : null}
+                value={getEnd(reviewStart, -1000)}
               />
             </Group>
           </Stack>
           <Stack gap={9}>
             <p className={classes.Label}>
-              검수 기간 <span>{getDurationString(reviewStart, voteStart)}</span>
+              검수 기간 <span>{getDiff(reviewStart, voteStart)}</span>
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
                 // disabled={status.isAfterStart("REVIEWING")}
-                time="00:00:00"
                 value={reviewStart}
                 setValue={setReviewStart}
               />
               <p>~</p>
               <ThemeDateInput
                 disabled={true}
-                time="23:59:59"
-                value={voteStart ? formatDate(voteStart, -1) : null}
+                value={getEnd(voteStart, -1000)}
               />
             </Group>
           </Stack>
           <Stack gap={9}>
             <p className={classes.Label}>
-              투표 기간 <span>{getDurationString(voteStart, voteEnd, 1)}</span>
+              투표 기간 <span>{getDiff(voteStart, voteEnd, 1000)}</span>
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
                 // disabled={status.isAfterStart("VOTE_READY")}
-                time="00:00:00"
                 value={voteStart}
                 setValue={setVoteStart}
               />
               <p>~</p>
               <ThemeDateInput
                 // disabled={status.isAfterStart("COMPLETE_READY")}
-                time="23:59:59"
                 value={voteEnd}
                 setValue={setVoteEnd}
               />
@@ -135,16 +117,10 @@ export function ThemeSchedule({
 
 interface ThemeDateInputProps {
   disabled?: boolean;
-  time: string;
-  value: string | null;
-  setValue?: Dispatch<SetStateAction<string | null>>;
+  value: DateTimeInfo;
+  setValue?: Dispatch<SetStateAction<DateTimeInfo>>;
 }
-function ThemeDateInput({
-  disabled,
-  time,
-  value,
-  setValue,
-}: ThemeDateInputProps) {
+function ThemeDateInput({ disabled, value, setValue }: ThemeDateInputProps) {
   return (
     <div style={{ position: "relative", flexGrow: 1 }}>
       <DateInput
@@ -152,8 +128,12 @@ function ThemeDateInput({
           input: classes.DateInputInput,
         }}
         disabled={disabled}
-        value={value}
-        onChange={setValue}
+        value={value.date}
+        onChange={(value: string | null) => {
+          setValue?.((prev) => {
+            return { ...prev, date: value };
+          });
+        }}
         valueFormat="YYYY. MM. DD."
         firstDayOfWeek={0}
         popoverProps={{
@@ -161,14 +141,43 @@ function ThemeDateInput({
           shadow: "md",
         }}
       />
-      {value && (
+      {value.date && (
         <div
           className={classes.Time}
           style={{
             color: disabled ? "var(--disabled-over)" : "var(--gray-8a)",
           }}
         >
-          <p>({time})</p>
+          <p>(</p>
+          <Select
+            classNames={{
+              input: classes.SelectInput,
+              options: classes.SelectOptions,
+              option: classes.SelectOption,
+            }}
+            styles={{
+              dropdown: {
+                padding: "5px 0px",
+              },
+            }}
+            disabled={disabled}
+            data={Array.from({ length: 24 }, (_, i) =>
+              i.toString().padStart(2, "0"),
+            )}
+            value={value.time.slice(0, 2)}
+            onChange={(value: string | null) => {
+              if (value)
+                setValue?.((prev) => {
+                  return { ...prev, time: value + prev.time.slice(2) };
+                });
+            }}
+            rightSection={null}
+            comboboxProps={{
+              width: 56,
+              position: "bottom",
+            }}
+          />
+          <p>{value.time.slice(2)})</p>
         </div>
       )}
     </div>

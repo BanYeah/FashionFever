@@ -21,8 +21,12 @@ import {
 } from "@mantine/core";
 import { HeartRating } from "../common/heart-rating/heartrating";
 import { AddFileButton } from "../common/add-file-button/add-file-button";
-import { Gift_t, GiftCollection_t } from "@/types/app/theme";
-import { GiftData, GiftCollectionData } from "@/types/api/theme";
+import {
+  GiftData,
+  GiftCollectionData,
+  Gift as Gift_t,
+  GiftCollection as GiftCollection_t,
+} from "@/types/api/theme";
 
 interface GiftCollectionHandle {
   getData: () => GiftCollection_t;
@@ -50,11 +54,10 @@ export const ThemeGifts = forwardRef(
     }>({});
 
     useEffect(() => {
-      if (!initialData || initialData.length <= 0) {
+      if (!initialData || initialData.length === 0) {
         setCollections([]);
         return;
       }
-
       setCollections(
         initialData.map((data) => ({
           id: crypto.randomUUID(),
@@ -101,7 +104,7 @@ export const ThemeGifts = forwardRef(
           <p>선물 목록 관리</p>
         </UnstyledButton>
 
-        <Collapse pb={`${collections.length == 0 ? 0 : 12}`} in={opened}>
+        <Collapse pb={`${collections.length === 0 ? 0 : 12}`} in={opened}>
           <Stack gap={10}>
             {collections.map((col) => (
               <GiftCollection
@@ -129,7 +132,6 @@ export const ThemeGifts = forwardRef(
 interface GiftCollectionProps {
   disabled?: boolean;
   initialData?: GiftCollectionData;
-
   onDelete: () => void;
 }
 
@@ -453,7 +455,6 @@ const Gift = forwardRef(
         setPreview(url);
         return () => URL.revokeObjectURL(url); // clean-up
       }
-
       setPreview(file);
     }, [file]);
 

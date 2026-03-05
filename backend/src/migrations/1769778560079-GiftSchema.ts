@@ -4,14 +4,14 @@ export class GiftSchema1769778560079 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE "GiftCollection" (
-        "gift_collection_id" BIGSERIAL PRIMARY KEY,
-        "theme_id"        UUID NOT NULL,
-        "heart_rate"      NUMERIC(3, 2) NOT NULL,
-        "gift_total_num"  INTEGER NOT NULL,
-        "is_random"       BOOLEAN NOT NULL,
-        "is_same_theme"   BOOLEAN,
-        "theme_type"      VARCHAR(6),
-        "rarity"          VARCHAR(2),
+        "gift_collection_id"  BIGSERIAL PRIMARY KEY,
+        "theme_id"            UUID NOT NULL,
+        "heart_rate"          NUMERIC(3, 2) NOT NULL,
+        "gift_total_num"      INTEGER NOT NULL,
+        "is_random"           BOOLEAN NOT NULL,
+        "is_same_theme"       BOOLEAN,
+        "theme_type"          VARCHAR(6),
+        "rarity"              VARCHAR(2),
         
         CONSTRAINT "chk_type_enum" CHECK (
           "theme_type" IN ('NORMAL', 'VIP', 'LUCK', 'CASH')
@@ -29,9 +29,9 @@ export class GiftSchema1769778560079 implements MigrationInterface {
       CREATE TABLE "Gift" (
         "gift_id"             BIGSERIAL PRIMARY KEY,
         "gift_collection_id"  BIGSERIAL NOT NULL,
-        "gift_url"            TEXT NOT NULL,
         "theme_name"          TEXT NOT NULL,
         "gift_name"           TEXT NOT NULL,
+        "gift_url"            TEXT NOT NULL,
         "collection_order"    INTEGER NOT NULL,
         
         CONSTRAINT "fk_gift_collection_detail" FOREIGN KEY ("gift_collection_id") REFERENCES "GiftCollection" ("gift_collection_id") ON DELETE CASCADE

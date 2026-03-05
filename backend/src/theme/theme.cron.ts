@@ -5,6 +5,7 @@ import { DataSource, QueryRunner, Repository, IsNull } from 'typeorm';
 
 import Redis from 'ioredis';
 import { R2Service } from 'src/common/r2/r2.service';
+import { PurgeCacheUtil } from 'src/common/utils/purge-cache.util';
 
 import { Schedule } from './entities/schedule.entity';
 import { Submission } from 'src/submission/entities/submission.entity';
@@ -22,49 +23,6 @@ export class ThemeCron {
     @InjectRepository(Submission)
     private readonly submissionRepo: Repository<Submission>,
   ) {}
-
-  private async purgeCache(updated: any[]) {
-    if (updated.length === 0) return;
-
-    /* GET /schedules/timeline
-       GET /schedules/voting-now
-       GET /themes */
-    const files = [
-      `${process.env.API_PREFIX}/schedules/timeline`,
-      `${process.env.API_PREFIX}/schedules/voting-now`,
-      `${process.env.API_PREFIX}/themes?page=1`,
-      `${process.env.API_PREFIX}/themes?page=2`,
-    ];
-
-    /* GET /themes/:theme_id/header
-       GET /themes/:theme_id/gift */
-    const enrollingThemeIds = updated
-      .filter((row: any) => row.status === 'ENROLLING') // updated to 'ENROLLING'
-      .map((row: any) => row.theme_id);
-    for (const themeId of enrollingThemeIds) {
-      files.push(`${process.env.API_PREFIX}/themes/${themeId}/header`);
-      files.push(`${process.env.API_PREFIX}/themes/${themeId}/gift`);
-    }
-
-    /* GET /themes/:theme_id/status */
-    const updatedThemeIds = updated.map((row: any) => row.theme_id);
-    for (const themeId of updatedThemeIds)
-      files.push(`${process.env.API_PREFIX}/themes/${themeId}/status`);
-
-    const url = `https://api.cloudflare.com/client/v4/zones/${process.env.CACHE_ZONE_ID}/purge_cache`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.CACHE_SECRET_ACCESS_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        files: files,
-      }),
-    });
-
-    if (!res.ok) throw new Error('/purge_cache API 호출 오류');
-  }
 
   private async readyVote(themeId: string) {
     /* 유저 탈퇴로 인해 이미지 경로가 NULL인 제출 제거 */
@@ -133,9 +91,11 @@ export class ThemeCron {
           });
         }
 
-        this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 준비');
-        await this.purgeCache([{ theme_id: themeId, status: 'INCOMPLETE' }]);
-        this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 성공');
+        await PurgeCacheUtil.apiTheme([
+          { theme_id: themeId, status: 'INCOMPLETE' },
+        ]).catch((err) =>
+          console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+        );
         return;
       }
     }
@@ -169,9 +129,11 @@ export class ThemeCron {
 
     await this.scheduleRepo.update({ theme_id: themeId }, { status: 'VOTING' });
 
-    this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 준비');
-    await this.purgeCache([{ theme_id: themeId, status: 'VOTING' }]);
-    this.logger.log('테마 투표 준비 관련 /purge_cache API 호출 성공');
+    await PurgeCacheUtil.apiTheme([
+      { theme_id: themeId, status: 'VOTING' },
+    ]).catch((err) =>
+      console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+    );
   }
 
   private async completeVote(themeId: string) {
@@ -342,9 +304,11 @@ export class ThemeCron {
       await queryRunner.release();
     }
 
-    this.logger.log('테마 결과 집계 관련 /purge_cache API 호출 준비');
-    await this.purgeCache([{ theme_id: themeId, status: 'COMPLETE' }]);
-    this.logger.log('테마 결과 집계 관련 /purge_cache API 호출 성공');
+    await PurgeCacheUtil.apiTheme([
+      { theme_id: themeId, status: 'COMPLETE' },
+    ]).catch((err) =>
+      console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+    );
   }
 
   private async adjustScore(themeId: string, queryRunner: QueryRunner) {
@@ -490,8 +454,8 @@ export class ThemeCron {
   // 매 10초마다 실행
   // @Cron('0/10 * * * * *'
 
-  // 매일 자정(00:00) 한국 시간 기준으로 실행
-  @Cron('0 0 0 * * *', {
+  // 한국 시간 기준으로 1시간마다 실행
+  @Cron('0 0 * * * *', {
     timeZone: 'Asia/Seoul',
   })
   async handleScheduleStatusUpdate() {
@@ -519,16 +483,16 @@ export class ThemeCron {
 
       this.logger.log('테마 일정 상태 업데이트 완료');
 
-      this.logger.log('/purge_cache API 호출 준비');
-      await this.purgeCache(updated);
-      this.logger.log('/purge_cache API 호출 성공');
+      await PurgeCacheUtil.apiTheme(updated).catch((err) =>
+        console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+      );
 
       /* 테마 투표 준비 */
       const voteReady = updated
         .filter((item: any) => item.status === 'VOTE_READY')
         .map((item: any) => item.theme_id);
 
-      if (voteReady.length >= 1) {
+      if (voteReady.length > 0) {
         this.logger.log('테마 투표 준비 시작');
         await this.readyVote(voteReady[0]);
         this.logger.log('테마 투표 준비 완료');
@@ -539,13 +503,13 @@ export class ThemeCron {
         .filter((item: any) => item.status === 'COMPLETE_READY')
         .map((item: any) => item.theme_id);
 
-      if (completeReady.length >= 1) {
+      if (completeReady.length > 0) {
         this.logger.log('테마 결과 집계 시작');
         await this.completeVote(completeReady[0]);
         this.logger.log('테마 결과 집계 완료');
       }
     } catch (error) {
-      this.logger.error('오류 발생', error.stack);
+      this.logger.error('[ERROR] ', error.stack);
     }
   }
 }

@@ -81,8 +81,8 @@ export class AccountController {
     description: '미니코드',
   })
   @ApiResponse({ status: 200, description: '사용자 삭제 성공' })
+  @ApiResponse({ status: 400, description: '사용자 삭제 불가' })
   @ApiResponse({ status: 404, description: '사용자 없음' })
-  @ApiResponse({ status: 422, description: '사용자 삭제 불가' })
   async deleteUser(@Query('minicode') minicode: string) {
     return await this.accountService.removeUser(minicode);
   }

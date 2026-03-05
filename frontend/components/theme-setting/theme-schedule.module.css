@@ -17,6 +17,18 @@
   }
 }
 
+.DateInputInput {
+  padding: 0px 10px;
+
+  height: 36px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 14px;
+}
+
 .Time {
   position: absolute;
   top: 0px;
@@ -30,17 +42,26 @@
   color: var(--gray-8a);
   font-size: 14px;
 
-  pointer-events: none;
+  p {
+    cursor: default !important;
+  }
 }
 
-.DateInputInput {
-  padding: 0px 10px;
+.SelectInput {
+  width: 17px;
 
-  height: 36px;
-
-  background-color: var(--gray-f2);
   border: none;
-  border-radius: 10px;
+  background-color: transparent;
+}
 
-  font-size: 14px;
+.SelectOptions {
+  width: 100%;
+}
+
+.SelectOption {
+  display: flex;
+  justify-content: center;
+
+  width: inherit;
+  height: 24px;
 }

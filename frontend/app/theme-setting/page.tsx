@@ -27,21 +27,21 @@ import {
   AccountSelect,
 } from "@/components/theme-setting/account-select";
 import { ThemeGifts } from "@/components/theme-setting/theme-gifts";
+import { ThemeStatus } from "@/types/theme-status";
 import { enrollBgColor } from "@/types/enroll-bg-color";
-import { GiftCollection_t } from "@/types/app/theme";
 import {
   GiftCollection,
   ThemePayload,
   GiftCollectionData,
   ThemeData,
 } from "@/types/api/theme";
-import { convertToWebP, WebPConversionError } from "@/utils/convert-to-webp";
 import {
   createThemeSetting,
   getThemeSetting,
   patchThemeSetting,
 } from "@/utils/api/theme";
-import { ThemeStatus } from "@/types/theme-status";
+import { DateTimeInfo, FormatDateUtil } from "@/utils/fomat-date.util";
+import { convertToWebP, WebPConversionError } from "@/utils/convert-to-webp";
 
 export default function ThemeSettingPage() {
   const router = useRouter();
@@ -61,7 +61,6 @@ export default function ThemeSettingPage() {
       setBannerPreview(url);
       return () => URL.revokeObjectURL(url); // clean-up
     }
-
     setBannerPreview(banner);
   }, [banner]);
 
@@ -81,10 +80,22 @@ export default function ThemeSettingPage() {
   ];
 
   /* 일정 관리 */
-  const [enrollStart, setEnrollStart] = useState<string | null>(null);
-  const [reviewStart, setReviewStart] = useState<string | null>(null);
-  const [voteStart, setVoteStart] = useState<string | null>(null);
-  const [voteEnd, setVoteEnd] = useState<string | null>(null);
+  const [eStart, setEStart] = useState<DateTimeInfo>({
+    date: null,
+    time: "00:00:00",
+  });
+  const [rStart, setRStart] = useState<DateTimeInfo>({
+    date: null,
+    time: "00:00:00",
+  });
+  const [vStart, setVStart] = useState<DateTimeInfo>({
+    date: null,
+    time: "00:00:00",
+  });
+  const [vEnd, setVEnd] = useState<DateTimeInfo>({
+    date: null,
+    time: "23:59:59",
+  });
 
   /* 검수/심사 계정 관리 */
   const [reviewer, setReviewer] = useState<string | null>(null);
@@ -103,20 +114,6 @@ export default function ThemeSettingPage() {
     GiftCollectionData[]
   >([]);
 
-  const formatDate = (dateStr: string, offset: number = 0) => {
-    const date = new Date(dateStr);
-    date.setDate(date.getDate() + offset);
-
-    const formatter = new Intl.DateTimeFormat("en-CA", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      timeZone: "Asia/Seoul",
-    });
-
-    return formatter.format(date);
-  };
-
   useEffect(() => {
     if (!themeId) {
       setName("");
@@ -125,10 +122,10 @@ export default function ThemeSettingPage() {
 
       setBanner(null);
 
-      setEnrollStart(null);
-      setReviewStart(null);
-      setVoteStart(null);
-      setVoteEnd(null);
+      setEStart({ date: null, time: "00:00:00" });
+      setRStart({ date: null, time: "00:00:00" });
+      setVStart({ date: null, time: "00:00:00" });
+      setVEnd({ date: null, time: "23:59:59" });
 
       setReviewer(null);
       setJudge([]);
@@ -156,28 +153,21 @@ export default function ThemeSettingPage() {
       setName(data.name);
       setDescription(data.desc);
       if (data.bg_limit) setBgLimit(enrollBgLimit[data.bg_limit].name);
+      else setBgLimit("배경 제한 없음");
 
       setBanner(data.banner_url);
 
-      setEnrollStart(formatDate(data.enroll_start_at));
-      setReviewStart(formatDate(data.review_start_at));
-      setVoteStart(formatDate(data.vote_start_at));
-      setVoteEnd(formatDate(data.complete_start_at, -1));
+      setEStart(FormatDateUtil.dateTime(data.enroll_start_at));
+      setRStart(FormatDateUtil.dateTime(data.review_start_at));
+      setVStart(FormatDateUtil.dateTime(data.vote_start_at));
+      setVEnd(FormatDateUtil.dateTime(data.complete_start_at, -1000));
 
       if (data.reviewer_minicode)
         setReviewer("judge_" + data.reviewer_minicode);
+      else setReviewer(null);
       setJudge(data.judge_minicodes.map((code) => "judge_" + code));
 
-      setInitialStatus(
-        () =>
-          new ThemeStatus(
-            data.status,
-            new Date(data.enroll_start_at),
-            new Date(data.review_start_at),
-            new Date(data.vote_start_at),
-            new Date(data.complete_start_at),
-          ),
-      );
+      setInitialStatus(() => new ThemeStatus(data.status));
       setInitialCollections(data.collections);
 
       setLoading(false);
@@ -187,10 +177,15 @@ export default function ThemeSettingPage() {
   /* 저장하기 */
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const handleSave = async () => {
-    const giftsData: GiftCollection_t[] =
+    const giftsData: GiftCollection[] =
       themeGiftsRef.current?.getAllData() || [];
 
     /* 입력값 존재 확인 */
+    const eSTZ = FormatDateUtil.timezone(eStart);
+    const rSTZ = FormatDateUtil.timezone(rStart);
+    const vSTZ = FormatDateUtil.timezone(vStart);
+    const vETZ = FormatDateUtil.timezone(vEnd);
+
     {
       if (name.trim() === "") {
         notify(
@@ -224,7 +219,7 @@ export default function ThemeSettingPage() {
         return;
       }
 
-      if (!enrollStart) {
+      if (!eSTZ) {
         notify(
           <p>
             <span style={{ color: "var(--main)" }}>참가 시작 시간</span>이
@@ -234,7 +229,7 @@ export default function ThemeSettingPage() {
         );
         return;
       }
-      if (!reviewStart) {
+      if (!rSTZ) {
         notify(
           <p>
             <span style={{ color: "var(--main)" }}>검수 시작 시간</span>이
@@ -244,7 +239,7 @@ export default function ThemeSettingPage() {
         );
         return;
       }
-      if (!voteStart) {
+      if (!vSTZ) {
         notify(
           <p>
             <span style={{ color: "var(--main)" }}>투표 시작 시간</span>이
@@ -254,7 +249,7 @@ export default function ThemeSettingPage() {
         );
         return;
       }
-      if (!voteEnd) {
+      if (!vETZ) {
         notify(
           <p>
             <span style={{ color: "var(--main)" }}>투표 종료 시간</span>이
@@ -354,23 +349,25 @@ export default function ThemeSettingPage() {
       }
     }
 
-    const enrollStartDate = new Date(enrollStart + "T00:00:00+09:00");
-    const reviewStartDate = new Date(reviewStart + "T00:00:00+09:00");
-    const voteStartDate = new Date(voteStart + "T00:00:00+09:00");
-    const completeStartDate = new Date(voteEnd + "T00:00:00+09:00");
-    completeStartDate.setDate(completeStartDate.getDate() + 1);
+    const enrollStartDate = new Date(eSTZ);
+    const reviewStartDate = new Date(rSTZ);
+    const voteStartDate = new Date(vSTZ);
+    const completeStartDate = new Date(vETZ);
+    completeStartDate.setTime(completeStartDate.getTime() + 1000);
 
     /* 일정 유효성 검사 */
-    // const isValidSchedule = validateSchedule(
-    //   enrollStartDate,
-    //   reviewStartDate,
-    //   voteStartDate,
-    //   completeStartDate,
-    //   notify,
-    // );
-    // if (!isValidSchedule) return;
+    if (
+      !validateSchedule(
+        enrollStartDate,
+        reviewStartDate,
+        voteStartDate,
+        completeStartDate,
+        notify,
+      )
+    )
+      return;
 
-    /* 하트레이트 중복 검사 */
+    /* 하트레이트 중복 확인 */
     const heartRates = giftsData.map((data) => data.heart_rate);
     if (new Set(heartRates).size !== heartRates.length) {
       notify(
@@ -382,30 +379,31 @@ export default function ThemeSettingPage() {
       return;
     }
 
-    const bgIndex = enrollBgLimit.findIndex((item) => item.name === bgLimit);
-    const convertToWebP_GC = async (
-      collections: GiftCollection_t[],
-    ): Promise<GiftCollection[]> => {
-      const result = await Promise.all(
-        collections.map(async (collection) => ({
-          ...collection,
-          gifts: await Promise.all(
-            collection.gifts.map(async (gift) => ({
-              ...gift,
-              gift_file:
-                gift.gift_file instanceof File
-                  ? await convertToWebP(gift.gift_file)
-                  : gift.gift_file,
-            })),
-          ),
-        })),
-      );
-
-      return result.sort((a, b) => b.heart_rate - a.heart_rate); // 내림차순 정렬
-    };
-
     try {
       setSaveLoading(true);
+
+      const bgIndex = enrollBgLimit.findIndex((item) => item.name === bgLimit);
+      const convertToWebP_GC = async (
+        collections: GiftCollection[],
+      ): Promise<GiftCollection[]> => {
+        const result = await Promise.all(
+          collections.map(async (collection) => ({
+            ...collection,
+            gifts: await Promise.all(
+              collection.gifts.map(async (gift) => ({
+                ...gift,
+                gift_file:
+                  gift.gift_file instanceof File
+                    ? await convertToWebP(gift.gift_file)
+                    : gift.gift_file,
+              })),
+            ),
+          })),
+        );
+
+        return result.sort((a, b) => b.heart_rate - a.heart_rate); // 내림차순 정렬
+      };
+
       const payload: ThemePayload = {
         name: name,
         desc: description,
@@ -520,7 +518,7 @@ export default function ThemeSettingPage() {
           <ThemeInput
             mt={16}
             label="테마 이름"
-            // disabled={initialStatus.isAfterStart("ENROLLING")}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
             placeholder=""
             value={name}
             setValue={setName}
@@ -528,14 +526,14 @@ export default function ThemeSettingPage() {
           <ThemeInput
             mt={22}
             label="테마 설명"
-            // disabled={initialStatus.isAfterStart("ENROLLING")}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
             placeholder="~ 미니는 누구?"
             value={description}
             setValue={setDescription}
           />
           <BgLimitCombobox
             mt={22}
-            // disabled={initialStatus.isAfterStart("ENROLLING")}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
             combobox={combobox}
             enrollBgLimit={enrollBgLimit}
             bgLimit={bgLimit}
@@ -546,14 +544,14 @@ export default function ThemeSettingPage() {
           {/* 일정 관리 */}
           <ThemeSchedule
             status={initialStatus}
-            enrollStart={enrollStart}
-            setEnrollStart={setEnrollStart}
-            reviewStart={reviewStart}
-            setReviewStart={setReviewStart}
-            voteStart={voteStart}
-            setVoteStart={setVoteStart}
-            voteEnd={voteEnd}
-            setVoteEnd={setVoteEnd}
+            enrollStart={eStart}
+            setEnrollStart={setEStart}
+            reviewStart={rStart}
+            setReviewStart={setRStart}
+            voteStart={vStart}
+            setVoteStart={setVStart}
+            voteEnd={vEnd}
+            setVoteEnd={setVEnd}
           />
           <Divider size={1} color={"var(--gray-d9)"} />
 
@@ -561,7 +559,7 @@ export default function ThemeSettingPage() {
           <AccountSelect
             mt={16}
             label="검수 계정 관리"
-            // disabled={initialStatus.isAfterStart("REVIEWING")}
+            disabled={initialStatus.isAfterStart("VOTE_READY")}
             value={reviewer}
             setValue={setReviewer}
             handleServerError={notifyServerError}
@@ -569,7 +567,7 @@ export default function ThemeSettingPage() {
           <AccountMultiSelect
             mt={22}
             label="심사 계정 관리"
-            // disabled={initialStatus.isAfterStart("VOTING")}
+            disabled={initialStatus.isAfterStart("COMPLETE_READY")}
             value={judge}
             setValue={setJudge}
             handleServerError={notifyServerError}
@@ -577,7 +575,7 @@ export default function ThemeSettingPage() {
           <Divider mt={10} size={1} color={"var(--gray-d9)"} />
           <ThemeGifts
             ref={themeGiftsRef}
-            // disabled={initialStatus.isAfterStart("ENROLLING")}
+            disabled={initialStatus.isAfterStart("ENROLLING")}
             initialData={initialCollections}
           />
           <Divider size={1} color={"var(--gray-d9)"} />
@@ -601,19 +599,6 @@ function validateSchedule(
   completeStartDate: Date,
   notify: (message: React.ReactNode) => void,
 ): boolean {
-  const schedules = [
-    enrollStartDate,
-    reviewStartDate,
-    voteStartDate,
-    completeStartDate,
-  ];
-
-  const now = new Date();
-  if (!schedules.every((date) => date > now)) {
-    notify(<p>과거 시점으로는 일정을 등록할 수 없어요!</p>);
-    return false;
-  }
-
   if (
     enrollStartDate >= reviewStartDate ||
     reviewStartDate >= voteStartDate ||

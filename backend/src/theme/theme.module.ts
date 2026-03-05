@@ -8,7 +8,7 @@ import { Header } from './entities/header.entity';
 import { GiftCollection } from 'src/gift/entities/gift-collection.entity';
 import { Gift } from 'src/gift/entities/gift.entity';
 
-import { User } from 'src/auth/entities/user.entity';
+import { Judge } from 'src/auth/entities/judge.entity';
 import { Reviewer } from './entities/reviewer.entity';
 import { ThemeJudge } from './entities/theme-judge.entity';
 
@@ -26,7 +26,7 @@ import { ThemeCron } from './theme.cron';
       Header,
       GiftCollection,
       Gift,
-      User,
+      Judge,
       Reviewer,
       ThemeJudge,
       Submission,
