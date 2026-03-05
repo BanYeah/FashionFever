@@ -13,7 +13,7 @@ import { Schedule } from './entities/schedule.entity';
 import { Banner } from './entities/banner.entity';
 import { Header } from './entities/header.entity';
 
-import { User } from 'src/auth/entities/user.entity';
+import { Judge } from 'src/auth/entities/judge.entity';
 import { Reviewer } from './entities/reviewer.entity';
 import { ThemeJudge } from './entities/theme-judge.entity';
 
@@ -27,7 +27,7 @@ export class ThemeService {
   constructor(
     private dataSource: DataSource,
     private readonly r2Service: R2Service,
-    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Judge) private judgeRepo: Repository<Judge>,
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
     @InjectRepository(GiftCollection)
     private giftRepo: Repository<GiftCollection>,
@@ -235,7 +235,7 @@ export class ThemeService {
       if (bannerFile !== null) {
         const bannerUrl = await this.r2Service.uploadImage(
           bannerFile,
-          'theme-banner',
+          `theme/${themeId}`,
         );
         uploadedFiles.push(bannerUrl);
 
@@ -255,17 +255,17 @@ export class ThemeService {
 
       // Reviewer
       if (dto.reviewer_minicode) {
-        const reviewerUser = await this.userRepo.findOneBy({
-          minicode: dto.reviewer_minicode,
+        const reviewer = await this.judgeRepo.findOne({
+          where: { minicode: dto.reviewer_minicode },
         });
-        if (!reviewerUser)
+        if (!reviewer)
           throw new BadRequestException(
             '입력하신 미니코드에 해당하는 심사위원을 찾을 수 없어요.',
           );
 
         await queryRunner.manager.save(Reviewer, {
           theme_id: themeId,
-          user_id: reviewerUser.user_id,
+          user_id: reviewer.user_id,
         });
       } else {
         await queryRunner.manager.save(Reviewer, {
@@ -275,17 +275,17 @@ export class ThemeService {
       }
 
       // ThemeJudge
-      const judgeUsers = await this.userRepo.find({
+      const judges = await this.judgeRepo.find({
         where: { minicode: In(dto.judge_minicodes) },
       });
 
-      const judges = judgeUsers.map((user) => ({
+      const themeJudges = judges.map((user) => ({
         theme_id: themeId,
         user_id: user.user_id,
       }));
 
-      if (judges.length > 0)
-        await queryRunner.manager.insert(ThemeJudge, judges);
+      if (themeJudges.length > 0)
+        await queryRunner.manager.insert(ThemeJudge, themeJudges);
 
       // GiftCollection & Gift
       for (const colDto of dto.collections) {
@@ -302,7 +302,7 @@ export class ThemeService {
           if (gift_file_order !== null) {
             const giftUrl = await this.r2Service.uploadImage(
               giftFiles[gift_file_order],
-              'theme-gift',
+              `theme/${themeId}`,
             );
             uploadedFiles.push(giftUrl);
 
@@ -381,19 +381,19 @@ export class ThemeService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     try {
-      /* 일정, 배너, 해더, 검수자 */
+      /* 일정, 배너, 해더, 검수자, 심사위원 */
       const theme = await queryRunner.manager.findOne(Schedule, {
         where: { theme_id: themeId },
-        relations: ['banner', 'header', 'reviewer', 'reviewer.user'],
+        relations: [
+          'banner',
+          'header',
+          'reviewer',
+          'reviewer.user',
+          'theme_judges',
+          'theme_judges.user',
+        ],
       });
-      if (!theme) throw new NotFoundException('존재하지 않는 테마예요!');
-
-      /* 심사위원 */
-      const judges = await queryRunner.manager.find(ThemeJudge, {
-        where: { theme_id: themeId },
-        relations: ['user'],
-      });
-      if (!judges) throw new NotFoundException('존재하지 않는 테마예요!');
+      if (!theme) throw new NotFoundException();
 
       /* 선물 목록 */
       const collections = await queryRunner.manager.find(GiftCollection, {
@@ -406,7 +406,7 @@ export class ThemeService {
           },
         },
       });
-      if (!collections) throw new NotFoundException('존재하지 않는 테마예요!');
+      if (!collections) throw new NotFoundException();
 
       return {
         data: {
@@ -423,7 +423,7 @@ export class ThemeService {
           status: theme.status,
 
           reviewer_minicode: theme.reviewer.user?.minicode || null,
-          judge_minicodes: judges.map((j) => j.user.minicode),
+          judge_minicodes: theme.theme_judges.map((j) => j.user.minicode),
 
           collections: collections.map((col) => ({
             heart_rate: Number(col.heart_rate),
@@ -476,26 +476,23 @@ export class ThemeService {
       });
       if (!schedule) throw new NotFoundException('존재하지 않는 테마예요!');
 
-      // 이미 시작된 일정을 수정하지는 않는지 확인
-      // {
-      //   const now = new Date();
-      //   const scheduleChecks = [
-      //     [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
-      //     [dto.review_start_at, schedule.review_start_at, '검수 시작'],
-      //     [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
-      //     [dto.complete_start_at, schedule.complete_start_at, '결과 집계 시작'],
-      //   ];
+      const now = new Date();
+      // const scheduleComparisons = [
+      //   [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
+      //   [dto.review_start_at, schedule.review_start_at, '검수 시작'],
+      //   [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
+      //   [dto.complete_start_at, schedule.complete_start_at, '결과 집계 시작'],
+      // ];
 
-      //   for (const [newDate, oldDate, label] of scheduleChecks) {
-      //     const isChanged =
-      //       new Date(newDate).getTime() !== new Date(oldDate).getTime();
-      //     const isStarted = new Date(oldDate) < now;
+      // for (const [newDate, oldDate, label] of scheduleComparisons) {
+      //   const isChanged =
+      //     new Date(newDate).getTime() !== new Date(oldDate).getTime();
+      //   const isStarted = new Date(oldDate) < now;
 
-      //     if (isChanged && isStarted)
-      //       throw new BadRequestException(
-      //         `이미 시작된 '${label}' 일정은 수정할 수 없어요!`,
-      //       );
-      //   }
+      //   if (isChanged && isStarted)
+      //     throw new BadRequestException(
+      //       `이미 시작된 '${label}' 일정은 수정할 수 없어요!`,
+      //     );
       // }
 
       await queryRunner.manager.update(
@@ -509,6 +506,8 @@ export class ThemeService {
         },
       );
 
+      // 참가 시작 전
+      if (now < schedule.enroll_start_at) {
       // Banner
       const banner = await queryRunner.manager.findOne(Banner, {
         where: { theme_id: themeId },
@@ -520,7 +519,7 @@ export class ThemeService {
       if (bannerFile !== null) {
         const bannerUrl = await this.r2Service.uploadImage(
           bannerFile,
-          'theme-banner',
+            `theme/${themeId}`,
         );
         uploadedFiles.push(bannerUrl);
 
@@ -546,13 +545,16 @@ export class ThemeService {
         { theme_id: themeId },
         { name: dto.name, desc: dto.desc, bg_limit: dto.bg_limit },
       );
+      }
 
+      // 투표 시작 전
+      if (now < schedule.vote_start_at) {
       // Reviewer
       if (dto.reviewer_minicode) {
-        const reviewerUser = await this.userRepo.findOneBy({
-          minicode: dto.reviewer_minicode,
+          const reviewer = await this.judgeRepo.findOne({
+            where: { minicode: dto.reviewer_minicode },
         });
-        if (!reviewerUser)
+          if (!reviewer)
           throw new BadRequestException(
             '입력하신 미니코드에 해당하는 심사위원을 찾을 수 없어요.',
           );
@@ -560,7 +562,7 @@ export class ThemeService {
         await queryRunner.manager.update(
           Reviewer,
           { theme_id: themeId },
-          { user_id: reviewerUser.user_id },
+            { user_id: reviewer.user_id },
         );
       } else {
         await queryRunner.manager.update(
@@ -568,23 +570,29 @@ export class ThemeService {
           { theme_id: themeId },
           { user_id: null },
         );
+        }
       }
 
+      // 결과 집계 시작 전
+      if (now < schedule.complete_start_at) {
       // ThemeJudge
       await queryRunner.manager.delete(ThemeJudge, { theme_id: themeId });
 
-      const judgeUsers = await this.userRepo.find({
+        const judges = await this.judgeRepo.find({
         where: { minicode: In(dto.judge_minicodes) },
       });
 
-      const judges = judgeUsers.map((user) => ({
+        const themeJudges = judges.map((user) => ({
         theme_id: themeId,
         user_id: user.user_id,
       }));
 
-      if (judges.length > 0)
-        await queryRunner.manager.insert(ThemeJudge, judges);
+        if (themeJudges.length > 0)
+          await queryRunner.manager.insert(ThemeJudge, themeJudges);
+      }
 
+      // 참가 시작 전
+      if (now < schedule.enroll_start_at) {
       // GiftCollection & Gift
       const giftCollections = await queryRunner.manager.find(GiftCollection, {
         where: { theme_id: themeId },
@@ -612,7 +620,7 @@ export class ThemeService {
           if (gift_file_order !== null) {
             const giftUrl = await this.r2Service.uploadImage(
               giftFiles[gift_file_order],
-              'theme-gift',
+                `theme/${themeId}`,
             );
             uploadedFiles.push(giftUrl);
 
@@ -635,6 +643,7 @@ export class ThemeService {
             throw new BadRequestException(
               '선물 이미지가 업로드되지 않은 선물이 있어요!',
             );
+            }
           }
         }
       }
@@ -671,11 +680,20 @@ export class ThemeService {
     const deletedFiles: string[] = [];
 
     try {
+      // Schdule
+      const schedule = await queryRunner.manager.findOne(Schedule, {
+        where: { theme_id: themeId },
+      });
+      if (!schedule) throw new NotFoundException();
+
+      // if (new Date() >= schedule.complete_start_at)
+      //   throw new BadRequestException('투표가 종료된 테마는 삭제할 수 없어요!');
+
       // Banner (banner_url)
       const banner = await queryRunner.manager.findOne(Banner, {
         where: { theme_id: themeId },
       });
-      if (!banner) throw new NotFoundException('존재하지 않는 테마예요!');
+      if (!banner) throw new NotFoundException();
 
       deletedFiles.push(banner.banner_url);
 
