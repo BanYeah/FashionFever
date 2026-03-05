@@ -19,9 +19,6 @@ import { CryptoUtil } from 'src/common/utils/crypto.util';
 import { User } from './entities/user.entity';
 import { Judge } from './entities/judge.entity';
 
-import { LoginDto } from './dto/login.dto';
-import { LoginAdminDto } from './dto/login-admin.dto';
-
 @Injectable()
 export class AuthService {
   constructor(
