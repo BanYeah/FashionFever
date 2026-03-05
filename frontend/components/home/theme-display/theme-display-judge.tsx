@@ -89,7 +89,7 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
         );
 
       case "VOTE_READY":
-        return <p>현재 투표 준비가 진행 중인 테마예요!</p>;
+        return <p>현재 심사 준비가 진행 중인 테마예요!</p>;
 
       case "COMPLETE_READY":
       case "COMPLETE":
@@ -140,7 +140,6 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
   const renderRight = () => {
     switch (data.status) {
       case "PREPARING":
-      case "VOTE_READY":
       case "COMPLETE_READY":
       case "COMPLETE":
       case "INCOMPLETE":
@@ -158,13 +157,19 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
         return (
           <Stack align="flex-end" justify="space-between" h={"100%"} gap={12}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.vote_start_at)} 후 투표 시작
+              {formatDueIn(data.vote_start_at)} 후 심사 시작
             </p>
             {result?.success && result.data.can_review ? (
               <ThemeReviewLink themeId={data.theme_id} />
             ) : (
               <></>
             )}
+          </Stack>
+        );
+      case "VOTE_READY":
+        return (
+          <Stack justify="flex-start" h={"100%"}>
+            <p style={{ color: "var(--main)" }}>잠시 후 심사 시작</p>
           </Stack>
         );
       case "VOTING":

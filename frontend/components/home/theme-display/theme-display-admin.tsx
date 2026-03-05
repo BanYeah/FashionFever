@@ -124,8 +124,6 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
   };
   const renderRight = () => {
     switch (data.status) {
-      case "VOTE_READY":
-      case "COMPLETE_READY":
       case "INCOMPLETE":
         return (
           <Stack justify="flex-end" h={"100%"}>
@@ -164,10 +162,24 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
             </Group>
           </Stack>
         );
+      case "VOTE_READY":
+        return (
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p style={{ color: "var(--main)" }}>잠시 후 투표 시작</p>
+            <ThemeSettingLink themeId={data.theme_id} />
+          </Stack>
+        );
       case "VOTING":
         return (
           <Stack align="flex-end" justify="space-between" gap={12}>
             <p>결과 발표까지 {formatDueIn(data.complete_start_at)}</p>
+            <ThemeSettingLink themeId={data.theme_id} />
+          </Stack>
+        );
+      case "COMPLETE_READY":
+        return (
+          <Stack align="flex-end" justify="space-between" gap={12}>
+            <p style={{ color: "var(--main)" }}>잠시 후 결과 발표</p>
             <ThemeSettingLink themeId={data.theme_id} />
           </Stack>
         );

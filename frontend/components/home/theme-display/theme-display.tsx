@@ -249,7 +249,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
         return (
           <Stack
             style={{ position: "relative" }}
-            // align="flex-end"
+            align="flex-end"
             justify="flex-end"
             w={"50%"}
             h={"100%"}
