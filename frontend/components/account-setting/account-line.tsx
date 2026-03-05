@@ -52,6 +52,14 @@ export function AccountLine({ variant, account, reload }: AccountLineProps) {
 
     if (!result.success) {
       switch (result.status) {
+        case 400:
+          notify(
+            <p>
+              투표가 진행 중인 테마가 있을 때는
+              <br /> 계정을 삭제할 수 없어요!
+            </p>,
+          );
+          break;
         case 404:
           notify(
             <p>
@@ -60,14 +68,7 @@ export function AccountLine({ variant, account, reload }: AccountLineProps) {
             </p>,
           );
           break;
-        case 422:
-          notify(
-            <p>
-              투표가 진행 중인 테마가 있을 때는
-              <br /> 계정을 삭제할 수 없어요!
-            </p>,
-          );
-          break;
+
         default:
           notifyServerError();
       }

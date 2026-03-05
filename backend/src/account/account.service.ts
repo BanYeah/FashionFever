@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException, // 404
   ConflictException, // 409
-  UnprocessableEntityException, // 422
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Like, In } from 'typeorm';
@@ -165,7 +164,7 @@ export class AccountService {
       const schedules = await queryRunner.manager.count(Schedule, {
         where: { status: In(['VOTE_READY', 'VOTING', 'COMPLETE_READY']) },
       });
-      if (schedules > 0) throw new UnprocessableEntityException(); // 422
+      if (schedules > 0) throw new BadRequestException(); // 400
 
       const user = await queryRunner.manager.findOne(User, {
         where: { minicode },
