@@ -10,9 +10,9 @@ import { Group, Stack, UnstyledButton, Divider, Loader } from "@mantine/core";
 import { ModalGoBack } from "../../common/modal/modal-go-back";
 import { ThemeReviewLink } from "./theme-review-link";
 import { ThemeScheduleData } from "@/types/api/theme";
-import { formatDueIn } from "@/utils/format-due-in";
 import { deleteThemeSetting } from "@/utils/api/theme";
 import { getReviewStatus } from "@/utils/api/review";
+import { FormatDateUtil } from "@/utils/fomat-date.util";
 
 interface ThemeDisplayAdminProps {
   data: ThemeScheduleData;
@@ -134,7 +134,7 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
       case "PREPARING":
         return (
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>{formatDueIn(data.enroll_start_at)} 남음</p>
+            <p>{FormatDateUtil.deadline(data.enroll_start_at)} 남음</p>
             <Group gap={4}>
               <ThemeDeleteButton themeId={data.theme_id} reload={reload} />
               <ThemeSettingLink themeId={data.theme_id} />
@@ -145,7 +145,7 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
         return (
           <Stack align="flex-end" justify="space-between" gap={12}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.review_start_at)} 남음
+              {FormatDateUtil.deadline(data.review_start_at)} 남음
             </p>
             <ThemeSettingLink themeId={data.theme_id} />
           </Stack>
@@ -154,7 +154,7 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
         return (
           <Stack align="flex-end" justify="space-between" gap={12}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.vote_start_at)} 후 투표 시작
+              {FormatDateUtil.deadline(data.vote_start_at)} 후 투표 시작
             </p>
             <Group gap={4}>
               <ThemeReviewLink themeId={data.theme_id} />
@@ -172,7 +172,9 @@ function ThemeInfo({ data, reload }: ThemeDisplayAdminProps) {
       case "VOTING":
         return (
           <Stack align="flex-end" justify="space-between" gap={12}>
-            <p>결과 발표까지 {formatDueIn(data.complete_start_at)}</p>
+            <p>
+              결과 발표까지 {FormatDateUtil.deadline(data.complete_start_at)}
+            </p>
             <ThemeSettingLink themeId={data.theme_id} />
           </Stack>
         );

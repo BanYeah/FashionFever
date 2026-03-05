@@ -7,7 +7,7 @@ import { Group, Stack, Divider, Loader } from "@mantine/core";
 import { ThemeReviewLink } from "./theme-review-link";
 import { ThemeScheduleData } from "@/types/api/theme";
 import { getReviewStatus } from "@/utils/api/review";
-import { formatDueIn } from "@/utils/format-due-in";
+import { FormatDateUtil } from "@/utils/fomat-date.util";
 
 export function ThemeDisplayJudge({ data }: { data: ThemeScheduleData }) {
   const [result, setResult] = useState<any>(undefined);
@@ -149,7 +149,7 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
         return (
           <Stack justify="flex-start" h={"100%"}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.review_start_at)} 남음
+              {FormatDateUtil.deadline(data.review_start_at)} 남음
             </p>
           </Stack>
         );
@@ -157,7 +157,7 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
         return (
           <Stack align="flex-end" justify="space-between" h={"100%"} gap={12}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.vote_start_at)} 후 심사 시작
+              {FormatDateUtil.deadline(data.vote_start_at)} 후 심사 시작
             </p>
             {result?.success && result.data.can_review ? (
               <ThemeReviewLink themeId={data.theme_id} />
@@ -175,7 +175,9 @@ function ThemeInfo({ data, result }: ThemeInfoProps) {
       case "VOTING":
         return (
           <Stack justify="flex-start" h={"100%"}>
-            <p>결과 발표까지 {formatDueIn(data.complete_start_at)}</p>
+            <p>
+              결과 발표까지 {FormatDateUtil.deadline(data.complete_start_at)}
+            </p>
           </Stack>
         );
     }

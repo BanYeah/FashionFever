@@ -8,10 +8,10 @@ import { useAuthStore } from "@/utils/store/authStore";
 import { Group, Stack, Box, Divider, Loader } from "@mantine/core";
 import { ThemeScheduleData } from "@/types/api/theme";
 import { VoteStatData } from "@/types/api/vote";
-import { formatDueIn } from "@/utils/format-due-in";
 import { getSubmission } from "@/utils/api/submission";
 import { getVoteStat } from "@/utils/api/vote";
 import { getRecordStat } from "@/utils/api/record";
+import { FormatDateUtil } from "@/utils/fomat-date.util";
 
 export function ThemeDisplay({ data }: { data: ThemeScheduleData }) {
   return (
@@ -202,7 +202,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
         return (
           <Stack align="flex-end" justify="space-between" gap={22}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.review_start_at)} 남음
+              {FormatDateUtil.deadline(data.review_start_at)} 남음
             </p>
             <Link
               href={`/gift-list?theme_id=${data.theme_id}&before-dress-up`}
@@ -221,7 +221,7 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
         return (
           <Stack justify="flex-start" h={"100%"}>
             <p style={{ color: "var(--main)" }}>
-              {formatDueIn(data.vote_start_at)} 후 투표 시작
+              {FormatDateUtil.deadline(data.vote_start_at)} 후 투표 시작
             </p>
           </Stack>
         );
@@ -234,7 +234,9 @@ function ThemeInfo({ data }: { data: ThemeScheduleData }) {
       case "VOTING":
         return (
           <Stack align="flex-end" justify="space-between" w={"50%"} gap={6}>
-            <p>결과 발표까지 {formatDueIn(data.complete_start_at)}</p>
+            <p>
+              결과 발표까지 {FormatDateUtil.deadline(data.complete_start_at)}
+            </p>
             <ProgressBar point={point} />
           </Stack>
         );
