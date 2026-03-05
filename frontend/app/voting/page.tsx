@@ -17,7 +17,7 @@ export default async function RankingPage({
 
   if (!themeId) notFound();
 
-  // VOTING(투표 중)이 아니면 '/home'으로 리다이렉트
+  // VOTING(투표 중)이 아니면 404로
   const statusResult = await getThemeStatus(themeId);
   if (!statusResult.success) notFound();
   if (statusResult.data.status !== "VOTING") notFound();

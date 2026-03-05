@@ -91,18 +91,14 @@ export class VoteService {
     if (rank1 === null || rank2 === null)
       throw new InternalServerErrorException();
 
-    const getPercentile = (rank: number): number => {
-      return Math.ceil(((rank + 1) / total) * 100);
-    };
-
     return {
       sub1: {
         prevScore: score1,
-        topP: getPercentile(rank1),
+        vote_score: Math.round(((total - rank1) / total) * 500) / 100,
       },
       sub2: {
         prevScore: score2,
-        topP: getPercentile(rank2),
+        vote_score: Math.round(((total - rank2) / total) * 500) / 100,
       },
       delta: Math.abs(delta1),
     };
@@ -293,19 +289,12 @@ export class VoteService {
       },
     );
 
-    const getTopStat = (topP: number) => {
-      if (topP <= 10) return 'Top 10%';
-      if (topP <= 30) return 'Top 30%';
-      if (topP <= 50) return 'Top 50%';
-      return 'Novice';
-    };
-
     const newVote = await this.createEmptyVote(userId, themeId);
     return {
       data: {
         ...newVote,
-        topP1: getTopStat(result.sub1.topP),
-        topP2: getTopStat(result.sub2.topP),
+        sub_vote_score1: result.sub1.vote_score,
+        sub_vote_score2: result.sub2.vote_score,
         vote_point: voteCount + 1,
       },
     };

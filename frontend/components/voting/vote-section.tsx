@@ -4,13 +4,23 @@ import classes from "./vote-section.module.css";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useNotification } from "../notification/notification";
-import { Box, Center, Stack, UnstyledButton, Loader } from "@mantine/core";
+import {
+  Box,
+  Center,
+  Group,
+  Stack,
+  UnstyledButton,
+  Loader,
+} from "@mantine/core";
 import { PointFooter } from "../app-shell/point-footer";
 import { VoteData, VotePayload } from "@/types/api/vote";
 import { createVote } from "@/utils/api/vote";
+import { HeartRating } from "../common/heart-rating/heartrating";
 
 export function VoteSection({ themeId }: { themeId: string }) {
   const { notify, notifyServerError } = useNotification();
+
+  const [winnerSide, setWinnerSide] = useState<number | null>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [pending, setPending] = useState<boolean>(false);
@@ -52,6 +62,7 @@ export function VoteSection({ themeId }: { themeId: string }) {
   const doVote = async (winner_side: number | null) => {
     if (loading || pending) return; // 중복 처리 방지
     setLoading(true);
+    setWinnerSide(winner_side);
 
     const payload: VotePayload = {
       vote_id: data.vote_id,
@@ -77,17 +88,15 @@ export function VoteSection({ themeId }: { themeId: string }) {
     setData((prev) => {
       return {
         ...prev!,
-        winP1: result.data.winP1,
-        winP2: result.data.winP2,
-        topP1: result.data.topP1,
-        topP2: result.data.topP2,
+        sub_vote_score1: result.data.sub_vote_score1,
+        sub_vote_score2: result.data.sub_vote_score2,
         vote_point: result.data.vote_point,
       };
     });
     setPending(true);
     setLoading(false);
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 4000));
 
     setPending(false);
     setData(result.data);
@@ -118,9 +127,20 @@ export function VoteSection({ themeId }: { themeId: string }) {
               </Center>
             )}
             {pending && (
-              <Stack className={classes.Overlay} justify="flex-end" gap={0}>
-                <TopImage topP={data.topP1} />
-              </Stack>
+              <Group
+                className={classes.Overlay}
+                align="center"
+                justify="space-between"
+                pl={30}
+                pr={40}
+                gap={0}
+              >
+                <ResultPreview
+                  key={data.sub_id1}
+                  voteScore={data.sub_vote_score1}
+                  winning={winnerSide === 1}
+                />
+              </Group>
             )}
             <Image
               src={data.sub_content_url1 ?? "/images/content_alt.svg"}
@@ -167,9 +187,20 @@ export function VoteSection({ themeId }: { themeId: string }) {
               </Center>
             )}
             {pending && (
-              <Stack className={classes.Overlay} gap={0}>
-                <TopImage topP={data.topP2} />
-              </Stack>
+              <Group
+                className={classes.Overlay}
+                align="center"
+                justify="space-between"
+                pl={30}
+                pr={40}
+                gap={0}
+              >
+                <ResultPreview
+                  key={data.sub_id2}
+                  voteScore={data.sub_vote_score2}
+                  winning={winnerSide === 2}
+                />
+              </Group>
             )}
             <Image
               src={data.sub_content_url2 ?? "/images/content_alt.svg"}
@@ -190,49 +221,44 @@ export function VoteSection({ themeId }: { themeId: string }) {
   );
 }
 
-function TopImage({ topP }: { topP?: string }) {
-  if (!topP || topP === "Novice") {
-    return (
-      <Image
-        src={"/images/voting/novice.svg"}
-        alt=""
-        width={100}
-        height={30}
-        style={{ display: "block", margin: "8px 13px" }}
-      />
-    );
-  }
+interface ResultPreviewProps {
+  voteScore?: number;
+  winning: boolean;
+}
 
-  switch (topP) {
-    case "Top 10%":
-      return (
+function ResultPreview({ voteScore = 0, winning }: ResultPreviewProps) {
+  const profiles = [
+    "images/voting/profile-blue.jpg",
+    "images/voting/profile-gray.jpg",
+    "images/voting/profile-pink.jpg",
+  ];
+
+  return (
+    <>
+      <Stack gap={0}>
         <Image
-          src={"/images/voting/top10.svg"}
+          src={profiles[Math.floor(Math.random() * profiles.length)]}
           alt=""
-          width={147}
-          height={52}
-          style={{ display: "block" }}
+          width={100}
+          height={100}
         />
-      );
-    case "Top 30%":
-      return (
-        <Image
-          src={"/images/voting/top30.svg"}
-          alt=""
-          width={147}
-          height={52}
-          style={{ display: "block" }}
-        />
-      );
-    default:
-      return (
-        <Image
-          src={"/images/voting/top50.svg"}
-          alt=""
-          width={124}
-          height={30}
-          style={{ display: "block", margin: "8px 13px" }}
-        />
-      );
-  }
+        <div className={classes.NameBox}>
+          <p>미니니</p>
+        </div>
+        <HeartRating value={voteScore} unitW={20} unitH={18} />
+      </Stack>
+      <>
+        {winning && (
+          <div className={classes.LikeBox}>
+            <Image
+              src="images/voting/like-1.svg"
+              alt=""
+              width={70}
+              height={97}
+            />
+          </div>
+        )}
+      </>
+    </>
+  );
 }
