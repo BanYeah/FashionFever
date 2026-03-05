@@ -1,13 +1,15 @@
 import {
   Injectable,
+  BadRequestException, // 400
   NotFoundException, // 404
   ConflictException, // 409
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Like, In } from 'typeorm';
 
-import { CryptoUtil } from 'src/common/utils/crypto.util';
 import { R2Service } from 'src/common/r2/r2.service';
+import { CryptoUtil } from 'src/common/utils/crypto.util';
+import { PurgeCacheUtil } from 'src/common/utils/purge-cache.util';
 
 import { User } from '../auth/entities/user.entity';
 import { Judge } from '../auth/entities/judge.entity';
@@ -131,29 +133,6 @@ export class AccountService {
     await this.judgeRepo.save(newJudge);
   }
 
-  private async purgeCache(userId: string) {
-    const prefixes = [
-      `${process.env.R2_PUBLIC_ENDPOINT}/submission/${userId}/`,
-    ];
-
-    const url = `https://api.cloudflare.com/client/v4/zones/${process.env.CACHE_ZONE_ID}/purge_cache`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.CACHE_SECRET_ACCESS_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prefixes: prefixes,
-      }),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData);
-    }
-  }
-
   async removeUser(minicode: string) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -198,7 +177,7 @@ export class AccountService {
           );
         });
 
-        await this.purgeCache(user.user_id).catch((err) =>
+        await PurgeCacheUtil.imageUser(user.user_id).catch((err) =>
           console.error('[CACHE_ERROR] Failed to purge cache: ', err),
         );
       }

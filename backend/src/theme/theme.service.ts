@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Not, In } from 'typeorm';
 
 import { R2Service } from 'src/common/r2/r2.service';
+import { PurgeCacheUtil } from 'src/common/utils/purge-cache.util';
 
 import { Schedule } from './entities/schedule.entity';
 import { Banner } from './entities/banner.entity';
@@ -698,6 +699,16 @@ export class ThemeService {
           `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(deletedFiles)}`,
         );
       });
+
+      await PurgeCacheUtil.imageTheme(themeId).catch((err) =>
+        console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+      );
+
+      await PurgeCacheUtil.apiTheme([
+        { theme_id: themeId, status: 'DELETE' },
+      ]).catch((err) =>
+        console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+      );
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
