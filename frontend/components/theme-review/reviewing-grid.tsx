@@ -131,16 +131,14 @@ export function ReviewingGrid({ themeId, view }: RankingGridProps) {
                 key={`${item.submission_id}`}
                 data={item}
                 view={view}
-                reload={(clear: boolean = false) => {
-                  if (clear) {
-                    setMeta((prev) => ({
-                      ...prev,
-                      current: pageIdx + 1,
-                    }));
-                    setData((prev) => {
-                      return prev.slice(0, pageIdx + 1);
-                    });
-                  }
+                reload={() => {
+                  setMeta((prev) => ({
+                    ...prev,
+                    current: pageIdx + 1,
+                  }));
+                  setData((prev) => {
+                    return prev.slice(0, pageIdx + 1);
+                  });
 
                   loadPage(pageIdx + 1);
                 }}
@@ -172,7 +170,7 @@ export function ReviewingGrid({ themeId, view }: RankingGridProps) {
 interface ReviewingCardProps {
   data: ReviewData;
   view: "approved" | "rejected";
-  reload: (clear: boolean) => void;
+  reload: () => void;
   notify: (msg: React.ReactNode) => void;
   notifyServerError: () => void;
 }
@@ -196,7 +194,7 @@ function ReviewingCard({
 
     const result = await patchReviewStatus(data.submission_id, status);
     if (result.success) {
-      reload(true);
+      reload();
       setLoading(false);
       close();
       return;

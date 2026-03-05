@@ -78,11 +78,7 @@ export class ReviewController {
     name: 'theme_id',
     description: '테마 번호',
   })
-  @ApiResponse({ status: 200, description: '스타일 조회 성공' })
-  @ApiResponse({
-    status: 403,
-    description: '권한 부족 (심사위원, 관리자 아님)',
-  })
+  @ApiResponse({ status: 200, description: '권한 조회 성공' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async getReviewStatus(
     @Session() session: any,
@@ -107,10 +103,7 @@ export class ReviewController {
     status: 200,
     description: '검수 상태가 성공적으로 수정됨',
   })
-  @ApiResponse({
-    status: 403,
-    description: '권한 부족 (심사위원, 관리자 아님)',
-  })
+  @ApiResponse({ status: 403, description: '권한 부족' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마/제출임' })
   @ApiResponse({ status: 410, description: '테마 검수 기간이 종료됨' })
   async patchReviewStatus(

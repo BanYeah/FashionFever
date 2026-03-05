@@ -14,8 +14,7 @@ import { Submission } from 'src/submission/entities/submission.entity';
 export class ReviewService {
   constructor(
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
-    @InjectRepository(Submission)
-    private submissionRepo: Repository<Submission>,
+    @InjectRepository(Submission) private submRepo: Repository<Submission>,
   ) {}
 
   private async validateReviewer(session: any, themeId: string) {
@@ -42,7 +41,7 @@ export class ReviewService {
     const take = 30;
     const skip = (page - 1) * take;
 
-    const [sub, total] = await this.submissionRepo.findAndCount({
+    const [sub, total] = await this.submRepo.findAndCount({
       order: { reviewed_at: 'DESC' as const },
       take: take,
       skip: skip,
@@ -70,18 +69,18 @@ export class ReviewService {
   async getReviewPending(session: any, themeId: string) {
     await this.validateReviewer(session, themeId);
 
-    const sub = await this.submissionRepo.findOne({
+    const sub = await this.submRepo.findOne({
       where: {
         theme_id: themeId,
         is_approved: IsNull(),
       },
     });
 
-    const total = await this.submissionRepo.count({
+    const total = await this.submRepo.count({
       where: { theme_id: themeId },
     });
 
-    const reviewed = await this.submissionRepo.count({
+    const reviewed = await this.submRepo.count({
       where: {
         theme_id: themeId,
         is_approved: Not(IsNull()),
@@ -104,12 +103,47 @@ export class ReviewService {
     };
   }
 
+  async getReviewStatus(session: any, themeId: string) {
+    await this.validateReviewer(session, themeId).catch((e) => {
+      if (e instanceof ForbiddenException)
+        return { data: { can_review: false } };
+      throw e;
+    });
+
+    const total = await this.submRepo.count({
+      where: { theme_id: themeId },
+    });
+
+    const reviewed = await this.submRepo.count({
+      where: {
+        theme_id: themeId,
+        is_approved: Not(IsNull()),
+      },
+    });
+
+    const rejected = await this.submRepo.count({
+      where: {
+        theme_id: themeId,
+        is_approved: false,
+      },
+    });
+
+    return {
+      data: { can_review: true },
+      meta: {
+        total,
+        reviewed,
+        rejected,
+      },
+    };
+  }
+
   async patchReviewStatus(
     session: any,
     subId: string,
     status: 'approved' | 'rejected',
   ) {
-    const sub = await this.submissionRepo.findOne({
+    const sub = await this.submRepo.findOne({
       where: { submission_id: subId },
       relations: ['schedule', 'schedule.reviewer'],
     });
@@ -128,46 +162,6 @@ export class ReviewService {
     sub.is_approved = status === 'approved';
     sub.reviewed_at = new Date();
 
-    await this.submissionRepo.save(sub);
-  }
-
-  async getReviewStatus(session: any, themeId: string) {
-    const schedule = await this.scheduleRepo.findOne({
-      where: { theme_id: themeId },
-      relations: ['reviewer'],
-    });
-    if (!schedule || !schedule.reviewer) throw new NotFoundException();
-
-    const canReview =
-      session.account === 'admin' ||
-      schedule.reviewer.user_id === session.user_id;
-    if (!canReview) return { data: { can_review: false } };
-
-    const total = await this.submissionRepo.count({
-      where: { theme_id: themeId },
-    });
-
-    const reviewed = await this.submissionRepo.count({
-      where: {
-        theme_id: themeId,
-        is_approved: Not(IsNull()),
-      },
-    });
-
-    const rejected = await this.submissionRepo.count({
-      where: {
-        theme_id: themeId,
-        is_approved: false,
-      },
-    });
-
-    return {
-      data: { can_review: true },
-      meta: {
-        total,
-        reviewed,
-        rejected,
-      },
-    };
+    await this.submRepo.save(sub);
   }
 }

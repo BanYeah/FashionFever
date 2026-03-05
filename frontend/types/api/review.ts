@@ -6,5 +6,5 @@ export interface ReviewData {
 export interface ReviewMeta {
   total: number;
   reviewed: number;
-  rejected: number;
+  rejected?: number;
 }
