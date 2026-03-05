@@ -21,33 +21,12 @@ export type ThemeStatusType =
 
 export class ThemeStatus {
   status: ThemeStatusType;
-  enrollStartAt: Date | null;
-  reviewStartAt: Date | null;
-  voteStartAt: Date | null;
-  completeStartAt: Date | null;
 
   constructor();
   constructor(status: ThemeStatusType);
-  constructor(
-    status: ThemeStatusType,
-    enrollStartAt: Date,
-    reviewStartAt: Date,
-    voteStartAt: Date,
-    completeStartAt: Date,
-  );
 
-  constructor(
-    status?: ThemeStatusType,
-    enrollStartAt?: Date,
-    reviewStartAt?: Date,
-    voteStartAt?: Date,
-    completeStartAt?: Date,
-  ) {
+  constructor(status?: ThemeStatusType) {
     this.status = status ?? "PREPARING";
-    this.enrollStartAt = enrollStartAt ?? null;
-    this.reviewStartAt = reviewStartAt ?? null;
-    this.voteStartAt = voteStartAt ?? null;
-    this.completeStartAt = completeStartAt ?? null;
   }
 
   isAfterStart(other: ThemeStatusType): boolean {
