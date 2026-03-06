@@ -16,3 +16,10 @@ export interface RankingData {
   final_score: number;
   final_rank: number;
 }
+
+export interface DeliveryData {
+  record_id: string;
+  minicode: string;
+  best_final_score: number;
+  delivered_at: string | null;
+}

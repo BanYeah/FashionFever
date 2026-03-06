@@ -1,9 +1,17 @@
 import {
   Injectable,
+  BadRequestException, // 400
   NotFoundException, // 404
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual } from 'typeorm';
+import {
+  Repository,
+  Not,
+  IsNull,
+  Like,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+} from 'typeorm';
 
 import { Schedule } from 'src/theme/entities/schedule.entity';
 import { GiftCollection } from 'src/gift/entities/gift-collection.entity';
@@ -163,5 +171,93 @@ export class RecordService {
         vote_point: voteStat ? voteStat.vote_count : 0,
       },
     };
+  }
+
+  async getDelivery(
+    themeId: string,
+    status: string,
+    page: number,
+    minicode?: string,
+  ) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId },
+    });
+    if (!schedule) throw new NotFoundException();
+    if (schedule.status !== 'COMPLETE') throw new NotFoundException();
+
+    const gift = await this.giftRepo.findOne({
+      where: { theme_id: themeId },
+      order: { heart_rate: 'ASC' as const },
+    });
+    if (!gift) throw new NotFoundException();
+
+    const take = 40;
+    const skip = (page - 1) * take;
+    const whereCondition: any = {
+      theme_id: themeId,
+      best_final_score: MoreThanOrEqual(gift.heart_rate),
+    };
+
+    switch (status) {
+      case 'all':
+        break;
+      case 'complete':
+        whereCondition.delivered_at = Not(IsNull());
+        break;
+      case 'incomplete':
+        whereCondition.delivered_at = IsNull();
+        break;
+      default:
+        throw new BadRequestException();
+    }
+
+    if (minicode)
+      whereCondition.user = {
+        minicode: Like(`${minicode.trim()}%`),
+      };
+    else whereCondition.user = Not(IsNull());
+
+    const [records, total] = await this.recordRepo.findAndCount({
+      where: whereCondition,
+      order: { best_final_score: 'DESC' as const },
+      take: take,
+      skip: skip,
+      relations: ['user'],
+    });
+
+    const data = records.map((record) => ({
+      record_id: record.record_id,
+      minicode: record.user?.minicode,
+      best_final_score: Number(record.best_final_score),
+      delivered_at: record.delivered_at,
+    }));
+
+    return {
+      data: data,
+      meta: {
+        total,
+        page,
+        last_page: Math.ceil(total / take),
+      },
+    };
+  }
+
+  async patchDelivery(recordId: string, status: string) {
+    switch (status) {
+      case 'complete':
+        await this.recordRepo.update(
+          { record_id: recordId },
+          { delivered_at: new Date() },
+        );
+        break;
+      case 'incomplete':
+        await this.recordRepo.update(
+          { record_id: recordId },
+          { delivered_at: null },
+        );
+        break;
+      default:
+        throw new BadRequestException();
+    }
   }
 }

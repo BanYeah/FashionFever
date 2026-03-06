@@ -69,6 +69,7 @@ export class RecordController {
     example: 1,
   })
   @ApiResponse({ status: 200, description: '기록 목록 반환 성공' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async getThemes(
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
     @Query('page') page: number,
@@ -90,5 +91,63 @@ export class RecordController {
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
   ) {
     return await this.recordService.getRecordStat(session.user_id, themeId);
+  }
+
+  @Get(':theme_id/delivery')
+  @Roles('admin')
+  @ApiOperation({ summary: '선물 지급 기록 조회 (관리자)' })
+  @ApiParam({
+    name: 'theme_id',
+    description: '테마 번호',
+  })
+  @ApiQuery({
+    name: 'minicode',
+    description: '미니코드',
+  })
+  @ApiQuery({
+    name: 'status',
+    description: '선물 지급 상태 (all | complete | incomplete)',
+  })
+  @ApiQuery({
+    name: 'page',
+    description: '페이지 번호 (1부터 시작)',
+    example: 1,
+  })
+  @ApiResponse({ status: 200, description: '기록 조회 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청 (데이터 검증 실패)' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
+  async getDelivery(
+    @Param('theme_id', new ParseUUIDPipe()) themeId: string,
+    @Query('status') status: string,
+    @Query('page') page: number,
+    @Query('minicode') minicode?: string,
+  ) {
+    return await this.recordService.getDelivery(
+      themeId,
+      status,
+      page,
+      minicode,
+    );
+  }
+
+  @Patch(':record_id/delivery')
+  @Roles('admin')
+  @ApiOperation({ summary: '선물 지급 기록 조회 (관리자)' })
+  @ApiParam({
+    name: 'record_id',
+    description: '기록 번호',
+  })
+  @ApiQuery({
+    name: 'status',
+    description: '선물 지급 상태 (complete | incomplete)',
+  })
+  @ApiResponse({ status: 200, description: '기록 조회 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청 (데이터 검증 실패)' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
+  async patchDelivery(
+    @Param('record_id') recordId: string,
+    @Query('status') status: string,
+  ) {
+    return await this.recordService.patchDelivery(recordId, status);
   }
 }
