@@ -18,8 +18,7 @@ export class RecordService {
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
     @InjectRepository(GiftCollection)
     private giftRepo: Repository<GiftCollection>,
-    @InjectRepository(Submission)
-    private submissionRepo: Repository<Submission>,
+    @InjectRepository(Submission) private submRepo: Repository<Submission>,
     @InjectRepository(VoteStat) private vStatRepo: Repository<VoteStat>,
     @InjectRepository(Record) private recordRepo: Repository<Record>,
   ) {}
@@ -31,7 +30,7 @@ export class RecordService {
     if (!schedule) throw new NotFoundException();
     if (schedule.status !== 'COMPLETE') throw new NotFoundException();
 
-    const submissions = await this.submissionRepo.find({
+    const submissions = await this.submRepo.find({
       where: { theme_id: themeId, user_id: userId },
       order: { final_rank: 'ASC' as const },
     });
@@ -42,11 +41,11 @@ export class RecordService {
       data: submissions.map((sub) => {
         return {
           content_url: sub.content_url,
-          vote_score: sub.vote_score,
-          like_score: sub.like_score,
-          judge_score: sub.judge_score,
-          adj_score: sub.adj_score,
-          final_score: sub.final_score,
+          vote_score: Number(sub.vote_score),
+          like_score: Number(sub.like_score),
+          judge_score: Number(sub.judge_score),
+          adj_score: Number(sub.adj_score),
+          final_score: Number(sub.final_score),
           final_rank: sub.final_rank,
         };
       }),
@@ -60,7 +59,7 @@ export class RecordService {
     if (!schedule) throw new NotFoundException();
     if (schedule.status !== 'COMPLETE') throw new NotFoundException();
 
-    const sub = await this.submissionRepo.findOne({
+    const sub = await this.submRepo.findOne({
       where: { theme_id: themeId, user_id: userId },
       order: { final_rank: 'ASC' as const },
     });
@@ -84,11 +83,11 @@ export class RecordService {
     return {
       data: {
         content_url: sub.content_url,
-        vote_score: sub.vote_score,
-        like_score: sub.like_score,
-        judge_score: sub.judge_score,
-        adj_score: sub.adj_score,
-        final_score: sub.final_score,
+        vote_score: Number(sub.vote_score),
+        like_score: Number(sub.like_score),
+        judge_score: Number(sub.judge_score),
+        adj_score: Number(sub.adj_score),
+        final_score: Number(sub.final_score),
         final_rank: sub.final_rank,
         collection: col
           ? {
@@ -120,7 +119,7 @@ export class RecordService {
     const take = 30;
     const skip = (page - 1) * take;
 
-    const [submissions, total] = await this.submissionRepo.findAndCount({
+    const [submissions, total] = await this.submRepo.findAndCount({
       where: { theme_id: themeId },
       order: { final_rank: 'ASC' as const },
       take: take,
@@ -129,7 +128,7 @@ export class RecordService {
 
     const data = submissions.map((sub) => ({
       content_url: sub.content_url,
-      final_score: sub.final_score,
+      final_score: Number(sub.final_score),
       final_rank: sub.final_rank,
     }));
 
