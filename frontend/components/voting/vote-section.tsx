@@ -12,7 +12,7 @@ import {
   UnstyledButton,
   Loader,
 } from "@mantine/core";
-import { PointFooter } from "../app-shell/point-footer";
+import { AppShellFooter } from "../app-shell/footer";
 import { VoteData, VotePayload } from "@/types/api/vote";
 import { createVote } from "@/utils/api/vote";
 import { HeartRating } from "../common/heart-rating/heartrating";
@@ -148,6 +148,7 @@ export function VoteSection({ themeId }: { themeId: string }) {
               width={390}
               height={312}
               style={{ width: "100%", height: "auto", display: "block" }}
+              loading="eager"
             />
           </div>
 
@@ -208,6 +209,7 @@ export function VoteSection({ themeId }: { themeId: string }) {
               width={390}
               height={312}
               style={{ width: "100%", height: "auto", display: "block" }}
+              loading="eager"
             />
           </div>
 
@@ -216,7 +218,10 @@ export function VoteSection({ themeId }: { themeId: string }) {
         </Stack>
       </section>
 
-      <PointFooter point={data?.vote_point} />
+      <AppShellFooter
+        variant="default"
+        description={`공감 포인트 ${data?.vote_point ?? 0}`}
+      />
     </>
   );
 }
