@@ -77,7 +77,7 @@ export class PurgeCacheUtil {
       `${process.env.API_ENDPOINT}/schedules/timeline`,
       `${process.env.API_ENDPOINT}/schedules/voting-now`,
     ];
-    const prefixes = [`${process.env.API_ENDPOINT}/themes?`];
+    const tags = ['api-themes'];
 
     /* GET /themes/:theme_id/status */
     const updated = themes.map((row: ThemeInfo) => row.theme_id);
@@ -104,9 +104,7 @@ export class PurgeCacheUtil {
           row.status === 'COMPLETE' || row.status === 'DELETE',
       ) // updated to 'COMPLETE'
       .map((row: ThemeInfo) => row.theme_id);
-    for (const themeId of complete) {
-      prefixes.push(`${process.env.API_ENDPOINT}/records/${themeId}/ranking`);
-    }
+    if (complete.length > 0) tags.push('api-records');
 
     const url = `https://api.cloudflare.com/client/v4/zones/${process.env.CACHE_ZONE_ID}/purge_cache`;
     const res = await fetch(url, {
@@ -117,7 +115,7 @@ export class PurgeCacheUtil {
       },
       body: JSON.stringify({
         files: files,
-        prefixes: prefixes,
+        tags: tags,
       }),
     });
 

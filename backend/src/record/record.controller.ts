@@ -1,6 +1,7 @@
 import {
   Controller,
   Session,
+  Header,
   Get,
   Patch,
   Param,
@@ -58,6 +59,7 @@ export class RecordController {
   }
 
   @Get(':theme_id/ranking')
+  @Header('Cache-Tag', 'api-records')
   @ApiOperation({ summary: '전체 기록 조회' })
   @ApiParam({
     name: 'theme_id',
