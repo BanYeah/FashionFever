@@ -37,7 +37,7 @@ export default async function EnrollPage({
           description={data.desc}
         />
       }
-      footer={null}
+      footer={null} // EnrollSection (Client Component)에 Footer
     >
       <EnrollSection themeId={themeId} bgLimit={data.bg_limit} />
     </AppShell>

@@ -447,7 +447,7 @@ export default function ThemeSettingPage() {
   };
 
   /* 테마 설정 상세 조회중 */
-  if (loading) {
+  if (loading)
     return (
       <Loader
         style={{
@@ -460,7 +460,6 @@ export default function ThemeSettingPage() {
         color="var(--main)"
       />
     );
-  }
 
   if (missing) notFound();
 
