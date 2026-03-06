@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
-import { AppShellFooter } from "@/components/app-shell/footer";
 import { RankingCollection } from "@/components/ranking/ranking-collection";
 import { ThemeHeaderData } from "@/types/api/theme";
 import { getThemeHeader } from "@/utils/api/theme";
@@ -34,16 +33,9 @@ export default async function RankingPage({
           gift
         />
       }
-      footer={
-        <AppShellFooter
-          variant="tabs"
-          tabs={["나의 최고 랭킹", "나의 랭킹", "상위 랭킹!"]}
-          activeTab={1}
-          tabLinks={["/", "/", "/"]}
-        />
-      }
+      footer={null} // RankingCollection (Client Component)에 Footer
     >
-      <RankingCollection />
+      <RankingCollection themeId={data.theme_id} />
     </AppShell>
   );
 }

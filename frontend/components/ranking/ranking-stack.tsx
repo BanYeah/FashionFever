@@ -6,21 +6,22 @@ import { useNotification } from "../notification/notification";
 import { Stack, Loader } from "@mantine/core";
 import { AppShellFooter } from "../app-shell/footer";
 import { RankingDisplay } from "./ranking-display";
+import { GiftReceive } from "./gift-receive";
 import { RecordData } from "@/types/api/record";
-import { getRecords } from "@/utils/api/record";
+import { getRecordTop1 } from "@/utils/api/record";
 
-export function RankingCollection({ themeId }: { themeId: string }) {
+export function RankingStack({ themeId }: { themeId: string }) {
   const { notify, notifyServerError } = useNotification();
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [data, setData] = useState<RecordData[] | null>(null);
+  const [data, setData] = useState<RecordData | null>(null);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       setData(null);
 
-      const result = await getRecords(themeId);
+      const result = await getRecordTop1(themeId);
       if (result.success) {
         setData(result.data);
         setLoading(false);
@@ -56,10 +57,9 @@ export function RankingCollection({ themeId }: { themeId: string }) {
         }}
       >
         {!loading && data && (
-          <Stack gap={12} m={12}>
-            {data.map((item) => (
-              <RankingDisplay key={item.content_url} data={item} />
-            ))}
+          <Stack gap={30} m={12}>
+            <RankingDisplay data={data} />
+            <GiftReceive data={data.collection} />
           </Stack>
         )}
         {!loading && !data && (
@@ -76,7 +76,7 @@ export function RankingCollection({ themeId }: { themeId: string }) {
         <AppShellFooter
           variant="tabs"
           tabs={["나의 최고 랭킹", "나의 랭킹", "상위 랭킹!"]}
-          activeTab={1}
+          activeTab={0}
           tabLinks={[
             `/ranking/${userId}/top1?theme_id=${themeId}`,
             `/ranking/${userId}?theme_id=${themeId}`,
