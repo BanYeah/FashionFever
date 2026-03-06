@@ -30,6 +30,6 @@ export class ScheduleController {
   @ApiResponse({ status: 200, description: '심사 가능한 테마 반환 성공' })
   @ApiResponse({ status: 404, description: '심사 가능한 테마 없음' })
   async getJudgingNow(@Session() session: any) {
-    return this.scheuleService.getJudgingNow(session.minicode);
+    return this.scheuleService.getJudgingNow(session.user_id);
   }
 }

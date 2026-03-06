@@ -101,10 +101,6 @@ export class RecordController {
     description: '테마 번호',
   })
   @ApiQuery({
-    name: 'minicode',
-    description: '미니코드',
-  })
-  @ApiQuery({
     name: 'status',
     description: '선물 지급 상태 (all | complete | incomplete)',
   })
@@ -113,12 +109,16 @@ export class RecordController {
     description: '페이지 번호 (1부터 시작)',
     example: 1,
   })
+  @ApiQuery({
+    name: 'minicode',
+    description: '미니코드',
+  })
   @ApiResponse({ status: 200, description: '기록 조회 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 (데이터 검증 실패)' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async getDelivery(
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
-    @Query('status') status: string,
+    @Query('status') status: 'all' | 'complete' | 'incomplete',
     @Query('page') page: number,
     @Query('minicode') minicode?: string,
   ) {
@@ -146,7 +146,7 @@ export class RecordController {
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async patchDelivery(
     @Param('record_id') recordId: string,
-    @Query('status') status: string,
+    @Query('status') status: 'complete' | 'incomplete',
   ) {
     return await this.recordService.patchDelivery(recordId, status);
   }

@@ -118,11 +118,7 @@ export class ThemeController {
   @Post('setting')
   @Roles('admin')
   @ApiTags('Theme Setting')
-  @ApiOperation({
-    summary: '테마 설정 등록 (관리자)',
-    description:
-      '테마 일정, 헤더, 배너 이미지, 리뷰어/심사위원, 선물 컬렉션을 한 번에 등록합니다.',
-  })
+  @ApiOperation({ summary: '테마 설정 등록 (관리자)' })
   @ApiBody({ type: ThemeFormDto })
   @ApiResponse({ status: 201, description: '테마 설정이 성공적으로 등록됨' })
   @ApiResponse({
@@ -165,6 +161,19 @@ export class ThemeController {
     return this.themeService.getThemeSettings(page);
   }
 
+  @Patch('setting/status')
+  @Roles('admin')
+  @ApiTags('Theme Setting')
+  @ApiOperation({ summary: '전체 테마 설정 상태 업데이트 (관리자)' })
+  @ApiResponse({
+    status: 200,
+    description: '테마 일정 상태가 성공적으로 업데이트됨',
+  })
+  async patchThemeStatus() {
+    await this.themeCron.handleScheduleStatusUpdate();
+    return;
+  }
+
   @Get(':theme_id/setting')
   @Roles('admin')
   @ApiTags('Theme Setting')
@@ -184,11 +193,7 @@ export class ThemeController {
   @Patch(':theme_id/setting')
   @Roles('admin')
   @ApiTags('Theme Setting')
-  @ApiOperation({
-    summary: '테마 설정 수정 (관리자)',
-    description:
-      '테마 일정, 헤더, 배너 이미지, 검수자/심사위원, 선물 컬렉션을 한 번에 수정합니다.',
-  })
+  @ApiOperation({ summary: '테마 설정 수정 (관리자)' })
   @ApiBody({ type: ThemeFormDto })
   @ApiResponse({ status: 200, description: '테마 설정이 성공적으로 수정됨' })
   @ApiResponse({
@@ -235,21 +240,5 @@ export class ThemeController {
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
   ) {
     return this.themeService.deleteThemeSetting(themeId);
-  }
-
-  @Patch(':theme_id/setting/status')
-  @Roles('admin')
-  @ApiTags('Theme Setting')
-  @ApiOperation({
-    summary: '테마 설정 상태 업데이트 (관리자)',
-    description: '테마 일정 상태를 업데이트합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '테마 일정 상태가 성공적으로 업데이트됨',
-  })
-  async patchThemeStatus() {
-    await this.themeCron.handleScheduleStatusUpdate();
-    return;
   }
 }

@@ -46,15 +46,13 @@ export class ScheduleService {
     };
   }
 
-  async getJudgingNow(minicode: string) {
+  async getJudgingNow(userId: string) {
     const schedule = await this.scheduleRepo.findOne({
       where: {
         status: 'VOTING',
-        theme_judges: {
-          user: { minicode: minicode },
-        },
+        theme_judges: { user_id: userId },
       },
-      relations: ['theme_judges', 'theme_judges.user'],
+      relations: ['theme_judges'],
     });
     if (!schedule) throw new NotFoundException();
 

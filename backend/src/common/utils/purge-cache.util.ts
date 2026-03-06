@@ -4,6 +4,25 @@ interface ThemeInfo {
 }
 
 export class PurgeCacheUtil {
+  static async images(files: string[]) {
+    const url = `https://api.cloudflare.com/client/v4/zones/${process.env.CACHE_ZONE_ID}/purge_cache`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.CACHE_SECRET_ACCESS_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        files: files,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData);
+    }
+  }
+
   static async imageUser(userId: string) {
     const prefixes = [
       `${process.env.R2_PUBLIC_ENDPOINT}/submission/${userId}/`,
@@ -53,13 +72,17 @@ export class PurgeCacheUtil {
 
     /* GET /schedules/timeline
        GET /schedules/voting-now
-       GET /themes */
+       GET /themes?page= */
     const files = [
-      `${process.env.API_PREFIX}/schedules/timeline`,
-      `${process.env.API_PREFIX}/schedules/voting-now`,
-      `${process.env.API_PREFIX}/themes?page=1`,
-      `${process.env.API_PREFIX}/themes?page=2`,
+      `${process.env.API_ENDPOINT}/schedules/timeline`,
+      `${process.env.API_ENDPOINT}/schedules/voting-now`,
     ];
+    const prefixes = [`${process.env.API_ENDPOINT}/themes?`];
+
+    /* GET /themes/:theme_id/status */
+    const updated = themes.map((row: ThemeInfo) => row.theme_id);
+    for (const themeId of updated)
+      files.push(`${process.env.API_ENDPOINT}/themes/${themeId}/status`);
 
     /* GET /themes/:theme_id/header
        GET /themes/:theme_id/gift */
@@ -70,8 +93,8 @@ export class PurgeCacheUtil {
       ) // updated to 'ENROLLING'
       .map((row: ThemeInfo) => row.theme_id);
     for (const themeId of enrolling) {
-      files.push(`${process.env.API_PREFIX}/themes/${themeId}/header`);
-      files.push(`${process.env.API_PREFIX}/themes/${themeId}/gift`);
+      files.push(`${process.env.API_ENDPOINT}/themes/${themeId}/header`);
+      files.push(`${process.env.API_ENDPOINT}/themes/${themeId}/gift`);
     }
 
     /* GET /records/:theme_id/ranking */
@@ -82,13 +105,8 @@ export class PurgeCacheUtil {
       ) // updated to 'COMPLETE'
       .map((row: ThemeInfo) => row.theme_id);
     for (const themeId of complete) {
-      files.push(`${process.env.API_PREFIX}/records/${themeId}/ranking`);
+      prefixes.push(`${process.env.API_ENDPOINT}/records/${themeId}/ranking`);
     }
-
-    /* GET /themes/:theme_id/status */
-    const updated = themes.map((row: ThemeInfo) => row.theme_id);
-    for (const themeId of updated)
-      files.push(`${process.env.API_PREFIX}/themes/${themeId}/status`);
 
     const url = `https://api.cloudflare.com/client/v4/zones/${process.env.CACHE_ZONE_ID}/purge_cache`;
     const res = await fetch(url, {
@@ -99,6 +117,7 @@ export class PurgeCacheUtil {
       },
       body: JSON.stringify({
         files: files,
+        prefixes: prefixes,
       }),
     });
 

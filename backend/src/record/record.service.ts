@@ -8,9 +8,9 @@ import {
   Repository,
   Not,
   IsNull,
-  Like,
   LessThanOrEqual,
   MoreThanOrEqual,
+  Like,
 } from 'typeorm';
 
 import { Schedule } from 'src/theme/entities/schedule.entity';
@@ -71,7 +71,6 @@ export class RecordService {
       where: { theme_id: themeId, user_id: userId },
       order: { final_rank: 'ASC' as const },
     });
-
     if (!sub) throw new NotFoundException();
 
     const col = await this.giftRepo.findOne({
@@ -82,9 +81,7 @@ export class RecordService {
       relations: ['gifts'],
       order: {
         heart_rate: 'DESC',
-        gifts: {
-          collection_order: 'ASC',
-        },
+        gifts: { collection_order: 'ASC' },
       },
     });
 
@@ -175,7 +172,7 @@ export class RecordService {
 
   async getDelivery(
     themeId: string,
-    status: string,
+    status: 'all' | 'complete' | 'incomplete',
     page: number,
     minicode?: string,
   ) {
@@ -199,16 +196,12 @@ export class RecordService {
     };
 
     switch (status) {
-      case 'all':
-        break;
       case 'complete':
         whereCondition.delivered_at = Not(IsNull());
         break;
       case 'incomplete':
         whereCondition.delivered_at = IsNull();
         break;
-      default:
-        throw new BadRequestException();
     }
 
     if (minicode)
@@ -242,7 +235,7 @@ export class RecordService {
     };
   }
 
-  async patchDelivery(recordId: string, status: string) {
+  async patchDelivery(recordId: string, status: 'complete' | 'incomplete') {
     switch (status) {
       case 'complete':
         await this.recordRepo.update(
@@ -256,8 +249,6 @@ export class RecordService {
           { delivered_at: null },
         );
         break;
-      default:
-        throw new BadRequestException();
     }
   }
 }
