@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
-import { EnrollSection } from "@/components/enroll/enroll-section";
+import { VoteSection } from "@/components/voting/vote-section";
 import { ThemeHeaderData } from "@/types/api/theme";
 import { getThemeHeader, getThemeStatus } from "@/utils/api/theme";
+import { AppShellFooter } from "@/components/app-shell/footer";
+import { DeliverySection } from "@/components/gift-delivery/delivery-section";
 
-export default async function EnrollPage({
+export default async function GiftDeliveryPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -17,16 +19,16 @@ export default async function EnrollPage({
 
   if (!themeId) notFound();
 
-  // ENROLLING(참가 중)이 아니면 404로
+  // COMPLETE(결과 발표)이 아니면 404로
   const statusResult = await getThemeStatus(themeId);
   if (!statusResult.success) notFound();
-  if (statusResult.data.status !== "ENROLLING") notFound();
+  if (statusResult.data.status !== "COMPLETE") notFound();
 
   // Header 정보 조회
-  const headerResult = await getThemeHeader(themeId);
-  if (!headerResult.success) notFound();
+  const headterResult = await getThemeHeader(themeId);
+  if (!headterResult.success) notFound();
 
-  const data: ThemeHeaderData = headerResult.data;
+  const data: ThemeHeaderData = headterResult.data;
 
   return (
     <AppShell
@@ -35,11 +37,13 @@ export default async function EnrollPage({
           themeId={data.theme_id}
           title={data.name}
           description={data.desc}
+          gift
+          subheader
         />
       }
-      footer={null} // EnrollSection (Client Component)에 Footer
+      footer={<AppShellFooter variant="default" description="선물 지급 관리" />}
     >
-      <EnrollSection themeId={themeId} bgLimit={data.bg_limit} />
+      <DeliverySection themeId={themeId} />
     </AppShell>
   );
 }

@@ -37,9 +37,9 @@ export class VoteController {
     name: 'theme_id',
     description: '테마 번호',
   })
+  @ApiBody({ type: CreateVoteDto })
   @ApiResponse({ status: 201, description: '성공적으로 투표가 등록됨' })
   @ApiResponse({ status: 400, description: '잘못된 요청 (데이터 검증 실패)' })
-  @ApiResponse({ status: 403, description: '권한 부족 (사용자 아님)' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   @ApiResponse({ status: 410, description: '테마 투표 기간이 종료됨' })
   @ApiResponse({ status: 422, description: '테마 투표 후보 부족' })
@@ -63,7 +63,6 @@ export class VoteController {
     description: '테마 번호',
   })
   @ApiResponse({ status: 200, description: '투표 상태 조회 성공' })
-  @ApiResponse({ status: 403, description: '권한 부족 (사용자 아님)' })
   @ApiResponse({ status: 404, description: '존재하지 않는 테마임' })
   async getSubmissions(
     @Session() session: any,

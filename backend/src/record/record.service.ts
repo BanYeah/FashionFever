@@ -1,9 +1,17 @@
 import {
   Injectable,
+  BadRequestException, // 400
   NotFoundException, // 404
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual } from 'typeorm';
+import {
+  Repository,
+  Not,
+  IsNull,
+  Like,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+} from 'typeorm';
 
 import { Schedule } from 'src/theme/entities/schedule.entity';
 import { GiftCollection } from 'src/gift/entities/gift-collection.entity';
@@ -18,8 +26,7 @@ export class RecordService {
     @InjectRepository(Schedule) private scheduleRepo: Repository<Schedule>,
     @InjectRepository(GiftCollection)
     private giftRepo: Repository<GiftCollection>,
-    @InjectRepository(Submission)
-    private submissionRepo: Repository<Submission>,
+    @InjectRepository(Submission) private submRepo: Repository<Submission>,
     @InjectRepository(VoteStat) private vStatRepo: Repository<VoteStat>,
     @InjectRepository(Record) private recordRepo: Repository<Record>,
   ) {}
@@ -31,7 +38,7 @@ export class RecordService {
     if (!schedule) throw new NotFoundException();
     if (schedule.status !== 'COMPLETE') throw new NotFoundException();
 
-    const submissions = await this.submissionRepo.find({
+    const submissions = await this.submRepo.find({
       where: { theme_id: themeId, user_id: userId },
       order: { final_rank: 'ASC' as const },
     });
@@ -42,11 +49,11 @@ export class RecordService {
       data: submissions.map((sub) => {
         return {
           content_url: sub.content_url,
-          vote_score: sub.vote_score,
-          like_score: sub.like_score,
-          judge_score: sub.judge_score,
-          adj_score: sub.adj_score,
-          final_score: sub.final_score,
+          vote_score: Number(sub.vote_score),
+          like_score: Number(sub.like_score),
+          judge_score: Number(sub.judge_score),
+          adj_score: Number(sub.adj_score),
+          final_score: Number(sub.final_score),
           final_rank: sub.final_rank,
         };
       }),
@@ -60,7 +67,7 @@ export class RecordService {
     if (!schedule) throw new NotFoundException();
     if (schedule.status !== 'COMPLETE') throw new NotFoundException();
 
-    const sub = await this.submissionRepo.findOne({
+    const sub = await this.submRepo.findOne({
       where: { theme_id: themeId, user_id: userId },
       order: { final_rank: 'ASC' as const },
     });
@@ -84,11 +91,11 @@ export class RecordService {
     return {
       data: {
         content_url: sub.content_url,
-        vote_score: sub.vote_score,
-        like_score: sub.like_score,
-        judge_score: sub.judge_score,
-        adj_score: sub.adj_score,
-        final_score: sub.final_score,
+        vote_score: Number(sub.vote_score),
+        like_score: Number(sub.like_score),
+        judge_score: Number(sub.judge_score),
+        adj_score: Number(sub.adj_score),
+        final_score: Number(sub.final_score),
         final_rank: sub.final_rank,
         collection: col
           ? {
@@ -120,7 +127,7 @@ export class RecordService {
     const take = 30;
     const skip = (page - 1) * take;
 
-    const [submissions, total] = await this.submissionRepo.findAndCount({
+    const [submissions, total] = await this.submRepo.findAndCount({
       where: { theme_id: themeId },
       order: { final_rank: 'ASC' as const },
       take: take,
@@ -129,7 +136,7 @@ export class RecordService {
 
     const data = submissions.map((sub) => ({
       content_url: sub.content_url,
-      final_score: sub.final_score,
+      final_score: Number(sub.final_score),
       final_rank: sub.final_rank,
     }));
 
@@ -164,5 +171,93 @@ export class RecordService {
         vote_point: voteStat ? voteStat.vote_count : 0,
       },
     };
+  }
+
+  async getDelivery(
+    themeId: string,
+    status: string,
+    page: number,
+    minicode?: string,
+  ) {
+    const schedule = await this.scheduleRepo.findOne({
+      where: { theme_id: themeId },
+    });
+    if (!schedule) throw new NotFoundException();
+    if (schedule.status !== 'COMPLETE') throw new NotFoundException();
+
+    const gift = await this.giftRepo.findOne({
+      where: { theme_id: themeId },
+      order: { heart_rate: 'ASC' as const },
+    });
+    if (!gift) throw new NotFoundException();
+
+    const take = 40;
+    const skip = (page - 1) * take;
+    const whereCondition: any = {
+      theme_id: themeId,
+      best_final_score: MoreThanOrEqual(gift.heart_rate),
+    };
+
+    switch (status) {
+      case 'all':
+        break;
+      case 'complete':
+        whereCondition.delivered_at = Not(IsNull());
+        break;
+      case 'incomplete':
+        whereCondition.delivered_at = IsNull();
+        break;
+      default:
+        throw new BadRequestException();
+    }
+
+    if (minicode)
+      whereCondition.user = {
+        minicode: Like(`${minicode.trim()}%`),
+      };
+    else whereCondition.user = Not(IsNull());
+
+    const [records, total] = await this.recordRepo.findAndCount({
+      where: whereCondition,
+      order: { best_final_score: 'DESC' as const },
+      take: take,
+      skip: skip,
+      relations: ['user'],
+    });
+
+    const data = records.map((record) => ({
+      record_id: record.record_id,
+      minicode: record.user?.minicode,
+      best_final_score: Number(record.best_final_score),
+      delivered_at: record.delivered_at,
+    }));
+
+    return {
+      data: data,
+      meta: {
+        total,
+        page,
+        last_page: Math.ceil(total / take),
+      },
+    };
+  }
+
+  async patchDelivery(recordId: string, status: string) {
+    switch (status) {
+      case 'complete':
+        await this.recordRepo.update(
+          { record_id: recordId },
+          { delivered_at: new Date() },
+        );
+        break;
+      case 'incomplete':
+        await this.recordRepo.update(
+          { record_id: recordId },
+          { delivered_at: null },
+        );
+        break;
+      default:
+        throw new BadRequestException();
+    }
   }
 }

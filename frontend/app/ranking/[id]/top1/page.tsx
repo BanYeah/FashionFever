@@ -1,12 +1,9 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
-import { AppShellFooter } from "@/components/app-shell/footer";
-import { RankingDisplay } from "@/components/ranking/ranking-display";
-import { GiftReceive } from "@/components/ranking/gift-receive";
-import { Stack } from "@mantine/core";
 import { ThemeHeaderData } from "@/types/api/theme";
 import { getThemeHeader } from "@/utils/api/theme";
+import { RankingStack } from "@/components/ranking/ranking-stack";
 
 export default async function RankingPage({
   searchParams,
@@ -36,19 +33,9 @@ export default async function RankingPage({
           gift
         />
       }
-      footer={
-        <AppShellFooter
-          variant="tabs"
-          tabs={["나의 최고 랭킹", "나의 랭킹", "상위 랭킹!"]}
-          activeTab={0}
-          tabLinks={["/", "/", "/"]}
-        />
-      }
+      footer={null} // RankingStack (Client Component)에 Footer
     >
-      <Stack gap={30} m={12}>
-        <RankingDisplay />
-        <GiftReceive />
-      </Stack>
+      <RankingStack themeId={data.theme_id} />
     </AppShell>
   );
 }

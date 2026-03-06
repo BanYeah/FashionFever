@@ -5,8 +5,8 @@ export interface VoteData {
   sub_id2: string;
   sub_content_url1: string | null;
   sub_content_url2: string | null;
-  topP1?: string;
-  topP2?: string;
+  sub_vote_score1?: number;
+  sub_vote_score2?: number;
   vote_point: number;
 }
 

@@ -1,0 +1,47 @@
+.InputWrapper {
+  flex: 1;
+}
+
+.Input {
+  padding: 6px 10px;
+
+  height: 40px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 16px;
+}
+
+.Input::placeholder {
+  color: var(--gray-b3);
+}
+
+.SelectInput {
+  width: 100px;
+  height: 40px;
+
+  background-color: var(--gray-f2);
+  border: none;
+  border-radius: 10px;
+
+  font-size: 16px;
+  text-align: center;
+}
+
+.SelectOptions {
+  width: 100%;
+}
+
+.SelectOption {
+  padding: 0px 12px;
+
+  width: inherit;
+  height: 30px;
+}
+
+.Minicode {
+  padding-left: 10px;
+  width: 65px;
+}

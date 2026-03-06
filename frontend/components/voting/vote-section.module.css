@@ -64,3 +64,15 @@
 
   background-color: rgba(0, 0, 0, 0.4);
 }
+
+.NameBox {
+  padding: 6px;
+  padding-bottom: 10px;
+
+  color: var(--white);
+}
+
+.LikeBox {
+  padding-top: 4px;
+  padding-bottom: 48px;
+}

@@ -4,7 +4,14 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "@/utils/store/authStore";
 import { useNotification } from "../notification/notification";
-import { Flex, Stack, UnstyledButton, Divider } from "@mantine/core";
+import {
+  Center,
+  Flex,
+  Stack,
+  UnstyledButton,
+  Loader,
+  Divider,
+} from "@mantine/core";
 import { ThemeDisplay } from "./theme-display/theme-display";
 import { ThemeDisplayJudge } from "./theme-display/theme-display-judge";
 import { ThemeDisplayAdmin } from "./theme-display/theme-display-admin";
@@ -119,7 +126,9 @@ export function ThemeCollection() {
             ));
           }
         })}
-        <div ref={observerRef}></div>
+        <Center ref={observerRef} h={loading ? 230 : 0}>
+          {loading && <Loader type="dots" color="var(--main)" />}
+        </Center>
       </Stack>
     );
   } else if (user?.account === "judge") {
@@ -140,7 +149,9 @@ export function ThemeCollection() {
             ));
           }
         })}
-        <div ref={observerRef}></div>
+        <Center ref={observerRef} h={loading ? 230 : 0}>
+          {loading && <Loader type="dots" color="var(--main)" />}
+        </Center>
       </Stack>
     );
   } else if (user?.account === "admin") {
@@ -175,7 +186,9 @@ export function ThemeCollection() {
             ));
           }
         })}
-        <div ref={observerRef}></div>
+        <Center ref={observerRef} h={loading ? 230 : 0}>
+          {loading && <Loader type="dots" color="var(--main)" />}
+        </Center>
       </Stack>
     );
   }

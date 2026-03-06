@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { AppShellHeader } from "@/components/app-shell/header";
 import { AppShellFooter } from "@/components/app-shell/footer";
-import { Reviewing } from "@/components/theme-review/reviewing";
+import { ReviewSection } from "@/components/theme-review/review-section";
 import { ReviewingGrid } from "@/components/theme-review/reviewing-grid";
 import { ThemeHeaderData } from "@/types/api/theme";
 import { getThemeHeader } from "@/utils/api/theme";
@@ -93,7 +93,7 @@ export default async function ThemeReviewPage({
           case "rejected":
             return <ReviewingGrid themeId={themeId} view={view} />;
           default:
-            return <Reviewing themeId={themeId} />;
+            return <ReviewSection themeId={themeId} />;
         }
       })()}
     </AppShell>
