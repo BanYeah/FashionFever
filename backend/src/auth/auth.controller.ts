@@ -10,7 +10,13 @@ import {
   Ip,
   UnauthorizedException, // 401
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,11 +29,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/register')
-  @ApiOperation({
-    summary: '신규 사용자 등록',
-    description:
-      '입력받은 minicode를 사용하여 시스템에 새로운 사용자를 생성합니다.',
-  })
+  @ApiOperation({ summary: '신규 사용자 등록' })
+  @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: '성공적으로 사용자가 등록됨' })
   @ApiResponse({ status: 409, description: '이미 존재하는 minicode' })
   async createUser(@Body() dto: CreateUserDto) {
@@ -35,13 +38,10 @@ export class AuthController {
   }
 
   @Get('/exist/:minicode')
-  @ApiOperation({
-    summary: '사용자 존재 여부 조회',
-    description: '전달받은 minicode가 등록되어 있는지 확인합니다.',
-  })
+  @ApiOperation({ summary: '사용자 존재 여부 조회' })
   @ApiParam({
     name: 'minicode',
-    description: '미니코드 (5-7자리)',
+    description: '미니코드',
   })
   @ApiResponse({ status: 200, description: '등록된 사용자임' })
   @ApiResponse({ status: 404, description: '등록되지 않은 사용자임' })
@@ -50,14 +50,10 @@ export class AuthController {
   }
 
   @Get('/judge/exist/:minicode')
-  @ApiOperation({
-    summary: '심사위원 임명 여부 조회',
-    description:
-      '특정 minicode의 사용자가 심사위원 권한을 가지고 있는지 확인합니다.',
-  })
+  @ApiOperation({ summary: '심사위원 임명 여부 조회' })
   @ApiParam({
     name: 'minicode',
-    description: '미니코드 (5-7자리)',
+    description: '미니코드',
   })
   @ApiResponse({ status: 200, description: '임명된 심사위원임' })
   @ApiResponse({
@@ -70,11 +66,8 @@ export class AuthController {
 
   @Post('/login')
   @HttpCode(200)
-  @ApiOperation({
-    summary: '사용자 로그인',
-    description:
-      '입력받은 minicode와 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
-  })
+  @ApiOperation({ summary: '사용자 로그인' })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({
     status: 401,
@@ -119,11 +112,8 @@ export class AuthController {
 
   @Post('/judge/login')
   @HttpCode(200)
-  @ApiOperation({
-    summary: '심사위원 로그인',
-    description:
-      '입력받은 minicode와 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
-  })
+  @ApiOperation({ summary: '심사위원 로그인' })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({
     status: 401,
@@ -168,11 +158,8 @@ export class AuthController {
 
   @Post('/admin/login')
   @HttpCode(200)
-  @ApiOperation({
-    summary: '관리자 로그인',
-    description:
-      '입력받은 enter_code를 검증하여 로그인을 수행하고 쿠키를 발급합니다.',
-  })
+  @ApiOperation({ summary: '관리자 로그인' })
+  @ApiBody({ type: LoginAdminDto })
   @ApiResponse({ status: 200, description: '로그인 성공 및 쿠키 발급' })
   @ApiResponse({ status: 401, description: '인증 실패 (잘못된 enter_code)' })
   @ApiResponse({ status: 423, description: '계정 잠금 (IP 차단)' })
@@ -228,10 +215,7 @@ export class AuthController {
   }
 
   @Get('/status')
-  @ApiOperation({
-    summary: '현재 로그인 상태 및 권한 확인',
-    description: '현재 로그인된 계정 정보를 반환합니다.',
-  })
+  @ApiOperation({ summary: '현재 로그인 상태 확인' })
   @ApiResponse({ status: 200, description: '로그인 정보 조회 성공' })
   @ApiResponse({ status: 401, description: '인증 실패' })
   async getStatus(

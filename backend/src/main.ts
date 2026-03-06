@@ -20,7 +20,11 @@ async function bootstrap() {
   app.setGlobalPrefix(apiPrefix);
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:8080'],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:8080',
+      'https://fashion-fever.org',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

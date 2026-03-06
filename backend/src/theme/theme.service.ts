@@ -94,9 +94,7 @@ export class ThemeService {
       relations: ['gifts'],
       order: {
         heart_rate: 'DESC',
-        gifts: {
-          collection_order: 'ASC',
-        },
+        gifts: { collection_order: 'ASC' },
       },
     });
     if (!collections) throw new NotFoundException();
@@ -232,17 +230,17 @@ export class ThemeService {
         dto.complete_start_at,
       ];
 
-      // if (!schedules.every((date) => date > now))
-      //   throw new BadRequestException(
-      //     '과거 시점으로는 일정을 등록할 수 없어요!',
-      //   );
+      if (!schedules.every((date) => date > now))
+        throw new BadRequestException(
+          '과거 시점으로는 일정을 등록할 수 없어요!',
+        );
 
-      // await this.validateSchedule(
-      //   dto.enroll_start_at,
-      //   dto.review_start_at,
-      //   dto.vote_start_at,
-      //   dto.complete_start_at,
-      // );
+      await this.validateSchedule(
+        dto.enroll_start_at,
+        dto.review_start_at,
+        dto.vote_start_at,
+        dto.complete_start_at,
+      );
 
       const schedule = queryRunner.manager.create(Schedule, {
         ...dto,
@@ -421,9 +419,7 @@ export class ThemeService {
         relations: ['gifts'],
         order: {
           heart_rate: 'DESC',
-          gifts: {
-            collection_order: 'ASC',
-          },
+          gifts: { collection_order: 'ASC' },
         },
       });
       if (!collections) throw new NotFoundException();
@@ -483,13 +479,13 @@ export class ThemeService {
 
     try {
       // Schedule
-      // await this.validateSchedule(
-      //   dto.enroll_start_at,
-      //   dto.review_start_at,
-      //   dto.vote_start_at,
-      //   dto.complete_start_at,
-      //   themeId,
-      // );
+      await this.validateSchedule(
+        dto.enroll_start_at,
+        dto.review_start_at,
+        dto.vote_start_at,
+        dto.complete_start_at,
+        themeId,
+      );
 
       const schedule = await queryRunner.manager.findOne(Schedule, {
         where: { theme_id: themeId },
@@ -497,23 +493,23 @@ export class ThemeService {
       if (!schedule) throw new NotFoundException('존재하지 않는 테마예요!');
 
       const now = new Date();
-      // const scheduleComparisons = [
-      //   [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
-      //   [dto.review_start_at, schedule.review_start_at, '검수 시작'],
-      //   [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
-      //   [dto.complete_start_at, schedule.complete_start_at, '결과 집계 시작'],
-      // ];
+      const scheduleComparisons = [
+        [dto.enroll_start_at, schedule.enroll_start_at, '참가 시작'],
+        [dto.review_start_at, schedule.review_start_at, '검수 시작'],
+        [dto.vote_start_at, schedule.vote_start_at, '투표 시작'],
+        [dto.complete_start_at, schedule.complete_start_at, '결과 집계 시작'],
+      ];
 
-      // for (const [newDate, oldDate, label] of scheduleComparisons) {
-      //   const isChanged =
-      //     new Date(newDate).getTime() !== new Date(oldDate).getTime();
-      //   const isStarted = new Date(oldDate) < now;
+      for (const [newDate, oldDate, label] of scheduleComparisons) {
+        const isChanged =
+          new Date(newDate).getTime() !== new Date(oldDate).getTime();
+        const isStarted = new Date(oldDate) < now;
 
-      //   if (isChanged && isStarted)
-      //     throw new BadRequestException(
-      //       `이미 시작된 '${label}' 일정은 수정할 수 없어요!`,
-      //     );
-      // }
+        if (isChanged && isStarted)
+          throw new BadRequestException(
+            `이미 시작된 '${label}' 일정은 수정할 수 없어요!`,
+          );
+      }
 
       await queryRunner.manager.update(
         Schedule,
@@ -576,7 +572,7 @@ export class ThemeService {
           });
           if (!reviewer)
             throw new BadRequestException(
-              '입력하신 미니코드에 해당하는 심사위원을 찾을 수 없어요.',
+              '입력하신 미니코드에 해당하는 검수자를 찾을 수 없어요.',
             );
 
           await queryRunner.manager.update(
@@ -700,14 +696,20 @@ export class ThemeService {
     const deletedFiles: string[] = [];
 
     try {
-      // Schdule
+      // Schedule
       const schedule = await queryRunner.manager.findOne(Schedule, {
         where: { theme_id: themeId },
       });
       if (!schedule) throw new NotFoundException();
 
-      // if (new Date() >= schedule.complete_start_at)
-      //   throw new BadRequestException('투표가 종료된 테마는 삭제할 수 없어요!');
+      const afterVoteStatus = [
+        'VOTE_READY',
+        'VOTING',
+        'COMPLETE_READY',
+        'COMPLETE',
+      ];
+      if (afterVoteStatus.includes(schedule.status))
+        throw new BadRequestException('투표가 종료된 테마는 삭제할 수 없어요!');
 
       // Banner (banner_url)
       const banner = await queryRunner.manager.findOne(Banner, {

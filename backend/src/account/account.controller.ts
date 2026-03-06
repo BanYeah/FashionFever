@@ -7,7 +7,13 @@ import {
   Query,
   HttpCode,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { AccountService } from './account.service';
 
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -26,6 +32,7 @@ export class AccountController {
     summary: '전체 사용자 정보 조회 (관리자)',
     description: '최신순으로 40개씩 사용자 목록을 가져옵니다.',
   })
+  @ApiBody({ type: FindDto })
   @ApiResponse({ status: 200, description: '사용자 목록 반환 성공' })
   async getUsers(@Body() dto: FindDto) {
     return await this.accountService.findAllUsers(dto.page, dto.minicode);
@@ -38,6 +45,7 @@ export class AccountController {
     summary: '전체 심사위원 정보 조회 (관리자)',
     description: '최신순으로 40개씩 심사위원 목록을 가져옵니다.',
   })
+  @ApiBody({ type: FindDto })
   @ApiResponse({ status: 200, description: '심사위원 목록 반환 성공' })
   async getJudges(@Body() dto: FindDto) {
     return await this.accountService.findAllJudges(dto.page, dto.minicode);
@@ -58,10 +66,7 @@ export class AccountController {
 
   @Patch('/judges/appoint')
   @Roles('admin')
-  @ApiOperation({
-    summary: '심사위원 임명 (관리자)',
-    description: '특정 사용자를 심사위원에 임명합니다.',
-  })
+  @ApiOperation({ summary: '심사위원 임명 (관리자)' })
   @ApiQuery({
     name: 'minicode',
     description: '미니코드',

@@ -52,6 +52,10 @@ export class ThemeCron {
           `[R2_COMMIT_ERROR] Failed to delete orphaned files: ${JSON.stringify(deletedFiles)}`,
         );
       });
+
+      PurgeCacheUtil.images(deletedFiles).catch((err) =>
+        console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+      );
     }
 
     /* 테마 투표 준비 */

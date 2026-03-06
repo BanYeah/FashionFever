@@ -132,7 +132,7 @@ export class AuthService {
 
     const user = await this.userRepo.findOne({
       where: { minicode },
-      relations: { judge: true }, // Left Join
+      relations: ['judge'],
     });
     if (!user || !user.judge) throw new UnauthorizedException(); // 401
 
@@ -153,6 +153,7 @@ export class AuthService {
 
   async validateAdmin(enterCode: string, ip: string): Promise<void> {
     const ipKey = `admin_lock:${ip}`;
+    console.log(`Admin login attempted from IP: [${ip}].`);
 
     const attempts = await this.redis.get(ipKey);
     if (attempts && parseInt(attempts, 10) >= 10)
