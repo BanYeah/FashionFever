@@ -1,6 +1,6 @@
 "use client";
 
-import classes from "./reviewing.module.css";
+import classes from "./review-section.module.css";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useNotification } from "../notification/notification";
@@ -10,7 +10,7 @@ import { getReviewPending, patchReviewStatus } from "@/utils/api/review";
 
 type StatusType = "approved" | "rejected";
 
-export function Reviewing({ themeId }: { themeId: string }) {
+export function ReviewSection({ themeId }: { themeId: string }) {
   const { notify, notifyServerError } = useNotification();
 
   const [loading, setLoading] = useState(false);
