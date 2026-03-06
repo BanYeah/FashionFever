@@ -1,5 +1,6 @@
 import {
   Controller,
+  Header,
   Body,
   Get,
   Post,
@@ -60,6 +61,7 @@ export class ThemeController {
   }
 
   @Get('')
+  @Header('Cache-Tag', 'api-themes')
   @ApiTags('Theme')
   @ApiOperation({ summary: '전체 테마 조회' })
   @ApiQuery({
