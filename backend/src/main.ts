@@ -49,6 +49,10 @@ async function bootstrap() {
         secure: process.env.NODE_ENV === 'production', // 배포 환경(HTTPS)에서는 true로
         maxAge: 1000 * 60 * 60 * 6, // 6시간
         sameSite: 'lax',
+        domain:
+          process.env.NODE_ENV === 'production'
+            ? `.${process.env.API_DOMAIN!.replace(/^api\./, '')}`
+            : undefined,
       },
     }),
   );
