@@ -14,17 +14,13 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   if (process.env.NODE_ENV === 'production')
-    app.getHttpAdapter().getInstance().set('trust proxy', 2);
+    app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   const apiPrefix = process.env.API_PREFIX!;
   app.setGlobalPrefix(apiPrefix);
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:8080',
-      'https://fashion-fever.org',
-    ],
+    origin: ['https://fashion-fever.org'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
