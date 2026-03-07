@@ -202,7 +202,12 @@ export class AuthController {
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({ status: 200, description: '로그아웃 성공' })
   async logout(@Request() req: any, @Response({ passthrough: true }) res: any) {
-    res.clearCookie('ff_session_id');
+    res.clearCookie('ff_session_id', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      domain: '.fashion-fever.org',
+    });
 
     await new Promise<void>((resolve, reject) => {
       req.session.destroy((err: any) => {

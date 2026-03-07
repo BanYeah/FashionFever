@@ -14,7 +14,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   if (process.env.NODE_ENV === 'production')
-    app.getHttpAdapter().getInstance().set('trust proxy', 2);
+    app.getHttpAdapter().getInstance().set('trust proxy', 3);
 
   const apiPrefix = process.env.API_PREFIX!;
   app.setGlobalPrefix(apiPrefix);
