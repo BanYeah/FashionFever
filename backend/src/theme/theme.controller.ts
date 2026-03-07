@@ -40,12 +40,16 @@ export class ThemeController {
   themeFormDto(body: any): ThemeFormDto {
     // body를 ThemeFormDto으로 변환
     // 1. null이 될 수 있는 요소
-    // 2. 배열일 수 있는 요소
+    // 2. Date이거나, Array일 수 있는 요소
     // 3. JSON 객체를 문자열로 표현한 요소
     const dto: ThemeFormDto = {
       ...body,
       bg_limit: body.bg_limit ? Number(body.bg_limit) : null,
       banner_url: body.banner_url ? body.banner_url : null,
+      enroll_start_at: new Date(body.enroll_start_at),
+      review_start_at: new Date(body.review_start_at),
+      vote_start_at: new Date(body.vote_start_at),
+      complete_start_at: new Date(body.complete_start_at),
       reviewer_minicode: body.reviewer_minicode ? body.reviewer_minicode : null,
       judge_minicodes: Array.isArray(body.judge_minicodes)
         ? body.judge_minicodes
