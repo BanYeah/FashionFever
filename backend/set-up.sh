@@ -20,8 +20,8 @@ git branch -m main
 git remote add origin https://github.com/BanYeah/FashionFever.git
 
 ## Only Backend Directory
-git sparse-checkout init --cone
-git sparse-checkout set backend
+# git sparse-checkout init --cone
+# git sparse-checkout set backend
 git pull origin main
 
 # Node.js
@@ -122,4 +122,4 @@ pm2 start dist/main.js --name "backend"
 ## Auto-restart in reboot
 # pm2 startup
 ## [PM2] To setup the Startup Script, copy/paste the following command:
-# pm2 save
+pm2 save
