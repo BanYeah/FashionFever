@@ -7,9 +7,6 @@ cd frontend
 npm install
 npm run build
 
-pm2 start npm --name "frontend" -- start
-pm2 save
-
 # Nginx
 sudo vim /etc/nginx/sites-available/default
 # server {
@@ -28,3 +25,6 @@ sudo vim /etc/nginx/sites-available/default
 # }
 ## Modify the location as shown above.
 sudo systemctl restart nginx
+
+pm2 start npm --name "frontend" -- start
+pm2 save
