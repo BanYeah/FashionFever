@@ -134,14 +134,8 @@ export function DeliverySection({ themeId }: { themeId: string }) {
 
   const handleSearchCode = () => {
     const params = new URLSearchParams(searchParams);
-    if (!searchCode) {
-      params.delete("minicode");
-    } else if (regex.test(searchCode)) {
-      params.set("minicode", searchCode);
-    } else {
-      notify(<p>유효하지 않은 형식의 미니코드예요!</p>);
-      return;
-    }
+    if (!searchCode) params.delete("minicode");
+    else params.set("minicode", searchCode);
 
     router.push(`${pathname}?${params.toString()}`);
   };
