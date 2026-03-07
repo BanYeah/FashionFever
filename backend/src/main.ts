@@ -14,7 +14,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   if (process.env.NODE_ENV === 'production')
-    app.getHttpAdapter().getInstance().set('trust proxy', 1);
+    app.getHttpAdapter().getInstance().set('trust proxy', 2);
 
   const apiPrefix = process.env.API_PREFIX!;
   app.setGlobalPrefix(apiPrefix);
@@ -45,10 +45,7 @@ async function bootstrap() {
         secure: process.env.NODE_ENV === 'production', // 배포 환경(HTTPS)에서는 true로
         maxAge: 1000 * 60 * 60 * 6, // 6시간
         sameSite: 'lax',
-        domain:
-          process.env.NODE_ENV === 'production'
-            ? `.${process.env.API_DOMAIN!.replace(/^api\./, '')}`
-            : undefined,
+        domain: '.fashion-fever.org',
       },
     }),
   );
