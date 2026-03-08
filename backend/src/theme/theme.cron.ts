@@ -212,10 +212,8 @@ export class ThemeCron {
         const judgeScore = 0.5;
 
         /* 공감 점수 반영 (0.50 만점) */
-        const rawLikeScore = Math.min(0.5 * (voteCount / 100), 0.5);
-        const roundedLikeScore = Math.round(rawLikeScore * 100) / 100;
-
-        const likeScore = voteCount < 30 ? 0 : roundedLikeScore;
+        const rawLikeScore = Math.min(0.5 * (voteCount / 30), 0.5);
+        const likeScore = Math.round(rawLikeScore * 100) / 100;
 
         /* 합계 점수 계산 (5.00 만점) */
         const sum = voteScore + judgeScore + likeScore;
