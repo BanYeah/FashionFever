@@ -9,6 +9,7 @@ import {
   DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+import { WebPUtil } from '../utils/webp.util';
 
 @Injectable()
 export class R2Service {
@@ -31,19 +32,22 @@ export class R2Service {
     file: Express.Multer.File,
     folder: string = 'untitled',
   ): Promise<string> {
-    if (file.mimetype !== 'image/webp')
-      throw new BadRequestException('WebP 형식의 이미지만 업로드할 수 있어요!');
-
     if (file.size > 1 * 1024 * 1024)
       throw new BadRequestException('이미지 크기는 1MB를 초과할 수 없어요!');
+
+    const convertedFile = await WebPUtil.convertToWebP(file).catch(() => {
+      throw new BadRequestException(
+        '이미지를 WebP 형식으로 변환하는데 실패했어요.',
+      );
+    });
 
     const fileName = `${folder}/${Date.now()}-${uuidv4()}.webp`;
     try {
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: fileName,
-        Body: file.buffer,
-        ContentType: file.mimetype,
+        Body: convertedFile.buffer,
+        ContentType: convertedFile.mimetype,
         // 브라우저 1일(86400), CDN 14일(1209600) 캐싱
         CacheControl: 'public, max-age=86400, s-maxage=1209600',
       });
