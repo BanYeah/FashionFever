@@ -7,18 +7,25 @@ import {
   Patch,
   Delete,
   Param,
+  Query,
   Request,
   Response,
   ParseUUIDPipe,
   UseInterceptors,
   UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
+  ApiConsumes,
   ApiBody,
   ApiParam,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import { SubmissionService } from '../submission/submission.service';
@@ -33,10 +40,7 @@ export class SubmissionController {
 
   @Post(':theme_id')
   @Roles('user')
-  @ApiOperation({
-    summary: '테마 참가 및 스타일 제출 (사용자)',
-    description: '테마 참가와 관련해 스타일을 한 번에 등록합니다.',
-  })
+  @ApiOperation({ summary: '테마 참가 및 스타일 제출 (사용자)' })
   @ApiBody({ type: CreateSubmissionDto })
   @ApiResponse({ status: 201, description: '테마에 성공적으로 참가됨' })
   @ApiResponse({
@@ -82,5 +86,36 @@ export class SubmissionController {
     @Param('theme_id', new ParseUUIDPipe()) themeId: string,
   ) {
     return this.submissionService.getSubmissions(themeId, session.user_id);
+  }
+
+  @Patch('')
+  @Roles('admin')
+  @ApiOperation({ summary: '테마 제출 스타일 변경 (관리자)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'file_url',
+    description: '파일 경로 (.webp 포함)',
+  })
+  @ApiResponse({ status: 200, description: '스타일 변경 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청 (데이터 검증 실패)' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 스타일임' })
+  @ApiResponse({ status: 410, description: '테마 검수 기간이 종료됨' })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('file_url') fileUrl: string,
+  ) {
+    return await this.submissionService.patchSubmission(fileUrl, file);
   }
 }

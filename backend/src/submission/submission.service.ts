@@ -14,6 +14,7 @@ import { Schedule } from 'src/theme/entities/schedule.entity';
 import { Submission } from './entities/submission.entity';
 
 import { CreateSubmissionDto } from './dto/createSubmission.dto';
+import { PurgeCacheUtil } from 'src/common/utils/purge-cache.util';
 
 @Injectable()
 export class SubmissionService {
@@ -139,5 +140,25 @@ export class SubmissionService {
           : [],
       },
     };
+  }
+
+  async patchSubmission(fileUrl: string, file: Express.Multer.File) {
+    const submission = await this.submRepo.findOne({
+      where: { content_url: fileUrl },
+      relations: ['schedule'],
+    });
+    if (!submission || !submission.schedule) throw new NotFoundException();
+    if (submission.schedule.status !== 'REVIEWING') throw new GoneException();
+
+    const userId = submission.user_id;
+    const contentUrl = await this.r2Service.uploadImage(
+      file,
+      `submission/${userId}`,
+    );
+    await this.submRepo.update(
+      { submission_id: submission.submission_id },
+      { content_url: contentUrl },
+    );
+    await this.r2Service.deleteImages([fileUrl]);
   }
 }
