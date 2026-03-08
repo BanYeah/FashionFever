@@ -160,5 +160,6 @@ export class SubmissionService {
       { content_url: contentUrl },
     );
     await this.r2Service.deleteImages([fileUrl]);
+    await PurgeCacheUtil.images([fileUrl]);
   }
 }
