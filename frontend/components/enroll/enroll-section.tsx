@@ -63,8 +63,10 @@ export function EnrollSection({ themeId, bgLimit }: EnrollSectionProps) {
 
     const payload: SubmissionPayload = {
       files: await Promise.all(
-        files.map((file) =>
-          file instanceof File ? convertToWebP(file) : file,
+        files.map(async (file) =>
+          file instanceof File
+            ? await convertToWebP(file).catch(() => file)
+            : file,
         ),
       ),
     };

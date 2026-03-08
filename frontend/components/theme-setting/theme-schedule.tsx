@@ -177,7 +177,7 @@ function ThemeDateInput({ disabled, value, setValue }: ThemeDateInputProps) {
               position: "bottom",
             }}
           />
-          <p>{value.time.slice(2)})</p>
+          <p>{value.time.slice(2, 5)})</p>
         </div>
       )}
     </div>

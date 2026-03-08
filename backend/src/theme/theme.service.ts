@@ -428,7 +428,7 @@ export class ThemeService {
         data: {
           name: theme.header.name,
           desc: theme.header.desc,
-          bg_limt: theme.header.bg_limit,
+          bg_limit: theme.header.bg_limit,
 
           banner_url: theme.banner.banner_url,
 
