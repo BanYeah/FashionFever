@@ -12,17 +12,12 @@ sudo cp /etc/fstab /etc/fstab.bak
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 
+# Setting Timezone
+sudo timedatectl set-timezone Asia/Seoul
+
 # Git Clone
-git init FashionFever
+git clone https://github.com/BanYeah/FashionFever.git
 cd FashionFever/
-
-git branch -m main
-git remote add origin https://github.com/BanYeah/FashionFever.git
-
-## Only Backend Directory
-# git sparse-checkout init --cone
-# git sparse-checkout set backend
-git pull origin main
 
 # Node.js
 curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
