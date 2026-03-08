@@ -31,11 +31,11 @@ export class VoteService {
 
   /*
    * Elo K-Factor 산출 함수
-   * 200회 초과 투표 시 영향력을 빠르게 희석시켜 매크로 및 과도한 어뷰징 방어
+   * 100회 초과 투표 시 영향력을 빠르게 희석시켜 매크로 및 과도한 어뷰징 방어
    */
   private getDynamicK(voteCount: number) {
     const DEFAULT_K = 32;
-    const THRESHOLD = 200;
+    const THRESHOLD = 100;
 
     if (voteCount < 30) return 24;
     if (voteCount <= THRESHOLD) return DEFAULT_K;
