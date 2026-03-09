@@ -672,6 +672,10 @@ export class ThemeService {
         );
       });
 
+      PurgeCacheUtil.apiTheme([{ theme_id: themeId, status: 'PATCH' }]).catch(
+        (err) => console.error('[CACHE_ERROR] Failed to purge cache: ', err),
+      );
+
       return { data: { theme_id: themeId } };
     } catch (err) {
       await queryRunner.rollbackTransaction();
