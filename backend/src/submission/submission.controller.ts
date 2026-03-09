@@ -88,7 +88,7 @@ export class SubmissionController {
     return this.submissionService.getSubmissions(themeId, session.user_id);
   }
 
-  @Patch('')
+  @Patch(':submission_id')
   @Roles('admin')
   @ApiOperation({ summary: '테마 제출 스타일 변경 (관리자)' })
   @ApiConsumes('multipart/form-data')
@@ -103,9 +103,9 @@ export class SubmissionController {
       },
     },
   })
-  @ApiQuery({
-    name: 'file_url',
-    description: '파일 경로 (.webp 포함)',
+  @ApiParam({
+    name: 'submission_id',
+    description: '제출 번호',
   })
   @ApiResponse({ status: 200, description: '스타일 변경 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 (데이터 검증 실패)' })
@@ -114,8 +114,8 @@ export class SubmissionController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Query('file_url') fileUrl: string,
+    @Param('submission_id') submissionId: string,
   ) {
-    return await this.submissionService.patchSubmission(fileUrl, file);
+    return await this.submissionService.patchSubmission(submissionId, file);
   }
 }
