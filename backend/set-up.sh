@@ -1,3 +1,7 @@
+# Setting Public IP of EC2 in 
+## Cloudflare -> Domains -> DNS -> Records
+## FashionFever Github Repository -> Settings -> Secrets and variables -> Actions -> EC2_HOST
+
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y curl build-essential
 
