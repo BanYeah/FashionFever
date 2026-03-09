@@ -57,3 +57,29 @@ export async function getSubmission(theme_id: string) {
   const data = await res.json();
   return { success: true, ...data };
 }
+
+export async function patchSubmission(submissionId: string, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_ENDPOINT}/submissions/${submissionId}`,
+    {
+      method: "PATCH",
+      body: formData, // FormData 사용 시 Content-Type 헤더 설정 금지
+      cache: "no-store",
+      credentials: "include",
+    },
+  );
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    return {
+      success: false,
+      status: res.status,
+      message: errorData.message || "스타일을 변경하는데 실패했습니다.",
+    };
+  }
+
+  return { success: true };
+}

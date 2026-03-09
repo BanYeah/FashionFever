@@ -19,11 +19,19 @@
   aspect-ratio: 5.13 / 2;
 }
 
+.ModalContent {
+  width: 100%;
+  max-width: 425px;
+  min-width: 320px;
+  height: fit-content;
+}
+
 .Button {
   display: flex;
   align-items: center;
   justify-content: center;
 
+  flex-grow: 1;
   height: 50px;
 
   color: var(--white);

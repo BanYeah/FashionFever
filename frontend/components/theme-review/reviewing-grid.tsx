@@ -17,7 +17,9 @@ import {
 } from "@mantine/core";
 import { PageMeta } from "@/types/page-meta";
 import { ReviewData } from "@/types/api/review";
+import { AddFileButton } from "../common/add-file-button/add-file-button";
 import { getReviews, patchReviewStatus } from "@/utils/api/review";
+import { patchSubmission } from "@/utils/api/submission";
 
 interface RankingGridProps {
   themeId: string;
@@ -185,9 +187,19 @@ function ReviewingCard({
   const [opened, { open, close }] = useDisclosure(false);
 
   const status = view === "approved" ? "rejected" : "approved";
-  const statusName = view === "approved" ? "반려" : "승인";
 
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | string | null>(data.content_url);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url); // clean-up
+    }
+    setPreview(file);
+  }, [file]);
 
   const patchStatus = async () => {
     setLoading(true);
@@ -195,14 +207,16 @@ function ReviewingCard({
     const result = await patchReviewStatus(data.submission_id, status);
     if (result.success) {
       reload();
-      setLoading(false);
       close();
+      setLoading(false);
       return;
     }
 
+    close();
+
     switch (result.status) {
       case 404:
-        notify(<p>존재하지 않는 테마/제출 사진이에요!</p>);
+        notify(<p>존재하지 않는 테마/제출이에요!</p>);
         break;
       case 410:
         notify(<p>검수 기간이 종료된 테마예요!</p>);
@@ -212,7 +226,120 @@ function ReviewingCard({
     }
 
     setLoading(false);
-    close();
+  };
+
+  const patchSubmStatus = async () => {
+    if (!(file instanceof File)) return;
+
+    setLoading(true);
+
+    const result = await patchSubmission(data.submission_id, file);
+    if (!result.success) {
+      close();
+
+      switch (result.status) {
+        case 400:
+          notify(<p>{result.message}</p>);
+          break;
+        case 404:
+          notify(<p>존재하지 않는 제출이에요!</p>);
+          break;
+        case 410:
+          notify(<p>검수 기간이 종료된 테마예요!</p>);
+          break;
+        default:
+          notifyServerError();
+      }
+
+      setLoading(false);
+      return;
+    }
+
+    await patchStatus();
+  };
+
+  const renderButtons = () => {
+    if (view === "approved")
+      return (
+        <UnstyledButton
+          className={classes.Button}
+          style={{
+            backgroundColor:
+              status === "approved" ? "var(--main)" : "var(--gray-8a)",
+          }}
+          onClick={patchStatus}
+        >
+          {loading ? (
+            <Loader size={24} color="var(--white)" />
+          ) : (
+            <p>반려 상태로 변경</p>
+          )}
+        </UnstyledButton>
+      );
+
+    // view === 'rejected'
+    if (!(file instanceof File))
+      return (
+        <>
+          <UnstyledButton
+            className={classes.Button}
+            style={{
+              backgroundColor:
+                status === "approved" ? "var(--main)" : "var(--gray-8a)",
+            }}
+            onClick={patchStatus}
+          >
+            {loading ? (
+              <Loader size={24} color="var(--white)" />
+            ) : (
+              <p>승인 상태로 변경</p>
+            )}
+          </UnstyledButton>
+          {/* 사진 변경 */}
+          {view === "rejected" && (
+            <div style={{ flexGrow: 0 }}>
+              <AddFileButton
+                icon="/images/theme-review/change.svg"
+                size={50}
+                fileRatio="5:4"
+                setFile={setFile}
+              />
+            </div>
+          )}
+        </>
+      );
+
+    return (
+      <>
+        <UnstyledButton
+          className={classes.Button}
+          style={{
+            backgroundColor:
+              status === "approved" ? "var(--main)" : "var(--gray-8a)",
+          }}
+          onClick={patchSubmStatus}
+        >
+          {loading ? (
+            <Loader size={24} color="var(--white)" />
+          ) : (
+            <p>사진 변경 및 승인 상태로 변경</p>
+          )}
+        </UnstyledButton>
+        {/* 사진 변경 취소 */}
+        <UnstyledButton
+          style={{ flexGrow: 0 }}
+          onClick={() => setFile(data.content_url)}
+        >
+          <Image
+            src="/images/theme-review/cancel.svg"
+            alt=""
+            width={50}
+            height={50}
+            style={{ display: "block" }}
+          />
+        </UnstyledButton>
+      </>
+    );
   };
 
   return (
@@ -226,30 +353,15 @@ function ReviewingCard({
         withCloseButton={false}
         padding={0}
       >
-        <Stack gap={0}>
+        <Stack className={classes.ModalContent} gap={0}>
           <Image
-            src={data.content_url ?? "/images/content_alt.svg"}
+            src={preview ?? "/images/content_alt.svg"}
             alt=""
             width={390}
             height={312}
             style={{ display: "block", width: "100%", height: "auto" }}
           />
-          <Group gap={0} grow>
-            <UnstyledButton
-              className={classes.Button}
-              style={{
-                backgroundColor:
-                  status === "approved" ? "var(--main)" : "var(--gray-8a)",
-              }}
-              onClick={patchStatus}
-            >
-              {loading ? (
-                <Loader size={24} color="var(--white)" />
-              ) : (
-                <p>{statusName} 상태로 변경</p>
-              )}
-            </UnstyledButton>
-          </Group>
+          <Group gap={0}>{renderButtons()}</Group>
         </Stack>
       </Modal>
 
