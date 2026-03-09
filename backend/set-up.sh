@@ -15,6 +15,18 @@ echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 # Setting Timezone
 sudo timedatectl set-timezone Asia/Seoul
 
+# Setting Alternative Port for SSH
+sudo vim /etc/ssh/sshd_config
+## Port 22
+## Port [Alt Port Number]
+## PasswordAuthentication no
+## Modify the configuration as shown above.
+sudo systemctl daemon-reload
+sudo systemctl restart ssh.socket
+
+# IMPORTANT! 기존 터미널을 끄지 않은 상태에서 새 터미널로 접속 테스트
+# ssh -i "key.pem" -p [Alt Port Number] ubuntu@[IP]
+
 # Git Clone
 git clone https://github.com/BanYeah/FashionFever.git
 cd FashionFever/
