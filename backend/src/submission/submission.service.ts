@@ -142,9 +142,9 @@ export class SubmissionService {
     };
   }
 
-  async patchSubmission(fileUrl: string, file: Express.Multer.File) {
+  async patchSubmission(submissionId: string, file: Express.Multer.File) {
     const submission = await this.submRepo.findOne({
-      where: { content_url: fileUrl },
+      where: { submission_id: submissionId },
       relations: ['schedule'],
     });
     if (!submission || !submission.schedule) throw new NotFoundException();
@@ -156,10 +156,13 @@ export class SubmissionService {
       `submission/${userId}`,
     );
     await this.submRepo.update(
-      { submission_id: submission.submission_id },
+      { submission_id: submissionId },
       { content_url: contentUrl },
     );
-    await this.r2Service.deleteImages([fileUrl]);
-    await PurgeCacheUtil.images([fileUrl]);
+
+    if (submission.content_url) {
+      await this.r2Service.deleteImages([submission.content_url]);
+      await PurgeCacheUtil.images([submission.content_url]);
+    }
   }
 }
