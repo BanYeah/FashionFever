@@ -63,7 +63,7 @@ export function ThemeSchedule({
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                // disabled={status.isAfterStart("ENROLLING")}
+                disabled={status.isAfterStart("ENROLLING")}
                 value={enrollStart}
                 setValue={setEnrollStart}
               />
@@ -80,7 +80,7 @@ export function ThemeSchedule({
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                // disabled={status.isAfterStart("REVIEWING")}
+                disabled={status.isAfterStart("REVIEWING")}
                 value={reviewStart}
                 setValue={setReviewStart}
               />
@@ -97,13 +97,13 @@ export function ThemeSchedule({
             </p>
             <Group gap={6} wrap="nowrap">
               <ThemeDateInput
-                // disabled={status.isAfterStart("VOTE_READY")}
+                disabled={status.isAfterStart("VOTE_READY")}
                 value={voteStart}
                 setValue={setVoteStart}
               />
               <p>~</p>
               <ThemeDateInput
-                // disabled={status.isAfterStart("COMPLETE_READY")}
+                disabled={status.isAfterStart("COMPLETE_READY")}
                 value={voteEnd}
                 setValue={setVoteEnd}
               />
